@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 from flask import Flask, request, jsonify
 from mcp.server.fastmcp import FastMCP
 
@@ -10,13 +11,64 @@ mcp_server = FastMCP("Zephyr build commands")
 
 # Configuration for virtual environment
 VENV_PATH = os.environ.get('ZEPHYR_VENV_PATH', '/path/to/your/zephyr-venv')
-VENV_ACTIVATE = os.path.join(VENV_PATH, 'bin', 'activate')
 
-def run_in_venv(cmd, **kwargs):
-    """Run command in virtual environment"""
-    # Create command that sources venv and runs the actual command
-    venv_cmd = f"source {VENV_ACTIVATE} && {' '.join(cmd)}"
-    return subprocess.run(venv_cmd, shell=True, **kwargs)
+def get_venv_paths():
+    """Get virtual environment paths for current platform"""
+    if sys.platform == "win32":
+        # Windows paths
+        venv_bin = os.path.join(VENV_PATH, 'Scripts')
+        python_exe = os.path.join(venv_bin, 'python.exe')
+        activate_script = os.path.join(venv_bin, 'activate.bat')
+    else:
+        # Unix/Linux/macOS paths
+        venv_bin = os.path.join(VENV_PATH, 'bin')
+        python_exe = os.path.join(venv_bin, 'python')
+        activate_script = os.path.join(venv_bin, 'activate')
+    
+    return venv_bin, python_exe, activate_script
+
+def get_venv_env():
+    """Get environment variables for virtual environment"""
+    venv_bin, python_exe, activate_script = get_venv_paths()
+    
+    env = os.environ.copy()
+    env['VIRTUAL_ENV'] = VENV_PATH
+    
+    # Prepend venv bin directory to PATH
+    if sys.platform == "win32":
+        env['PATH'] = f"{venv_bin};{env['PATH']}"
+    else:
+        env['PATH'] = f"{venv_bin}:{env['PATH']}"
+    
+    # Remove PYTHONHOME if it exists to avoid conflicts
+    env.pop('PYTHONHOME', None)
+    return env
+
+def run_with_venv(cmd, **kwargs):
+    """Run command with virtual environment activated"""
+    kwargs['env'] = get_venv_env()
+    
+    # On Windows, we might need shell=True for some commands
+    if sys.platform == "win32" and 'shell' not in kwargs:
+        kwargs['shell'] = True
+    
+    return subprocess.run(cmd, **kwargs)
+
+# Alternative approach using activation script
+def run_in_venv_with_script(cmd, **kwargs):
+    """Run command by activating venv first (Windows compatible)"""
+    venv_bin, python_exe, activate_script = get_venv_paths()
+    
+    if sys.platform == "win32":
+        # Windows batch command
+        full_cmd = f'"{activate_script}" && {" ".join(cmd)}'
+        kwargs['shell'] = True
+    else:
+        # Unix shell command
+        full_cmd = f'source "{activate_script}" && {" ".join(cmd)}'
+        kwargs['shell'] = True
+    
+    return subprocess.run(full_cmd, **kwargs)
 
 # regist tool
 @mcp_server.tool()
@@ -43,15 +95,25 @@ def build(
         if args:
             # Handle all west build argument formats
             for arg in args:
-                cmd.extend(arg)
+                if isinstance(arg, list):
+                    cmd.extend(arg)
+                else:
+                    cmd.append(arg)
 
         if extra_args:
             cmd.append("--")
             for arg in extra_args:
-                cmd.extend(arg)
+                if isinstance(arg, list):
+                    cmd.extend(arg)
+                else:
+                    cmd.append(arg)
 
-        result = run_in_venv(cmd, capture_output=True, text=True)
-        return {"status": "success", "output": result.stdout}
+        result = run_with_venv(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            return {"status": "success", "output": result.stdout}
+        else:
+            return {"status": "error", "message": result.stderr, "output": result.stdout}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -73,10 +135,17 @@ def flash(device: str = None, runner: str = None, args: list = None) -> dict:
         if runner:
             cmd.extend(["--runner", runner])
         if args:
-            cmd.extend(args)
+            if isinstance(args, list):
+                cmd.extend(args)
+            else:
+                cmd.append(args)
 
-        result = run_in_venv(cmd, capture_output=True, text=True)
-        return {"status": "success", "output": result.stdout}
+        result = run_with_venv(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            return {"status": "success", "output": result.stdout}
+        else:
+            return {"status": "error", "message": result.stderr, "output": result.stdout}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -91,16 +160,14 @@ def build_zephyr():
         build_dir = os.path.join(project_path, "build")
         os.makedirs(build_dir, exist_ok=True)
 
-        cmd = [
-            "west",
-            "build",
-            "-b",
-            request.json.get("board", "native_posix"),
-            project_path,
-        ]
-
-        result = run_in_venv(
-            cmd,
+        result = run_with_venv(
+            [
+                "west",
+                "build",
+                "-b",
+                request.json.get("board", "native_posix"),
+                project_path,
+            ],
             cwd=build_dir,
             capture_output=True,
             text=True,
@@ -124,7 +191,7 @@ def flash_zephyr():
         if not project_path or not os.path.exists(project_path):
             return jsonify({"error": "Invalid project path"}), 400
 
-        result = run_in_venv(
+        result = run_with_venv(
             ["west", "flash"],
             cwd=os.path.join(project_path, "build"),
             capture_output=True,
