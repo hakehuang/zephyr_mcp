@@ -1,13 +1,22 @@
 import subprocess
 import os
 from flask import Flask, request, jsonify
-from mcp import MCPServer
+from mcp.server.fastmcp import FastMCP
 
 app = Flask(__name__)
 
 # init MCP server
-mcp_server = MCPServer("Zephyr Build Server")
+mcp_server = FastMCP("Zephyr build commands")
 
+# Configuration for virtual environment
+VENV_PATH = os.environ.get('ZEPHYR_VENV_PATH', '/path/to/your/zephyr-venv')
+VENV_ACTIVATE = os.path.join(VENV_PATH, 'bin', 'activate')
+
+def run_in_venv(cmd, **kwargs):
+    """Run command in virtual environment"""
+    # Create command that sources venv and runs the actual command
+    venv_cmd = f"source {VENV_ACTIVATE} && {' '.join(cmd)}"
+    return subprocess.run(venv_cmd, shell=True, **kwargs)
 
 # regist tool
 @mcp_server.tool()
@@ -41,7 +50,7 @@ def build(
             for arg in extra_args:
                 cmd.extend(arg)
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = run_in_venv(cmd, capture_output=True, text=True)
         return {"status": "success", "output": result.stdout}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -66,7 +75,7 @@ def flash(device: str = None, runner: str = None, args: list = None) -> dict:
         if args:
             cmd.extend(args)
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = run_in_venv(cmd, capture_output=True, text=True)
         return {"status": "success", "output": result.stdout}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -82,14 +91,16 @@ def build_zephyr():
         build_dir = os.path.join(project_path, "build")
         os.makedirs(build_dir, exist_ok=True)
 
-        result = subprocess.run(
-            [
-                "west",
-                "build",
-                "-b",
-                request.json.get("board", "native_posix"),
-                project_path,
-            ],
+        cmd = [
+            "west",
+            "build",
+            "-b",
+            request.json.get("board", "native_posix"),
+            project_path,
+        ]
+
+        result = run_in_venv(
+            cmd,
             cwd=build_dir,
             capture_output=True,
             text=True,
@@ -113,7 +124,7 @@ def flash_zephyr():
         if not project_path or not os.path.exists(project_path):
             return jsonify({"error": "Invalid project path"}), 400
 
-        result = subprocess.run(
+        result = run_in_venv(
             ["west", "flash"],
             cwd=os.path.join(project_path, "build"),
             capture_output=True,
