@@ -1,5 +1,0 @@
-{
-  "transport": "http",
-  "url": "http://localhost:5002/mcp/",
-  "server_name": "VSCode-Tools"
-}
