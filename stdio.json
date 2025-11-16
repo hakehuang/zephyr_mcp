@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "vsc-tools": {
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/server.py",
+        "--mode",
+        "stdio"
+      ]
+    }
+  }
+}
