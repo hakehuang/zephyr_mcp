@@ -1,0 +1,11 @@
+# Zephyr MCP Agent Dependencies
+# 基础依赖
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Agno Agent 相关依赖
+agno>=0.1.0  # 假设的版本，需要根据实际情况调整
+
+# Zephyr 相关工具（通常通过系统安装）
+# west (通过Zephyr SDK安装)
+# git (系统工具)

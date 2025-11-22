@@ -1,0 +1,18 @@
+{
+    "agent_name": "zephyr_mcp_agent",
+    "version": "1.0.0",
+    "description": "Zephyr MCP Agent - 提供Zephyr项目管理和Git操作工具集",
+    "author": "Zephyr MCP Team",
+    "tools_directory": "./src/tools",
+    "utils_directory": "./src/utils",
+    "log_level": "INFO",
+    "max_workers": 4,
+    "timeout": 300,
+    "enable_async": true,
+    "supported_operations": [
+        "git_operations",
+        "west_commands",
+        "zephyr_management",
+        "validation_tools"
+    ]
+}
