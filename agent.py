@@ -220,6 +220,9 @@ class ZephyrMCPAgent:
                             self.send_error(404, f"Tool '{tool_name}' not found")
                             return
                         
+                        # 执行参数验证 - 尝试使用mcp_server中的validate功能
+                        self._validate_request_params(tool_name, params)
+                        
                         # 执行工具
                         tool_info = registered_tools[tool_name]
                         tool_func = tool_info['function']
@@ -413,6 +416,70 @@ class ZephyrMCPAgent:
                     self.wfile.write(response_json.encode('utf-8'))
                 else:
                     self.send_error(404, "Not Found")
+            
+            def _validate_request_params(self, tool_name, params):
+                  """验证请求参数的合规性，确保参数匹配工具要求"""
+                  try:
+                      self.server.agent.logger.info(f"正在验证工具 '{tool_name}' 的参数...")
+                       
+                      # 特殊处理 validate_west_init_params 工具
+                      if tool_name == 'validate_west_init_params':
+                          # 检查必需参数
+                          if 'repo_url' not in params:
+                              self.send_error(400, "缺少必需参数: repo_url")
+                              return
+                          
+                          # 验证 repo_url 格式
+                          import re
+                          url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
+                          if not url_pattern.match(params['repo_url']):
+                              self.send_error(400, "无效的 repo_url 格式")
+                              return
+                          
+                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                       
+                      # west_flash 工具的参数验证
+                      elif tool_name == 'west_flash':
+                          # 确保必需的 build_dir 参数存在
+                          if 'build_dir' not in params:
+                              self.send_error(400, "west_flash 需要必需参数: build_dir")
+                              return
+                      # west_update 工具的参数验证
+                      elif tool_name == 'west_update':
+                          # 确保 project_dir 参数存在
+                          if 'project_dir' not in params:
+                              self.send_error(400, "west_update 需要必需参数: project_dir")
+                              return
+                          
+                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                       
+                      # 通用参数验证逻辑
+                      elif tool_name == 'test_git_connection':
+                          if 'url' not in params:
+                              self.send_error(400, "缺少必需参数: url")
+                              return
+                          
+                          # 验证 url 格式
+                          import re
+                          url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
+                          if not url_pattern.match(params['url']):
+                              self.send_error(400, "无效的 URL 格式")
+                              return
+                          
+                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                       
+                      # 通用参数验证：检查必需参数
+                      tool_info = self.server.agent.tool_registry.get_registered_tools().get(tool_name)
+                      if tool_info and 'parameters' in tool_info:
+                          for param in tool_info['parameters']:
+                              if param.get('required', False) and param['name'] not in params:
+                                  self.send_error(400, f"缺少必需参数: {param['name']}")
+                                  return
+                       
+                  except Exception as e:
+                      # 验证过程出错，但不阻止请求继续
+                      self.server.agent.logger.warning(f"参数验证过程出错: {str(e)}")
+                      # 不抛出异常，允许请求继续处理
             
             def log_message(self, format, *args):
                 """重写日志方法，使用agent的logger"""
