@@ -6,6 +6,11 @@ requests>=2.31.0
 # Agno Agent 相关依赖
 agno>=0.1.0  # 假设的版本，需要根据实际情况调整
 
+# 大模型相关依赖
+openai>=1.0.0  # OpenAI API客户端
+anthropic>=0.20.0  # Claude API客户端
+# DeepSeek API通过requests调用，无需额外安装特定客户端
+
 # Zephyr 相关工具（通常通过系统安装）
 # west (通过Zephyr SDK安装)
 # git (系统工具)

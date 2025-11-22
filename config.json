@@ -13,6 +13,30 @@
         "git_operations",
         "west_commands",
         "zephyr_management",
-        "validation_tools"
-    ]
+        "validation_tools",
+        "ai_assistant"
+    ],
+    "llm": {
+        "enabled": true,
+        "default_model": "gpt-4-turbo",
+        "models": {
+            "openai": {
+                "api_key_env": "OPENAI_API_KEY",
+                "models": ["gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"],
+                "default": "gpt-4-turbo"
+            },
+            "anthropic": {
+                "api_key_env": "ANTHROPIC_API_KEY",
+                "models": ["claude-3-opus-20240229", "claude-3-sonnet-20240229"],
+                "default": "claude-3-sonnet-20240229"
+            },
+            "deepseek": {
+                "api_key_env": "DEEPSEEK_API_KEY",
+                "models": ["deepseek-chat", "deepseek-coder"],
+                "default": "deepseek-chat"
+            }
+        },
+        "cache_enabled": true,
+        "max_cache_size": 1000
+    }
 }

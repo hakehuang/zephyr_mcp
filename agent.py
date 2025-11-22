@@ -10,7 +10,12 @@ import sys
 import json
 import argparse
 import importlib
+import traceback
+import logging
 from typing import Dict, Any, List, Callable
+
+# LLM集成相关导入
+from src.utils.llm_integration import LLMIntegration
 
 # 添加项目根目录到Python路径，确保可以正确导入模块
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -144,10 +149,48 @@ class ZephyrMCPAgent:
             self.logger.error(f"注册工具失败: {str(e)}")
             return False
     
+    def register_llm_tools(self):
+        """
+        注册LLM相关工具
+        """
+        try:
+            # 导入LLM集成相关模块
+            from src.utils.llm_integration import init_llm, LLMIntegration
+            from src.tools.llm_tools import register_llm_tools, get_registered_tools
+            
+            # 初始化LLM集成
+            llm_config = self.config.get('llm', {})
+            init_llm(llm_config)
+            
+            # 注册LLM工具
+            self.logger.info("开始注册LLM工具...")
+            llm_tools = get_registered_tools()
+            
+            # 将LLM工具注册到工具注册表
+            for tool_info in llm_tools:
+                tool_name = tool_info["name"]
+                # 这里简化处理，实际需要根据工具注册表的API进行适配
+                self.logger.info(f"注册LLM工具: {tool_name}")
+            
+            # 使用llm_tools中的注册函数
+            register_llm_tools(self)
+            
+            self.logger.info("LLM工具注册完成")
+        except Exception as e:
+            self.logger.error(f"注册LLM工具失败: {str(e)}")
+            self.logger.debug(traceback.format_exc())
+
     def start(self):
         """启动agent"""
         self.logger.info(f"启动 {self.config['agent_name']} v{self.config['version']}")
         self.register_tools()
+        
+        # 初始化并注册LLM工具（如果启用）
+        if 'llm' in self.config and self.config['llm'].get('enabled', True):
+            try:
+                self.register_llm_tools()
+            except Exception as e:
+                self.logger.error(f"LLM工具初始化失败: {str(e)}")
         
         # 执行工具健康检查
         self.perform_health_check()
@@ -284,8 +327,98 @@ class ZephyrMCPAgent:
                         self.end_headers()
                         self.wfile.write(json.dumps(error_response).encode('utf-8'))
                         self.server.agent.logger.error(f"执行工具 '{tool_name}' 时出错: {str(e)}")
+                elif self.path == "/api/ai_assistant":
+                    # AI助手端点
+                    self._handle_ai_assistant_request()
                 else:
                     self.send_error(404, "Not Found")
+                    
+            def _handle_ai_assistant_request(self):
+                """处理AI助手请求"""
+                # 读取请求体
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                
+                try:
+                    # 解析JSON请求
+                    request = json.loads(post_data.decode('utf-8'))
+                    
+                    # 检查LLM是否启用
+                    if not self.server.agent.config.get("llm", {}).get("enabled", False):
+                        self.send_error(503, "AI助手功能未启用")
+                        return
+                    
+                    # 检查LLM集成是否可用
+                    if not self.server.agent.llm_integration:
+                        self.send_error(503, "LLM集成不可用，请检查配置和依赖")
+                        return
+                    
+                    # 验证请求参数
+                    if "messages" not in request:
+                        self.send_error(400, "缺少消息参数 'messages'")
+                        return
+                        
+                    messages = request["messages"]
+                    if not isinstance(messages, list):
+                        self.send_error(400, "消息参数必须是一个列表")
+                        return
+                    
+                    # 检查每个消息是否包含必要的字段
+                    for i, message in enumerate(messages):
+                        if not isinstance(message, dict):
+                            self.send_error(400, f"消息 {i} 必须是一个字典")
+                            return
+                        if "role" not in message or "content" not in message:
+                            self.send_error(400, f"消息 {i} 缺少必要字段 'role' 或 'content'")
+                            return
+                        if message["role"] not in ["system", "user", "assistant"]:
+                            self.send_error(400, f"消息 {i} 的 'role' 必须是 'system', 'user' 或 'assistant'")
+                            return
+                    
+                    # 获取可选参数
+                    model = request.get("model")
+                    temperature = request.get("temperature", 0.7)
+                    max_tokens = request.get("max_tokens", 1000)
+                    
+                    # 调用LLM对话工具
+                    try:
+                        # 使用LLM集成的对话方法
+                        llm_integration = self.server.agent.llm_integration
+                        if llm_integration is None:
+                            raise RuntimeError("LLM集成未初始化")
+                        
+                        result = llm_integration.chat(
+                            messages=messages,
+                            model=model,
+                            temperature=temperature,
+                            max_tokens=max_tokens
+                        )
+                        
+                        if result.get("success", False):
+                            # 构造响应
+                            response = {
+                                "success": True,
+                                "response": result["response"],
+                                "model": result["model"],
+                                "usage": result.get("usage", {})
+                            }
+                            
+                            # 发送响应
+                            self.send_response(200)
+                            self.send_header('Content-Type', 'application/json')
+                            self.end_headers()
+                            self.wfile.write(json.dumps(response).encode('utf-8'))
+                        else:
+                            self.send_error(500, result.get("error", "AI助手处理失败"))
+                    except Exception as e:
+                        self.server.agent.logger.error(f"AI助手请求处理异常: {str(e)}")
+                        self.send_error(500, f"处理AI助手请求时发生错误: {str(e)}")
+                        
+                except json.JSONDecodeError:
+                    self.send_error(400, "Invalid JSON format")
+                except Exception as e:
+                    self.server.agent.logger.error(f"处理AI助手请求时发生错误: {str(e)}")
+                    self.send_error(500, f"处理请求时发生错误: {str(e)}")
             
             def do_GET(self):
                 """处理GET请求，提供工具信息和API文档"""
@@ -311,7 +444,8 @@ class ZephyrMCPAgent:
                     
                     response = {
                         "tools": tools_info,
-                        "total": len(tools_info)
+                        "total": len(tools_info),
+                        "llm_integration": self.server.agent.config.get("llm", {}).get("enabled", False)
                     }
                     
                     self.send_response(200)
@@ -351,59 +485,86 @@ class ZephyrMCPAgent:
                     host = self.server.server_address[0]
                     port = self.server.server_address[1]
                     
+                    # 基础API端点
+                    endpoints = [
+                        {
+                            "url": "/api/tools",
+                            "method": "GET",
+                            "description": "获取所有可用工具列表",
+                            "response_format": {
+                                "tools": "[工具信息列表]",
+                                "total": "工具总数",
+                                "llm_integration": "是否启用了LLM集成"
+                            },
+                            "example": f"curl -X GET http://{host}:{port}/api/tools"
+                        },
+                        {
+                            "url": "/api/tool/info",
+                            "method": "GET",
+                            "description": "获取特定工具的详细信息",
+                            "parameters": [
+                                {"name": "name", "type": "query", "description": "工具名称", "required": True}
+                            ],
+                            "response_format": {
+                                "name": "工具名称",
+                                "description": "工具描述",
+                                "parameters": "参数列表",
+                                "returns": "返回值列表",
+                                "module": "工具模块"
+                            },
+                            "example": f"curl -X GET http://{host}:{port}/api/tool/info?name=test_git_connection"
+                        },
+                        {
+                            "url": "/api/tool",
+                            "method": "POST",
+                            "description": "执行工具调用",
+                            "request_format": {
+                                "tool": "工具名称",
+                                "params": "工具参数对象"
+                            },
+                            "response_format": {
+                                "success": "调用是否成功",
+                                "result": "工具执行结果",
+                                "error": "错误信息（如果有）",
+                                "tool": "调用的工具名称"
+                            },
+                            "example": f"curl -X POST http://{host}:{port}/api/tool -H 'Content-Type: application/json' -d '{{\"tool\":\"test_git_connection\",\"params\":{{\"url\":\"https://github.com/zephyrproject-rtos/zephyr\"}}}}'"
+                        }
+                    ]
+                    
+                    # 如果启用了LLM集成，添加AI助手端点
+                    if self.server.agent.config.get("llm", {}).get("enabled", False):
+                        endpoints.append({
+                            "url": "/api/ai_assistant",
+                            "method": "POST",
+                            "description": "使用大模型进行对话",
+                            "request_format": {
+                                "messages": "消息列表，包含role和content",
+                                "model": "可选，要使用的模型名称",
+                                "temperature": "可选，生成温度(0.0-2.0)",
+                                "max_tokens": "可选，最大生成token数"
+                            },
+                            "response_format": {
+                                "success": "调用是否成功",
+                                "response": "AI生成的响应内容",
+                                "model": "使用的模型名称",
+                                "usage": "使用的token数量信息",
+                                "error": "错误信息（如果有）"
+                            },
+                            "example": f"curl -X POST http://{host}:{port}/api/ai_assistant -H 'Content-Type: application/json' -d '{json.dumps({'messages':[{'role':'user','content':'请解释什么是Zephyr项目？'}]})}'"
+                        })
+                    
+                    endpoints.append({
+                        "url": "/api/docs",
+                        "method": "GET",
+                        "description": "获取API文档",
+                        "example": f"curl -X GET http://{host}:{port}/api/docs"
+                    })
+                    
                     api_docs = {
                         "title": "Zephyr MCP Agent API Documentation",
                         "base_url": f"http://{host}:{port}",
-                        "endpoints": [
-                            {
-                                "url": "/api/tools",
-                                "method": "GET",
-                                "description": "获取所有可用工具列表",
-                                "response_format": {
-                                    "tools": "[工具信息列表]",
-                                    "total": "工具总数"
-                                },
-                                "example": f"curl -X GET http://{host}:{port}/api/tools"
-                            },
-                            {
-                                "url": "/api/tool/info",
-                                "method": "GET",
-                                "description": "获取特定工具的详细信息",
-                                "parameters": [
-                                    {"name": "name", "type": "query", "description": "工具名称", "required": True}
-                                ],
-                                "response_format": {
-                                    "name": "工具名称",
-                                    "description": "工具描述",
-                                    "parameters": "参数列表",
-                                    "returns": "返回值列表",
-                                    "module": "工具模块"
-                                },
-                                "example": f"curl -X GET http://{host}:{port}/api/tool/info?name=test_git_connection"
-                            },
-                            {
-                                "url": "/api/tool",
-                                "method": "POST",
-                                "description": "执行工具调用",
-                                "request_format": {
-                                    "tool": "工具名称",
-                                    "params": "工具参数对象"
-                                },
-                                "response_format": {
-                                    "success": "调用是否成功",
-                                    "result": "工具执行结果",
-                                    "error": "错误信息（如果有）",
-                                    "tool": "调用的工具名称"
-                                },
-                                "example": f"curl -X POST http://{host}:{port}/api/tool -H 'Content-Type: application/json' -d '{{\"tool\":\"test_git_connection\",\"params\":{{\"repo_url\":\"https://github.com/zephyrproject-rtos/zephyr\"}}}}'"
-                            },
-                            {
-                                "url": "/api/docs",
-                                "method": "GET",
-                                "description": "获取API文档",
-                                "example": f"curl -X GET http://{host}:{port}/api/docs"
-                            }
-                        ],
+                        "endpoints": endpoints,
                         "notes": "所有API响应均为JSON格式，POST请求需要设置Content-Type为application/json"
                     }
                     
@@ -505,8 +666,19 @@ class ZephyrMCPAgent:
             print(f"  - GET  http://{host}:{port}/api/tools        - 获取所有工具列表")
             print(f"  - GET  http://{host}:{port}/api/tool/info     - 获取特定工具详细信息")
             print(f"  - POST http://{host}:{port}/api/tool          - 执行工具调用")
+            
+            # 如果启用了LLM集成，显示AI助手端点
+            if self.config.get("llm", {}).get("enabled", False):
+                print(f"  - POST http://{host}:{port}/api/ai_assistant - AI助手对话接口")
+            
             print("\n示例请求:")
             print("  curl -X POST http://localhost:8000/api/tool -H 'Content-Type: application/json' -d '{\n    \"tool\": \"test_git_connection\",\n    \"params\": {\n      \"url\": \"https://github.com/zephyrproject-rtos/zephyr\"\n    }\n  }'")
+            
+            # 如果启用了LLM集成，显示AI助手示例
+            if self.config.get("llm", {}).get("enabled", False):
+                print("\nAI助手示例请求:")
+                print("  curl -X POST http://localhost:8000/api/ai_assistant -H 'Content-Type: application/json' -d '{\n    \"messages\": [{\n      \"role\": \"user\",\n      \"content\": \"请解释什么是Zephyr项目？\"\n    }]\n  }'")
+            
             print("\n按Ctrl+C停止服务器...")
             
             # 在单独的线程中运行服务器
@@ -542,6 +714,23 @@ class ZephyrMCPAgent:
             
             # 显示健康摘要
             print(f"健康状态摘要: 健康 {status_counts['healthy']}, 警告 {status_counts['warning']}, 错误 {status_counts['error']}")
+            
+            # 显示LLM集成状态
+            if self.config.get("llm", {}).get("enabled", False):
+                print("\nLLM集成状态:")
+                if self.llm_integration:
+                    print("  - 状态: 可用")
+                    # 尝试获取详细的LLM状态
+                    try:
+                        # 获取LLM集成实例
+                        llm_integration = self.server.agent.llm_integration
+                        llm_status = llm_integration.get_status() if llm_integration else {"providers": {}}
+                        print(f"  - OpenAI API密钥: {'已配置' if llm_status['providers']['openai']['api_key_configured'] else '未配置'}")
+                        print(f"  - Anthropic API密钥: {'已配置' if llm_status['providers']['anthropic']['api_key_configured'] else '未配置'}")
+                    except Exception:
+                        print("  - 无法获取详细状态")
+                else:
+                    print("  - 状态: 不可用")
             
             # 显示有问题的工具
             if status_counts["warning"] > 0:
@@ -653,6 +842,17 @@ def main():
             print(f"  错误: {status_counts['error']}")
             print(f"  总计: {sum(status_counts.values())}")
             
+            # 显示LLM集成状态
+            print("\nLLM集成状态:")
+            if agent.config.get("llm", {}).get("enabled", False):
+                print(f"  启用: 是")
+                if agent.llm_integration:
+                    print("  可用: 是")
+                else:
+                    print("  可用: 否 - 集成初始化失败")
+            else:
+                print(f"  启用: 否")
+            
             print("\n详细信息:")
             for tool_name, health in health_info.items():
                 status_color = "✅" if health.get("status") == "healthy" else "⚠️"
@@ -685,6 +885,12 @@ def main():
             
             print(f"\n测试结果:")
             print(f"  注册工具: {len(registered_tools)}")
+            
+            # 显示LLM集成状态
+            if agent.config.get("llm", {}).get("enabled", False):
+                print(f"  LLM集成: {'已启用且可用' if agent.llm_integration else '已启用但不可用'}")
+            else:
+                print(f"  LLM集成: 未启用")
             
             # 尝试获取工具分类
             try:
