@@ -12,6 +12,7 @@ import argparse
 import importlib
 import traceback
 import logging
+import uuid
 from typing import Dict, Any, List, Callable
 
 # LLM集成相关导入
@@ -53,8 +54,27 @@ try:
         def mock_setup_logger(level="INFO"):
             """模拟设置日志"""
             import logging
-            logging.basicConfig(level=getattr(logging, level))
-            return logging.getLogger(__name__)
+            # 创建自定义日志格式化器，包含trace_id
+            formatter = logging.Formatter('%(asctime)s [%(levelname)s] [%(trace_id)s] %(message)s')
+            
+            # 配置根日志器
+            root_logger = logging.getLogger()
+            root_logger.setLevel(getattr(logging, level))
+            
+            # 确保有handler
+            if not root_logger.handlers:
+                handler = logging.StreamHandler()
+                handler.setFormatter(formatter)
+                root_logger.addHandler(handler)
+            else:
+                # 更新现有handler的格式化器
+                for handler in root_logger.handlers:
+                    handler.setFormatter(formatter)
+            
+            # 创建日志记录器并添加trace_id属性
+            logger = logging.getLogger(__name__)
+            logger.trace_id = "-"
+            return logger
         
         Agent = MockAgent
         Tool = MockTool
@@ -73,6 +93,8 @@ class ZephyrMCPAgent:
         self.config_path = config_path
         self.config = self._load_config()
         self.logger = setup_logger(self.config.get("log_level", "INFO"))
+        # 初始化trace_id属性
+        self.logger.trace_id = "-"
         
         # 创建Agent实例
         try:
@@ -240,6 +262,9 @@ class ZephyrMCPAgent:
             def do_POST(self):
                 """处理POST请求，执行工具调用"""
                 if self.path == "/api/tool":
+                    # 生成或获取trace_id
+                    trace_id = self.headers.get('X-Trace-ID', str(uuid.uuid4()))
+                    
                     # 读取请求体
                     content_length = int(self.headers['Content-Length'])
                     post_data = self.rfile.read(content_length)
@@ -260,7 +285,16 @@ class ZephyrMCPAgent:
                         registered_tools = self.server.agent.tool_registry.get_registered_tools()
                         
                         if tool_name not in registered_tools:
-                            self.send_error(404, f"Tool '{tool_name}' not found")
+                            # 添加trace_id到错误响应
+                            self.send_response(404)
+                            self.send_header('Content-Type', 'application/json')
+                            self.send_header('X-Trace-ID', trace_id)
+                            self.end_headers()
+                            error_response = {
+                                "error": f"Tool '{tool_name}' not found",
+                                "trace_id": trace_id
+                            }
+                            self.wfile.write(json.dumps(error_response).encode('utf-8'))
                             return
                         
                         # 执行参数验证 - 尝试使用mcp_server中的validate功能
@@ -270,8 +304,9 @@ class ZephyrMCPAgent:
                         tool_info = registered_tools[tool_name]
                         tool_func = tool_info['function']
                         
-                        # 记录工具调用
-                        self.server.agent.logger.info(f"执行工具: {tool_name}，参数: {params}")
+                        # 记录工具调用，包含trace_id
+                        self.server.agent.logger.info(f"执行工具: {tool_name}，参数: {params}", 
+                                                   extra={'trace_id': trace_id})
                         
                         # 导入必要的模块
                         import subprocess
@@ -295,16 +330,19 @@ class ZephyrMCPAgent:
                         except Exception as e:
                             # 记录详细的错误信息
                             error_trace = traceback.format_exc()
-                            self.server.agent.logger.error(f"工具执行错误: {tool_name}, 错误: {str(e)}")
-                            self.server.agent.logger.error(f"错误详情: {error_trace}")
+                            self.server.agent.logger.error(f"工具执行错误: {tool_name}, 错误: {str(e)}", 
+                                                    extra={'trace_id': trace_id})
+                            self.server.agent.logger.error(f"错误详情: {error_trace}", 
+                                                    extra={'trace_id': trace_id})
                             # 重新抛出异常，由上层处理
                             raise
                         
-                        # 构造响应
+                        # 构造响应，确保包含trace_id
                         response = {
                             "success": True,
                             "result": result,
-                            "tool": tool_name
+                            "tool": tool_name,
+                            "trace_id": trace_id
                         }
                         
                         # 发送响应
@@ -314,26 +352,50 @@ class ZephyrMCPAgent:
                         self.wfile.write(json.dumps(response).encode('utf-8'))
                         
                     except json.JSONDecodeError:
-                        self.send_error(400, "Invalid JSON format")
+                        # 添加trace_id到错误响应
+                        self.send_response(400)
+                        self.send_header('Content-Type', 'application/json')
+                        self.send_header('X-Trace-ID', trace_id)
+                        self.end_headers()
+                        error_response = {
+                            "error": "Invalid JSON format",
+                            "trace_id": trace_id
+                        }
+                        self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     except Exception as e:
                         # 发送错误响应
                         error_response = {
                             "success": False,
                             "error": str(e),
-                            "tool": tool_name if 'tool_name' in locals() else None
+                            "tool": tool_name if 'tool_name' in locals() else None,
+                            "trace_id": trace_id,
+                            "error_code": "TOOL_EXECUTION_ERROR"
                         }
                         self.send_response(500)
                         self.send_header('Content-Type', 'application/json')
                         self.end_headers()
                         self.wfile.write(json.dumps(error_response).encode('utf-8'))
-                        self.server.agent.logger.error(f"执行工具 '{tool_name}' 时出错: {str(e)}")
+                        self.server.agent.logger.error(f"执行工具 '{tool_name}' 时出错: {str(e)}", 
+                                                    extra={'trace_id': trace_id})
                 elif self.path == "/api/ai_assistant":
+                    # 生成或获取trace_id
+                    trace_id = self.headers.get('X-Trace-ID', str(uuid.uuid4()))
                     # AI助手端点
-                    self._handle_ai_assistant_request()
+                    self._handle_ai_assistant_request(trace_id)
                 else:
-                    self.send_error(404, "Not Found")
+                    # 未找到路径，返回404，包含trace_id
+                    self.send_response(404)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('X-Trace-ID', trace_id)
+                    self.end_headers()
+                    error_response = {
+                        "error": "Not Found",
+                        "path": self.path,
+                        "trace_id": trace_id
+                    }
+                    self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     
-            def _handle_ai_assistant_request(self):
+            def _handle_ai_assistant_request(self, trace_id):
                 """处理AI助手请求"""
                 # 读取请求体
                 content_length = int(self.headers['Content-Length'])
@@ -400,7 +462,8 @@ class ZephyrMCPAgent:
                                 "success": True,
                                 "response": result["response"],
                                 "model": result["model"],
-                                "usage": result.get("usage", {})
+                                "usage": result.get("usage", {}),
+                                "trace_id": trace_id
                             }
                             
                             # 发送响应
@@ -411,18 +474,31 @@ class ZephyrMCPAgent:
                         else:
                             self.send_error(500, result.get("error", "AI助手处理失败"))
                     except Exception as e:
-                        self.server.agent.logger.error(f"AI助手请求处理异常: {str(e)}")
+                        self.server.agent.logger.error(f"AI助手请求处理异常: {str(e)}", 
+                                                    extra={'trace_id': trace_id})
                         self.send_error(500, f"处理AI助手请求时发生错误: {str(e)}")
                         
                 except json.JSONDecodeError:
                     self.send_error(400, "Invalid JSON format")
                 except Exception as e:
-                    self.server.agent.logger.error(f"处理AI助手请求时发生错误: {str(e)}")
-                    self.send_error(500, f"处理请求时发生错误: {str(e)}")
+                    self.server.agent.logger.error(f"处理AI助手请求时发生错误: {str(e)}", 
+                                                    extra={'trace_id': trace_id})
+                    # 添加trace_id到错误响应
+                    self.send_response(500)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('X-Trace-ID', trace_id)
+                    self.end_headers()
+                    error_response = {
+                        "error": f"处理请求时发生错误: {str(e)}",
+                        "trace_id": trace_id
+                    }
+                    self.wfile.write(json.dumps(error_response).encode('utf-8'))
             
             def do_GET(self):
-                """处理GET请求，提供工具信息和API文档"""
+                """处理GET请求，提供工具信息和API文档，包含trace_id"""
                 import urllib.parse
+                # 生成或获取trace_id
+                trace_id = self.headers.get('X-Trace-ID', str(uuid.uuid4()))
                 
                 # 解析URL
                 parsed_url = urllib.parse.urlparse(self.path)
@@ -445,11 +521,13 @@ class ZephyrMCPAgent:
                     response = {
                         "tools": tools_info,
                         "total": len(tools_info),
-                        "llm_integration": self.server.agent.config.get("llm", {}).get("enabled", False)
+                        "llm_integration": self.server.agent.config.get("llm", {}).get("enabled", False),
+                        "trace_id": trace_id
                     }
                     
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
+                    self.send_header('X-Trace-ID', trace_id)
                     self.end_headers()
                     self.wfile.write(json.dumps(response).encode('utf-8'))
                 elif path.startswith("/api/tool/info"):
@@ -457,7 +535,16 @@ class ZephyrMCPAgent:
                     tool_name = query_components.get('name', [None])[0]
                     
                     if not tool_name:
-                        self.send_error(400, "Missing tool name parameter")
+                        # 添加trace_id到错误响应
+                        self.send_response(400)
+                        self.send_header('Content-Type', 'application/json')
+                        self.send_header('X-Trace-ID', trace_id)
+                        self.end_headers()
+                        error_response = {
+                            "error": "Missing tool name parameter",
+                            "trace_id": trace_id
+                        }
+                        self.wfile.write(json.dumps(error_response).encode('utf-8'))
                         return
                     
                     registered_tools = self.server.agent.tool_registry.get_registered_tools()
@@ -478,6 +565,7 @@ class ZephyrMCPAgent:
                     
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
+                    self.send_header('X-Trace-ID', trace_id)
                     self.end_headers()
                     self.wfile.write(json.dumps(response).encode('utf-8'))
                 elif path == "/api/docs":
@@ -568,10 +656,12 @@ class ZephyrMCPAgent:
                         "notes": "所有API响应均为JSON格式，POST请求需要设置Content-Type为application/json"
                     }
                     
-                    # 生成并发送JSON响应
+                    # 生成并发送JSON响应，添加trace_id
+                    api_docs['trace_id'] = trace_id
                     response_json = json.dumps(api_docs, ensure_ascii=False)
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json; charset=utf-8')
+                    self.send_header('X-Trace-ID', trace_id)
                     self.send_header('Content-Length', str(len(response_json.encode('utf-8'))))
                     self.end_headers()
                     self.wfile.write(response_json.encode('utf-8'))
@@ -579,68 +669,68 @@ class ZephyrMCPAgent:
                     self.send_error(404, "Not Found")
             
             def _validate_request_params(self, tool_name, params):
-                  """验证请求参数的合规性，确保参数匹配工具要求"""
-                  try:
-                      self.server.agent.logger.info(f"正在验证工具 '{tool_name}' 的参数...")
-                       
-                      # 特殊处理 validate_west_init_params 工具
-                      if tool_name == 'validate_west_init_params':
-                          # 检查必需参数
-                          if 'repo_url' not in params:
-                              self.send_error(400, "缺少必需参数: repo_url")
-                              return
-                          
-                          # 验证 repo_url 格式
-                          import re
-                          url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
-                          if not url_pattern.match(params['repo_url']):
-                              self.send_error(400, "无效的 repo_url 格式")
-                              return
-                          
-                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
-                       
-                      # west_flash 工具的参数验证
-                      elif tool_name == 'west_flash':
-                          # 确保必需的 build_dir 参数存在
-                          if 'build_dir' not in params:
-                              self.send_error(400, "west_flash 需要必需参数: build_dir")
-                              return
-                      # west_update 工具的参数验证
-                      elif tool_name == 'west_update':
-                          # 确保 project_dir 参数存在
-                          if 'project_dir' not in params:
-                              self.send_error(400, "west_update 需要必需参数: project_dir")
-                              return
-                          
-                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
-                       
-                      # 通用参数验证逻辑
-                      elif tool_name == 'test_git_connection':
-                          if 'url' not in params:
-                              self.send_error(400, "缺少必需参数: url")
-                              return
-                          
-                          # 验证 url 格式
-                          import re
-                          url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
-                          if not url_pattern.match(params['url']):
-                              self.send_error(400, "无效的 URL 格式")
-                              return
-                          
-                          self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
-                       
-                      # 通用参数验证：检查必需参数
-                      tool_info = self.server.agent.tool_registry.get_registered_tools().get(tool_name)
-                      if tool_info and 'parameters' in tool_info:
-                          for param in tool_info['parameters']:
-                              if param.get('required', False) and param['name'] not in params:
-                                  self.send_error(400, f"缺少必需参数: {param['name']}")
-                                  return
-                       
-                  except Exception as e:
-                      # 验证过程出错，但不阻止请求继续
-                      self.server.agent.logger.warning(f"参数验证过程出错: {str(e)}")
-                      # 不抛出异常，允许请求继续处理
+                """验证请求参数的合规性，确保参数匹配工具要求"""
+                try:
+                    self.server.agent.logger.info(f"正在验证工具 '{tool_name}' 的参数...")
+                    
+                    # 特殊处理 validate_west_init_params 工具
+                    if tool_name == 'validate_west_init_params':
+                        # 检查必需参数
+                        if 'repo_url' not in params:
+                            self.send_error(400, "缺少必需参数: repo_url")
+                            return
+                        
+                        # 验证 repo_url 格式
+                        import re
+                        url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
+                        if not url_pattern.match(params['repo_url']):
+                            self.send_error(400, "无效的 repo_url 格式")
+                            return
+                        
+                        self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                    
+                    # west_flash 工具的参数验证
+                    elif tool_name == 'west_flash':
+                        # 确保必需的 build_dir 参数存在
+                        if 'build_dir' not in params:
+                            self.send_error(400, "west_flash 需要必需参数: build_dir")
+                            return
+                    # west_update 工具的参数验证
+                    elif tool_name == 'west_update':
+                        # 确保 project_dir 参数存在
+                        if 'project_dir' not in params:
+                            self.send_error(400, "west_update 需要必需参数: project_dir")
+                            return
+                        
+                        self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                    
+                    # 通用参数验证逻辑
+                    elif tool_name == 'test_git_connection':
+                        if 'url' not in params:
+                            self.send_error(400, "缺少必需参数: url")
+                            return
+                        
+                        # 验证 url 格式
+                        import re
+                        url_pattern = re.compile(r'^(https?|git)://[^\s/$.?#].[^\s]*$')
+                        if not url_pattern.match(params['url']):
+                            self.send_error(400, "无效的 URL 格式")
+                            return
+                        
+                        self.server.agent.logger.info(f"工具 '{tool_name}' 的参数验证通过")
+                    
+                    # 通用参数验证：检查必需参数
+                    tool_info = self.server.agent.tool_registry.get_registered_tools().get(tool_name)
+                    if tool_info and 'parameters' in tool_info:
+                        for param in tool_info['parameters']:
+                            if param.get('required', False) and param['name'] not in params:
+                                self.send_error(400, f"缺少必需参数: {param['name']}")
+                                return
+                    
+                except Exception as e:
+                    # 验证过程出错，但不阻止请求继续
+                    self.server.agent.logger.warning(f"参数验证过程出错: {str(e)}")
+                    # 不抛出异常，允许请求继续处理
             
             def log_message(self, format, *args):
                 """重写日志方法，使用agent的logger"""

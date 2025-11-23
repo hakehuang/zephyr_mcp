@@ -1,6 +1,9 @@
 from typing import Dict, Any
 import os
 
+from ..utils.common_tools import check_tools
+from ..utils.internal_helpers import _west_update_internal
+
 # 尝试导入mcp或fastmcp
 mcp = None
 try:
@@ -18,9 +21,6 @@ except ImportError:
                     return func
                 return decorator
         mcp = MockMCP()
-
-from ..utils.common_tools import check_tools
-from ..utils.internal_helpers import _west_update_internal
 
 @mcp.tool()
 def west_update(project_dir: str) -> Dict[str, Any]:
