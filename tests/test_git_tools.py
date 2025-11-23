@@ -84,14 +84,18 @@ class GitToolsTestCase:
                 try:
                     from src.tools.fetch_branch_or_pr import _fetch_branch_or_pr_internal
                     self._fetch_branch_or_pr_internal = _fetch_branch_or_pr_internal
+                    print("[+] 成功导入_fetch_branch_or_pr_internal(正确模块)")
                 except ImportError:
                     try:
                         from src.mcp_server import _fetch_branch_or_pr_internal
                         self._fetch_branch_or_pr_internal = _fetch_branch_or_pr_internal
+                        print("[+] 成功导入_fetch_branch_or_pr_internal(备用模块)")
                     except ImportError:
                         self._fetch_branch_or_pr_internal = None
-            except Exception:
+                        print("[-] 无法导入_fetch_branch_or_pr_internal")
+            except Exception as e:
                 self._fetch_branch_or_pr_internal = None
+                print(f"[-] 导入_fetch_branch_or_pr_internal时发生错误: {e}")
             
             self.import_success = any([self.git_rebase, self.fetch_branch_or_pr])
             
