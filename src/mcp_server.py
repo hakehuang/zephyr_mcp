@@ -63,6 +63,8 @@ try:
     from src.tools.get_git_config_status import get_git_config_status
     from src.tools.fetch_branch_or_pr import fetch_branch_or_pr
     from src.tools.git_rebase import git_rebase
+    from src.tools.setup_zephyr_environment import setup_zephyr_environment
+    from src.tools.llm_tools import llm_tools
 except ImportError:
     # 备选导入方案，直接从tools目录导入
     sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -80,6 +82,8 @@ except ImportError:
     from tools.get_git_config_status import get_git_config_status
     from tools.fetch_branch_or_pr import fetch_branch_or_pr
     from tools.git_rebase import git_rebase
+    from tools.setup_zephyr_environment import setup_zephyr_environment
+    from tools.llm_tools import llm_tools
 
 def __ensure_tools_are_registered(server):
     """确保所有工具函数都被MCP正确注册"""
@@ -97,7 +101,9 @@ def __ensure_tools_are_registered(server):
         "test_git_connection",
         "get_git_config_status",
         "fetch_branch_or_pr",
-        "git_rebase"
+        "git_rebase",
+        "setup_zephyr_environment",
+        "llm_tools"
     ]
     
     try:
@@ -127,7 +133,9 @@ if __name__ == "__main__":
         "test_git_connection": test_git_connection,
         "get_git_config_status": get_git_config_status,
         "fetch_branch_or_pr": fetch_branch_or_pr,
-        "git_rebase": git_rebase
+        "git_rebase": git_rebase,
+        "setup_zephyr_environment": setup_zephyr_environment,
+        "llm_tools": llm_tools
     }
     
     # 批量注册所有工具

@@ -1,5 +1,8 @@
 from typing import Dict, Any, Optional
 import os
+import subprocess
+
+from ..utils.common_tools import check_tools, run_command
 
 # 尝试导入mcp或fastmcp
 mcp = None
@@ -19,7 +22,7 @@ except ImportError:
                 return decorator
         mcp = MockMCP()
 
-from ..utils.common_tools import check_tools, run_command
+
 
 @mcp.tool()
 def git_redirect_zephyr_mirror(enable: bool = True, mirror_url: str = None) -> Dict[str, Any]:
