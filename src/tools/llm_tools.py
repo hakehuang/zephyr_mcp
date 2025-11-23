@@ -12,6 +12,22 @@ from typing import Dict, Any, List, Optional
 import logging
 from dotenv import load_dotenv
 
+# 定义llm_tools类，解决导入错误
+class llm_tools:
+    """
+    LLM工具类，提供与大语言模型交互的功能
+    """
+    @staticmethod
+    def get_llm_status():
+        """
+        获取LLM状态信息
+        """
+        status = {
+            "available": LLM_AVAILABLE,
+            "providers": {}
+        }
+        return status
+
 # Load environment variables
 # 加载环境变量
 load_dotenv()

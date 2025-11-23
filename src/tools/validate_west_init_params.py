@@ -6,8 +6,11 @@ validate_west_init_params - Validate west init parameters and provide helpful su
 
 from typing import Dict, Any, Optional
 import os
+import sys
 import re
-from ..utils.common_tools import check_tools
+# 添加项目根目录到Python路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.utils.common_tools import check_tools
 
 # 尝试导入mcp或fastmcp
 mcp = None
