@@ -7,7 +7,7 @@ validate_west_init_params - Validate west init parameters and provide helpful su
 from typing import Dict, Any, Optional
 import os
 import re
-import subprocess
+from ..utils.common_tools import check_tools
 
 # 尝试导入mcp或fastmcp
 mcp = None
@@ -27,12 +27,11 @@ except ImportError:
                 return decorator
         mcp = MockMCP()
 
-from ..utils.common_tools import check_tools, ensure_directory_exists, run_command
-
 # 内部函数：验证west init参数
 def _west_init_core(repo_url: Optional[str] = None, branch: Optional[str] = None, 
                    project_dir: Optional[str] = None) -> Dict[str, Any]:
     """
+    Internal function to validate the validity of west init parameters
     内部函数，验证west init参数的有效性
     """
     # 验证Git仓库URL

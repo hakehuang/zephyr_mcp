@@ -1,6 +1,9 @@
 from typing import Dict, Any
 import os
+from ..utils.common_tools import check_tools
+from ..utils.internal_helpers import _switch_zephyr_version_internal
 
+# Try to import mcp or fastmcp
 # 尝试导入mcp或fastmcp
 mcp = None
 try:
@@ -11,16 +14,14 @@ except ImportError:
         from fastmcp import FastMCP
         mcp = FastMCP()
     except ImportError:
-        # 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
+        # In test environments, if mcp cannot be imported, create a simple mock object
+# 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
         class MockMCP:
             def tool(self):
                 def decorator(func):
                     return func
                 return decorator
         mcp = MockMCP()
-
-from ..utils.common_tools import check_tools, format_error_message
-from ..utils.internal_helpers import _switch_zephyr_version_internal
 
 @mcp.tool()
 def switch_zephyr_version(project_dir: str, ref: str) -> Dict[str, Any]:
@@ -45,6 +46,7 @@ def switch_zephyr_version(project_dir: str, ref: str) -> Dict[str, Any]:
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
+    # Check if tools are installed
     # 检查工具是否安装
     tools_status = check_tools(["git", "west"])
     if not tools_status.get("git", False):
@@ -52,9 +54,11 @@ def switch_zephyr_version(project_dir: str, ref: str) -> Dict[str, Any]:
     if not tools_status.get("west", False):
         return {"status": "error", "log": "", "error": "west工具未安装"}
     
+    # Check if project directory exists
     # 检查项目目录是否存在
     if not os.path.exists(project_dir):
         return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
     
+    # Call internal function to switch version
     # 调用内部函数执行版本切换
     return _switch_zephyr_version_internal(project_dir, ref)

@@ -1,6 +1,8 @@
 from typing import Dict, Any
-import os
+import subprocess
+from ..utils.common_tools import check_tools
 
+# Try to import mcp or fastmcp
 # 尝试导入mcp或fastmcp
 mcp = None
 try:
@@ -11,15 +13,14 @@ except ImportError:
         from fastmcp import FastMCP
         mcp = FastMCP()
     except ImportError:
-        # 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
+        # In test environments, if mcp cannot be imported, create a simple mock object
+# 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
         class MockMCP:
             def tool(self):
                 def decorator(func):
                     return func
                 return decorator
         mcp = MockMCP()
-
-from ..utils.common_tools import check_tools, run_command, parse_git_config
 
 @mcp.tool()
 def get_git_redirect_status() -> Dict[str, Any]:
@@ -42,12 +43,14 @@ def get_git_redirect_status() -> Dict[str, Any]:
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
+    # Check if git tool is installed
     # 检查git工具是否安装
     tools_status = check_tools(["git"])
     if not tools_status.get("git", False):
         return {"status": "error", "log": "", "error": "git工具未安装"}
     
     try:
+        # Get all git global configuration
         # 获取所有的git全局配置
         cmd = ["git", "config", "--global", "--list"]
         process = subprocess.run(cmd, capture_output=True, text=True)
@@ -59,10 +62,12 @@ def get_git_redirect_status() -> Dict[str, Any]:
                 "error": f"获取Git配置失败: {process.stderr}"
             }
         
+        # Parse configuration
         # 解析配置
         config_output = process.stdout.strip()
         config_lines = config_output.split('\n') if config_output else []
         
+        # Find zephyr-related redirect configurations
         # 查找与zephyr相关的重定向配置
         zephyr_redirects = []
         for line in config_lines:
@@ -72,8 +77,10 @@ def get_git_redirect_status() -> Dict[str, Any]:
                     key = parts[0].strip()
                     value = parts[1].strip()
                     
+                    # Check if it's a zephyr-related redirect
                     # 检查是否是zephyr相关的重定向
                     if "zephyr" in key.lower() or "zephyr" in value.lower():
+                        # Extract mirror_url and original_url
                         # 提取mirror_url和original_url
                         mirror_url = key[4:].split(".insteadof")[0]
                         original_url = value
@@ -83,6 +90,7 @@ def get_git_redirect_status() -> Dict[str, Any]:
                             "original_url": original_url
                         })
         
+        # Check if there are any redirect configurations
         # 检查是否有任何重定向配置
         has_redirects = len(zephyr_redirects) > 0
         

@@ -157,7 +157,124 @@ Get Git configuration status (global or project-specific).
 **Parameters:**
 - `project_dir` (Optional[str]): Project directory for local config
 
-## Authentication Methods
+## Agent使用说明
+
+Zephyr MCP Agent是一个命令行工具，用于启动和管理Zephyr MCP服务，将Zephyr MCP工具包装成可通过HTTP API访问的服务。
+
+### 基本使用
+
+```bash
+# 启动Agent服务
+python agent.py
+
+# 指定配置文件
+python agent.py --config path/to/custom_config.json
+```
+
+### 命令行参数
+
+- `--config`: 指定配置文件路径（默认: config.json）
+- `--list-tools`: 列出所有可用工具（按分类显示）
+- `--health-check`: 执行工具健康检查（显示健康状态摘要和LLM集成状态）
+- `--generate-docs`: 生成工具文档并保存到指定文件（需要提供文件名参数）
+- `--doc-format`: 文档格式（可选值: markdown, json, text，默认: markdown）
+- `--filter`: 使用正则表达式过滤工具
+- `--search`: 搜索包含关键词的工具
+- `--test`: 测试模式，验证工具注册但不启动服务
+
+### API使用
+
+启动服务后，可以通过以下API端点与Agent交互：
+
+```
+# 执行工具调用
+POST http://localhost:8000/api/tool
+
+# AI助手对话接口（如果启用）
+POST http://localhost:8000/api/ai_assistant
+```
+
+### 工具调用示例
+
+```bash
+curl -X POST http://localhost:8000/api/tool -H 'Content-Type: application/json' -H 'X-Trace-ID: your-trace-id' -d '{
+  "tool": "test_git_connection",
+  "params": {
+    "url": "https://github.com/zephyrproject-rtos/zephyr"
+  }
+}'
+```
+
+响应格式：
+```json
+{
+  "success": true,
+  "result": {...},  // 工具执行结果
+  "tool": "tool_name",
+  "trace_id": "your-trace-id"
+}
+```
+
+### 健康检查功能
+
+运行健康检查命令可以获取工具的健康状态报告：
+
+```bash
+python agent.py --health-check
+```
+
+健康检查会显示：
+- 工具健康状态摘要（健康、警告、错误数量）
+- LLM集成状态
+- 每个工具的详细信息（状态、参数数量、描述等）
+
+### 搜索和过滤工具
+
+可以使用关键词搜索工具：
+
+```bash
+python agent.py --search "git"
+```
+
+### 测试模式
+
+测试模式可以验证工具注册是否成功，而不需要启动服务：
+
+```bash
+python agent.py --test
+```
+
+测试模式会显示：
+- 注册的工具数量
+- LLM集成状态
+- 工具分类信息
+
+### LLM集成（可选）
+
+如果在配置中启用了LLM集成，还可以使用AI助手接口。Agent启动时会自动注册LLM相关工具（如果配置中启用）。
+
+AI助手示例请求：
+
+```bash
+curl -X POST http://localhost:8000/api/ai_assistant -H 'Content-Type: application/json' -H 'X-Trace-ID: your-trace-id' -d '{
+  "messages": [{
+    "role": "user",
+    "content": "请解释什么是Zephyr项目？"
+  }]
+}'
+### 错误处理
+
+Agent具有完善的错误处理机制，所有API响应都包含trace_id，便于问题追踪和调试。错误响应格式：
+
+```json
+{
+  "success": false,
+  "error": "错误描述",
+  "tool": "tool_name",
+  "trace_id": "your-trace-id",
+  "error_code": "TOOL_EXECUTION_ERROR"
+}
+```## Authentication Methods
 
 The server supports three authentication methods:
 

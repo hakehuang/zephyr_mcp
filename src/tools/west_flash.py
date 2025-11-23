@@ -1,5 +1,7 @@
 from typing import Dict, Any, Optional
 import os
+import subprocess
+from ..utils.common_tools import check_tools
 
 # 尝试导入mcp或fastmcp
 mcp = None
@@ -18,8 +20,6 @@ except ImportError:
                     return func
                 return decorator
         mcp = MockMCP()
-
-from ..utils.common_tools import check_tools, format_error_message, run_command
 
 @mcp.tool()
 def west_flash(build_dir: str, board: Optional[str] = None, 

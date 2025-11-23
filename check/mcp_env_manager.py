@@ -52,7 +52,10 @@ class MCPEnvManager:
                (git_password and not git_password.startswith('${'))
     
     def _uses_env_references(self, env_config: Dict) -> bool:
-        """检查是否使用了环境变量引用"""
+        """
+        Check if environment variable references are used
+        检查是否使用了环境变量引用
+        """
         git_username = env_config.get('GIT_USERNAME', '')
         git_password = env_config.get('GIT_PASSWORD', '')
         
@@ -60,7 +63,10 @@ class MCPEnvManager:
                (git_password and '${env:' in git_password)
     
     def get_system_env_vars(self) -> Dict:
-        """获取系统环境变量"""
+        """
+        Get system environment variables
+        获取系统环境变量
+        """
         return {
             'GIT_USERNAME': os.environ.get('GIT_USERNAME', '未设置'),
             'GIT_PASSWORD': '已设置' if os.environ.get('GIT_PASSWORD') else '未设置',

@@ -1,77 +1,97 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Tool Wrapper Module - For adapting existing Zephyr MCP tools to agno agent
 工具包装模块 - 用于将现有Zephyr MCP工具适配到agno agent
 """
 
-from typing import Dict, Any, List, Callable, Optional, get_type_hints
+from typing import Dict, Any, List, Callable, get_type_hints
 import inspect
 import os
 import sys
 import re
 
+# Ensure tools can be imported correctly
 # 确保可以正确导入工具模块
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 
 class ToolWrapper:
-    """工具包装类，用于适配现有工具到agno agent"""
+    """
+    Tool Wrapper Class, for adapting existing tools to agno agent
+    工具包装类，用于适配现有工具到agno agent
+    """
     
     @staticmethod
     def wrap_tool(tool_func: Callable) -> Dict[str, Any]:
-        """包装工具函数，提取其元数据
+        """
+        Wrap tool function and extract its metadata
+        包装工具函数，提取其元数据
         
         Args:
+            tool_func: Tool function
             tool_func: 工具函数
             
         Returns:
+            Dictionary containing tool metadata
             包含工具元数据的字典
         """
         if not callable(tool_func):
             return None
         
+        # Extract basic information
         # 提取基本信息
         tool_info = {
             "name": getattr(tool_func, "__name__", "unknown_tool"),
             "description": "",
-            "function": tool_func,  # 始终使用原始函数
+            "function": tool_func,  # Always use the original function
+            # 始终使用原始函数
             "parameters": [],
             "returns": {}
         }
         
+        # Get function signature
         # 获取函数签名
         signature = inspect.signature(tool_func)
         
+        # Get type hints
         # 获取类型提示
         try:
             type_hints = get_type_hints(tool_func)
         except (TypeError, ValueError):
             type_hints = {}
         
+        # Extract parameter information
         # 提取参数信息
         tool_info["parameters"] = ToolWrapper._extract_parameters(tool_func, signature, type_hints)
         
+        # Extract return value information
         # 提取返回值信息
         tool_info["returns"] = ToolWrapper._extract_returns(tool_func, type_hints)
         
+        # Extract function description
         # 提取功能描述
         doc = getattr(tool_func, "__doc__", "") or ""
         doc = doc.strip()
         
         if doc:
+            # Try to extract short description
             # 尝试提取简短描述
             doc_lines = doc.split('\n')
             short_description = doc_lines[0].strip()
             
+            # Simplify description processing for clarity
             # 简化描述处理，确保清晰可读
             tool_info["description"] = short_description
             
+            # Add detailed description if there are more lines
             # 如果有更多行，添加详细描述
             if len(doc_lines) > 1:
                 detailed_description = "\n".join(line.strip() for line in doc_lines[1:] if line.strip())
                 if detailed_description:
                     tool_info["description"] = f"{short_description}\n\n{detailed_description}"
         
+        # Extract exception handling information and module
         # 提取异常处理信息和模块
         tool_info["exception_handling"] = ToolWrapper._extract_exception_handling(tool_func)
         tool_info["module"] = tool_func.__module__
@@ -81,7 +101,22 @@ class ToolWrapper:
     @staticmethod
     def _extract_parameters(tool_func: Callable, signature: inspect.Signature, 
                           type_hints: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """从函数和文档中提取参数信息"""
+        """
+        Extract parameter information from function and documentation
+        从函数和文档中提取参数信息
+        
+        Args:
+            tool_func: Tool function
+            tool_func: 工具函数
+            signature: Function signature
+            signature: 函数签名
+            type_hints: Type hints dictionary
+            type_hints: 类型提示字典
+        
+        Returns:
+            List of parameter information dictionaries
+            参数信息字典列表
+        """
         parameters = []
         docstring = inspect.getdoc(tool_func) or ""
         
@@ -126,7 +161,18 @@ class ToolWrapper:
     
     @staticmethod
     def _parse_param_descriptions(docstring: str) -> Dict[str, str]:
-        """解析文档字符串中的参数描述"""
+        """
+        Parse parameter descriptions from docstring
+        解析文档字符串中的参数描述
+        
+        Args:
+            docstring: Function docstring
+            docstring: 函数文档字符串
+        
+        Returns:
+            Dictionary mapping parameter names to descriptions
+            参数名到描述的映射字典
+        """
         param_descriptions = {}
         
         # 支持多种参数文档格式
@@ -191,7 +237,20 @@ class ToolWrapper:
     
     @staticmethod
     def _extract_returns(tool_func: Callable, type_hints: Dict[str, Any]) -> Dict[str, Any]:
-        """提取返回值信息"""
+        """
+        Extract return value information
+        提取返回值信息
+        
+        Args:
+            tool_func: Tool function
+            tool_func: 工具函数
+            type_hints: Type hints dictionary
+            type_hints: 类型提示字典
+        
+        Returns:
+            Dictionary with return type and description
+            包含返回类型和描述的字典
+        """
         docstring = inspect.getdoc(tool_func) or ""
         
         # 获取返回值描述
@@ -227,7 +286,18 @@ class ToolWrapper:
     
     @staticmethod
     def _extract_description(tool_func: Callable) -> str:
-        """提取功能描述"""
+        """
+        Extract function description
+        提取功能描述
+        
+        Args:
+            tool_func: Tool function
+            tool_func: 工具函数
+        
+        Returns:
+            Extracted description
+            提取的描述
+        """
         docstring = inspect.getdoc(tool_func) or ""
         
         # 清理文档字符串
@@ -256,7 +326,18 @@ class ToolWrapper:
     
     @staticmethod
     def _extract_exception_handling(tool_func: Callable) -> str:
-        """提取异常处理信息"""
+        """
+        Extract exception handling information
+        提取异常处理信息
+        
+        Args:
+            tool_func: Tool function
+            tool_func: 工具函数
+        
+        Returns:
+            Extracted exception handling information
+            提取的异常处理信息
+        """
         docstring = inspect.getdoc(tool_func) or ""
         
         # 查找异常处理部分
@@ -277,12 +358,16 @@ class ToolWrapper:
     
     @staticmethod
     def validate_tool(tool_func: Callable) -> Dict[str, Any]:
-        """验证工具函数是否有效
+        """
+        Validate if the tool function is valid
+        验证工具函数是否有效
         
         Args:
+            tool_func: Function to validate
             tool_func: 要验证的函数
             
         Returns:
+            Validation result dictionary
             验证结果字典
         """
         # 直接检查是否可调用即可，保持简单
@@ -290,38 +375,50 @@ class ToolWrapper:
         
     @staticmethod
     def is_valid_tool(tool_func: Callable) -> bool:
-        """简单检查工具函数是否有效（用于原始调用）
+        """
+        Simple check if tool function is valid (for original calls)
+        简单检查工具函数是否有效（用于原始调用）
         
         Args:
+            tool_func: Function to validate
             tool_func: 要验证的函数
             
         Returns:
+            Whether the function is a valid tool function
             是否为有效的工具函数
         """
         return callable(tool_func)
 
 
 def create_agno_tool(tool_func: Callable) -> Dict[str, Any]:
-    """创建适合agno agent的工具描述对象
+    """
+    Create tool description object suitable for agno agent
+    创建适合agno agent的工具描述对象
     
     Args:
+        tool_func: Tool function
         tool_func: 工具函数
         
     Returns:
+        Formatted tool description dictionary
         格式化的工具描述字典
     """
+    # Validate if tool is valid
     # 验证工具是否有效
     if not ToolWrapper.is_valid_tool(tool_func):
         raise ValueError(f"无效的工具函数: {tool_func}")
     
+    # Extract tool information
     # 提取工具信息
     wrapped = ToolWrapper.wrap_tool(tool_func)
     
+    # Convert to agno tool format, ensuring original function is returned
     # 转换为agno工具格式，确保返回原始函数
     agno_tool = {
         "name": wrapped["name"],
         "description": wrapped["description"],
-        "function": tool_func,  # 直接使用原始函数
+        "function": tool_func,  # Directly use the original function
+        # 直接使用原始函数
         "parameters": wrapped["parameters"],
         "returns": wrapped["returns"]
     }
@@ -330,7 +427,18 @@ def create_agno_tool(tool_func: Callable) -> Dict[str, Any]:
 
 
 def create_tool_wrapper(func: Callable) -> Callable:
-    """创建工具包装装饰器，增强错误处理"""
+    """
+    Create tool wrapper decorator to enhance error handling
+    创建工具包装装饰器，增强错误处理
+    
+    Args:
+        func: Function to wrap
+        func: 要包装的函数
+    
+    Returns:
+        Wrapped function with enhanced error handling
+        具有增强错误处理的包装函数
+    """
     def wrapper(*args, **kwargs):
         try:
             # 执行原始函数
@@ -363,5 +471,6 @@ def create_tool_wrapper(func: Callable) -> Callable:
     
     return wrapper
 
+# Export commonly used functions
 # 导出常用函数
 __all__ = ['create_agno_tool', 'create_tool_wrapper', 'ToolWrapper']

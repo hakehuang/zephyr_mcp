@@ -1,5 +1,7 @@
 from typing import Dict, Any, Optional, Union, List
 import os
+import subprocess
+from ..utils.common_tools import check_tools
 
 # 尝试导入mcp或fastmcp
 mcp = None
@@ -18,8 +20,6 @@ except ImportError:
                     return func
                 return decorator
         mcp = MockMCP()
-
-from ..utils.common_tools import check_tools, format_error_message, run_command
 
 @mcp.tool()
 def run_twister(platform: Optional[str] = None, tests: Optional[Union[List[str], str]] = None, 

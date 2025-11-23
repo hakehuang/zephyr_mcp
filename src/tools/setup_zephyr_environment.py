@@ -63,22 +63,26 @@ import sys
 import platform
 import subprocess
 import shutil
-import json
-from typing import Dict, Any, Optional, List
+import argparse
+from typing import Dict, Any, List
 
-# Mock MCP for standalone testing
+# 尝试导入mcp或fastmcp
+mcp = None
 try:
-    from ...agent import mcp
+    from mcp import FastMCP
+    mcp = FastMCP()
 except ImportError:
-    # 创建MockMCP用于独立测试
-    class MockMCP:
-        def tool(self):
-            def decorator(func):
-                return func
-            return decorator
-    mcp = MockMCP()
-
-from ..utils.common_tools import check_tools, format_error_message
+    try:
+        from fastmcp import FastMCP
+        mcp = FastMCP()
+    except ImportError:
+        # 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
+        class MockMCP:
+            def tool(self):
+                def decorator(func):
+                    return func
+                return decorator
+        mcp = MockMCP()
 
 
 @mcp.tool()
@@ -990,7 +994,6 @@ if __name__ == "__main__":
     Parses command line arguments and invokes the setup function, providing
     user-friendly output and error handling.
     """
-    import argparse
     
     parser = argparse.ArgumentParser(
         description="Zephyr RTOS Development Environment Setup Tool",

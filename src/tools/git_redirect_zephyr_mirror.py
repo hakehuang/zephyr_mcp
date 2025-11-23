@@ -1,9 +1,9 @@
-from typing import Dict, Any, Optional
-import os
+from typing import Dict, Any
 import subprocess
 
-from ..utils.common_tools import check_tools, run_command
+from ..utils.common_tools import check_tools
 
+# Try to import mcp or fastmcp
 # 尝试导入mcp或fastmcp
 mcp = None
 try:
@@ -14,6 +14,7 @@ except ImportError:
         from fastmcp import FastMCP
         mcp = FastMCP()
     except ImportError:
+        # In test environments, if mcp cannot be imported, create a simple mock object
         # 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
         class MockMCP:
             def tool(self):
@@ -47,17 +48,20 @@ def git_redirect_zephyr_mirror(enable: bool = True, mirror_url: str = None) -> D
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
+    # Check if git tool is installed
     # 检查git工具是否安装
     tools_status = check_tools(["git"])
     if not tools_status.get("git", False):
         return {"status": "error", "log": "", "error": "git工具未安装"}
     
+    # If no mirror URL is specified, use the default domestic mirror
     # 如果未指定镜像源，使用默认的国内镜像源
     if mirror_url is None:
         mirror_url = "https://mirror.tuna.tsinghua.edu.cn/git/zephyrproject-rtos/zephyr.git"
     
     try:
         if enable:
+            # Set up redirect
             # 设置重定向
             cmd = ["git", "config", "--global", "url." + mirror_url + ".insteadOf", "https://github.com/zephyrproject-rtos/zephyr.git"]
             process = subprocess.run(cmd, capture_output=True, text=True)
@@ -75,10 +79,12 @@ def git_redirect_zephyr_mirror(enable: bool = True, mirror_url: str = None) -> D
                     "error": f"启用重定向失败: {process.stderr}"
                 }
         else:
+            # Remove redirect
             # 移除重定向
             cmd = ["git", "config", "--global", "--unset", "url." + mirror_url + ".insteadOf"]
             process = subprocess.run(cmd, capture_output=True, text=True)
             
+            # If it fails, it might be because the configuration doesn't exist, which is normal
             # 如果失败，可能是因为配置不存在，这是正常的
             if process.returncode != 0 and "No such key" in process.stderr:
                 return {
