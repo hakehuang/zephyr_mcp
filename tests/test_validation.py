@@ -37,15 +37,15 @@ def test_tool_call(tool_name, params, expected_status=200):
         
         # 检查状态码是否符合预期
         assert status_code == expected_status, f"预期状态码 {expected_status}，实际得到 {status_code}"
-        print("✓ 测试通过")
+        print("[PASS] 测试通过")
         return MockResponse(status_code, response_text)
     except AssertionError as e:
-        print(f"❌ 断言失败: {e}")
+        print(f"[ERROR] 断言失败: {e}")
         raise
     except Exception as e:
-        print(f"❌ 测试过程中发生错误: {e}")
+        print(f"[ERROR] 测试过程中发生错误: {e}")
         # 在测试环境中，我们允许某些错误并返回模拟通过
-        print("⚠️  在测试模式下模拟通过")
+        print("[WARN] 在测试模式下模拟通过")
         return MockResponse(expected_status, json.dumps({"status": "success", "message": "模拟通过"}))
 
 # 测试1: west_flash工具的有效参数测试（提供build_dir）
@@ -89,6 +89,6 @@ except AssertionError as e:
     print(f"注意: 测试异常: {e}")
 
 try:
-    print("\n🎉 所有测试完成！")
+    print("\n[SUCCESS] 所有测试完成！")
 except Exception as e:
-    print(f"\n❌ 测试过程中出现错误: {e}")
+    print(f"\n[ERROR] 测试过程中出现错误: {e}")

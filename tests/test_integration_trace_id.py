@@ -16,7 +16,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 # 服务器地址
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 
 class TestIntegrationTraceId(unittest.TestCase):

@@ -43,28 +43,28 @@ def test_imports():
             imported_tools.append(name)
             # 避免打印过多信息，只显示成功数量
         except ImportError as e:
-            print(f"✗ {module} 导入失败: {e}")
+            print(f"[ERROR] {module} 导入失败: {e}")
             success = False
         except AttributeError as e:
-            print(f"✗ {module} 中找不到 {name}: {e}")
+            print(f"[ERROR] {module} 中找不到 {name}: {e}")
             success = False
     
-    print(f"✓ 成功导入 {len(imported_tools)}/{len(tool_imports)} 个工具函数")
+    print(f"[OK] 成功导入 {len(imported_tools)}/{len(tool_imports)} 个工具函数")
     
     # 测试共享工具函数导入（关键函数）
     try:
         from src.utils.common_tools import check_tools, run_command, format_error_message
-        print("✓ 成功导入关键共享工具函数")
+        print("[OK] 成功导入关键共享工具函数")
     except ImportError as e:
-        print(f"✗ 导入关键共享工具函数失败: {e}")
+        print(f"[ERROR] 导入关键共享工具函数失败: {e}")
         success = False
     
     # 内部辅助函数导入不是必须的，即使失败也继续测试
     try:
         from src.utils.internal_helpers import _git_checkout_internal
-        print("✓ 成功导入示例内部辅助函数")
+        print("[OK] 成功导入示例内部辅助函数")
     except ImportError as e:
-        print(f"⚠️  导入内部辅助函数失败: {e} (可选，继续测试)")
+        print(f"[WARN] 导入内部辅助函数失败: {e} (可选，继续测试)")
     
     return success
 
@@ -85,7 +85,7 @@ def test_common_tools():
         
         return True
     except Exception as e:
-        print(f"⚠️  共享工具函数测试遇到问题: {e} (继续测试)")
+        print(f"[WARN] 共享工具函数测试遇到问题: {e} (继续测试)")
         return False
 
 def main():
@@ -104,10 +104,10 @@ def main():
     
     print("\n测试完成!")
     if success:
-        print("✓ 所有测试通过")
+        print("[OK] 所有测试通过")
         return 0
     else:
-        print("✗ 测试失败")
+        print("[ERROR] 测试失败")
         return 1
 
 if __name__ == "__main__":

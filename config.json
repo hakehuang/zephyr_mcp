@@ -16,6 +16,11 @@
         "validation_tools",
         "ai_assistant"
     ],
+    "language": {
+        "default": "zh",
+        "available": ["zh", "en"],
+        "auto_detect": true
+    },
     "llm": {
         "enabled": true,
         "default_model": "gpt-4-turbo",

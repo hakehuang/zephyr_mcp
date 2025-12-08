@@ -3,7 +3,7 @@ import json
 
 # 测试工具调用API
 def test_tool_call():
-    url = "http://localhost:8000/api/tool"
+    url = "http://localhost:8001/api/tool"
     headers = {"Content-Type": "application/json"}
     data = {
         "tool": "test_git_connection",

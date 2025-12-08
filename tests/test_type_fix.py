@@ -33,7 +33,7 @@ def test_type_compatibility():
             """模拟核心函数的类型签名"""
             return {"status": "success", "message": "核心函数模拟成功"}
         
-        print("✓ 成功创建模拟测试函数")
+        print("[PASS] 成功创建模拟测试函数")
         
         print("\n1. 检查模拟west_init函数签名:")
         try:
@@ -42,7 +42,7 @@ def test_type_compatibility():
                 if name in ['repo_url', 'branch', 'project_dir', 'username', 'token', 'auth_method']:
                     print(f"   {name}: {param.annotation if param.annotation != inspect.Parameter.empty else '未指定'}")
         except Exception as e:
-            print(f"   ⚠️ 获取签名失败: {e}")
+            print(f"   [WARN] 获取签名失败: {e}")
         
         print("\n2. 检查模拟核心函数签名:")
         try:
@@ -51,33 +51,33 @@ def test_type_compatibility():
                 if name in ['repo_url', 'branch', 'project_dir', 'username', 'token', 'auth_method']:
                     print(f"   {name}: {param.annotation if param.annotation != inspect.Parameter.empty else '未指定'}")
         except Exception as e:
-            print(f"   ⚠️ 获取签名失败: {e}")
+            print(f"   [WARN] 获取签名失败: {e}")
         
         print("\n3. 测试参数类型兼容性:")
         
         # 模拟函数调用，只检查参数类型而不执行实际功能
         try:
             # 测试None参数
-            print("   ✓ None参数类型检查通过")
+            print("   [PASS] None参数类型检查通过")
             
             # 测试默认值
-            print("   ✓ 默认值类型检查通过")
+            print("   [PASS] 默认值类型检查通过")
             
             # 验证类型提示完整性
             required_params = ['repo_url', 'branch', 'project_dir']
             optional_params = ['username', 'token', 'auth_method']
             
-            print(f"   ✓ 验证了{len(required_params)}个必需参数和{len(optional_params)}个可选参数的类型签名")
-            print("   ✓ 参数验证完成 (模拟模式)")
+            print(f"   [PASS] 验证了{len(required_params)}个必需参数和{len(optional_params)}个可选参数的类型签名")
+            print("   [PASS] 参数验证完成 (模拟模式)")
             print("   返回结果状态: success")
             
         except Exception as e:
-            print(f"   ✗ 参数测试遇到问题: {e}")
+            print(f"   [FAIL] 参数测试遇到问题: {e}")
     
     except Exception as e:
-        print(f"❌ 测试过程中遇到错误: {e}")
+        print(f"[ERROR] 测试过程中遇到错误: {e}")
     
-    print("\n✅ 类型兼容性测试完成 (模拟模式)")
+    print("\n[SUCCESS] 类型兼容性测试完成 (模拟模式)")
 
 if __name__ == "__main__":
     test_type_compatibility()

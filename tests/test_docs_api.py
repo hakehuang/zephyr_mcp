@@ -3,7 +3,7 @@ import json
 
 # 测试API文档端点
 def test_api_docs():
-    url = "http://localhost:8000/api/docs"
+    url = "http://localhost:8001/api/docs"
     print(f"发送请求到: {url}")
     
     try:

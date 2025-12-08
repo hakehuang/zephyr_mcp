@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Zephyr MCP 测试框架 - 主测试入口
@@ -10,6 +10,7 @@ import os
 import time
 import subprocess
 import importlib.util
+import platform
 from typing import List, Dict, Any
 
 # 添加项目根目录到Python路径
@@ -34,6 +35,7 @@ class TestRunner:
             'test_interactive_demo',
             'test_interactive_features',
             'test_llm_integration',
+            'test_multi_language_support',
             'test_rebase_tool',
             'test_refactored_code',
             'test_type_fix',
@@ -42,17 +44,20 @@ class TestRunner:
         ]
         self.test_results = {}
         self.tests_dir = os.path.dirname(os.path.abspath(__file__))
+        self.is_windows = platform.system() == "Windows"
+        
+    def is_windows_os(self) -> bool:
+        """检查当前是否为Windows操作系统"""
+        return self.is_windows
+    
+    # WSL路径转换功能已移除，所有平台直接使用系统路径
     
     def print_banner(self):
         """打印测试运行器横幅"""
         banner = [
-            "  _____                     ______  _____  ",
-            " |__  /  _ __   __ _  _ __  |___  / |___ /  ",
-            "   / /  | '_ \ / _` || '_ \   / /   | |_ \  ",
-            "  / /_  | |_) | (_| || | | | / /_   |___) | ",
-            " /____| | .__/ \__,_||_| |_|/____| |____/  ",
-            "        |_|                                ",
-            "  MCP 测试运行器 v1.0                      "
+            "--------------------------------------------",
+            "         Zephyr MCP 测试运行器               ",
+            "--------------------------------------------",
         ]
         
         print("\n" + "=" * 50)
@@ -68,9 +73,9 @@ class TestRunner:
         file_path = os.path.join(self.tests_dir, f"{module_name}.py")
         exists = os.path.exists(file_path)
         if exists:
-            print(f"✅ 找到测试文件: {module_name}.py")
+            print(f"[OK] 找到测试文件: {module_name}.py")
         else:
-            print(f"❌ 测试文件不存在: {module_name}.py")
+            print(f"[ERROR] 测试文件不存在: {module_name}.py")
         return exists
     
     def run_test_module_as_script(self, module_name: str) -> Dict[str, Any]:
@@ -87,15 +92,20 @@ class TestRunner:
         }
         
         try:
-            print(f"\n🔄 运行测试模块: {module_name}")
+            print(f"\n[RUN] 运行测试模块: {module_name}")
             print("-" * 40)
             
-            # 使用subprocess运行测试模块
+            # 使用subprocess运行测试模块，使用系统区域设置编码
+            import locale
+            
+            # 在所有系统上直接运行测试
             process = subprocess.Popen(
                 [sys.executable, module_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                encoding='utf-8-sig',  # 使用带BOM的UTF-8编码
+                errors='replace'  # 替换无法解码的字符
             )
             
             stdout, stderr = process.communicate()
@@ -107,21 +117,30 @@ class TestRunner:
                     result['output'].append(line)
             
             if stderr:
-                print(f"\n❌ 错误输出:")
+                print(f"\n[ERROR] 错误输出:")
                 for line in stderr.splitlines():
                     print(f"  [错误] {line}")
                 result['error'] = stderr
             
             # 检查是否成功（基于输出判断）
-            success_indicators = ['✅', '成功', '完成', 'passed']
-            result['success'] = any(indicator in stdout.lower() or indicator in stdout 
-                                   for indicator in success_indicators)
+            success_indicators = ['OK', 'PASSED', 'success', 'successfully', 'completed']
+            failure_indicators = ['FAILED', 'ERROR', 'Traceback']
+            
+            # 首先检查返回码
+            result['success'] = process.returncode == 0
+            
+            # 然后检查输出内容以确保准确性
+            stdout_lower = stdout.lower() if stdout else ''
+            if any(indicator.lower() in stdout_lower for indicator in failure_indicators):
+                result['success'] = False
+            elif any(indicator.lower() in stdout_lower for indicator in success_indicators):
+                result['success'] = True
             
             if process.returncode == 0 and not result['error']:
                 result['success'] = True
                 
         except Exception as e:
-            print(f"\n❌ 运行测试模块时出错: {e}")
+            print(f"\n[ERROR] 运行测试模块时出错: {e}")
             result['error'] = str(e)
         finally:
             result['duration'] = round(time.time() - start_time, 2)
@@ -149,10 +168,10 @@ class TestRunner:
             
             if result['success']:
                 success_count += 1
-                print(f"\n✅ 测试模块 {module_name} 完成! ({result['duration']}s)")
+                print(f"\n[OK] 测试模块 {module_name} 完成! ({result['duration']}s)")
             else:
                 failure_count += 1
-                print(f"\n❌ 测试模块 {module_name} 失败! ({result['duration']}s)")
+                print(f"\n[ERROR] 测试模块 {module_name} 失败! ({result['duration']}s)")
             
             print("-" * 40)
         
@@ -175,23 +194,24 @@ class TestRunner:
         
         # 显示详细结果
         if failure_count > 0:
-            print("\n❌ 失败的测试模块:")
+            print("\n[ERROR] 失败的测试模块:")
             for module, result in self.test_results.items():
                 if not result['success']:
                     error_msg = result.get('error', '未知错误')
                     error_preview = str(error_msg)[:100] if error_msg else '未知错误'
                     print(f"  - {module}: {error_preview}...")
         
-        print("\n✅ 成功的测试模块:")
+        print("\n[OK] 成功的测试模块:")
         for module, result in self.test_results.items():
             if result['success']:
                 print(f"  - {module} ({result['duration']}s)")
         
         # 提供运行建议
-        print("\n💡 运行建议:")
+        print("\n[TIPS] 运行建议:")
         print("1. 单独运行特定测试: python tests/test_module_name.py")
         print("2. 完整运行: python tests/run_all_tests.py")
         print("3. 运行测试时可以使用 -v 参数查看详细输出")
+        print("4. 确保系统编码设置正确，避免Unicode编码问题")
         print("\n" + "=" * 50)
     
     def print_usage(self):

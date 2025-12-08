@@ -11,13 +11,26 @@ import sys
 import os
 from unittest import mock
 
+# 修复Windows命令行编码问题
+def safe_print(text: str) -> None:
+    """安全打印函数，确保在不同编码环境下都能正常显示"""
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # 替换Unicode表情符号为ASCII字符
+        text = text.replace('⚠️', '[WARNING]')
+        text = text.replace('❌', '[ERROR]')
+        text = text.replace('🎉', '[SUCCESS]')
+        text = text.replace('✅', '[OK]')
+        print(text)
+
 # 尝试导入requests，但如果失败也不会中断测试
 try:
     import requests
 except ImportError:
     requests = None
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 
 def test_trace_id_functionality():
@@ -53,12 +66,12 @@ def test_trace_id_functionality():
                 response = requests.get(f"{BASE_URL}/health", headers=headers, timeout=1)
                 live_test = True
             except (requests.RequestException, Exception):
-                print("⚠️  本地服务器未运行，使用模拟测试...")
+                safe_print("⚠️  本地服务器未运行，使用模拟测试...")
                 # 使用模拟响应
                 response = MockResponse(custom_trace_id)
                 live_test = False
         else:
-            print("⚠️  requests库不可用，使用模拟测试...")
+            safe_print("⚠️  requests库不可用，使用模拟测试...")
             response = MockResponse(custom_trace_id)
             live_test = False
         
@@ -186,12 +199,12 @@ def test_trace_id_functionality():
                 print(f"注意: AI助手返回非预期状态码: {response.status_code}")
         except Exception as e:
             print(f"测试AI助手端点时出错: {str(e)}")
-            print("⚠️  使用模拟响应完成测试...")
+            safe_print("⚠️  使用模拟响应完成测试...")
             # 使用模拟响应
             mock_ai_response = MockResponse(custom_trace_id)
             print(f"模拟AI助手响应中的trace_id: {mock_ai_response.json().get('trace_id')}")
     else:
-        print("⚠️  使用模拟响应测试AI助手端点...")
+        safe_print("⚠️  使用模拟响应测试AI助手端点...")
         mock_ai_response = MockResponse(custom_trace_id)
         print(f"模拟AI助手响应中的trace_id: {mock_ai_response.json().get('trace_id')}")
     
@@ -219,23 +232,23 @@ if __name__ == "__main__":
                 server_running = response.status_code == 200
                 print(f"服务器健康检查: {'成功' if server_running else '失败'}")
             except (requests.RequestException, Exception):
-                print("⚠️  无法连接到服务器，将使用模拟测试模式")
+                safe_print("⚠️  无法连接到服务器，将使用模拟测试模式")
         else:
-            print("⚠️  requests库不可用，将使用模拟测试模式")
+            safe_print("⚠️  requests库不可用，将使用模拟测试模式")
         
         # 运行测试（现在支持模拟模式）
         test_trace_id_functionality()
         
-        print("\n🎉 测试完成！所有断言通过")
+        safe_print("\n🎉 测试完成！所有断言通过")
         sys.exit(0)
         
     except AssertionError as e:
-        print(f"❌ 断言失败: {str(e)}")
+        safe_print(f"❌ 断言失败: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
     except Exception as e:
-        print(f"❌ 测试过程中发生错误: {str(e)}")
+        safe_print(f"❌ 测试过程中发生错误: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

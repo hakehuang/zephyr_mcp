@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 添加项目根目录到Python路径
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def test_llm_import():
     """
@@ -25,10 +25,10 @@ def test_llm_import():
         # 尝试导入LLM集成模块
         from src.utils.llm_integration import LLMIntegration
         from src.tools.llm_tools import init_llm, get_llm, get_llm_status, get_registered_tools
-        logger.info("✅ LLM模块导入成功")
+        logger.info("[OK] LLM模块导入成功")
         return True
     except ImportError as e:
-        logger.error(f"❌ LLM模块导入失败: {str(e)}")
+        logger.error(f"[ERROR] LLM模块导入失败: {str(e)}")
         return False
 
 def test_llm_initialization():
@@ -48,7 +48,7 @@ def test_llm_initialization():
         llm = LLMIntegration(llm_config)
         
         # 验证配置加载
-        logger.info(f"✅ LLM集成初始化成功")
+        logger.info(f"[OK] LLM集成初始化成功")
         logger.info(f"  - 配置内容: {json.dumps(llm_config, indent=2, ensure_ascii=False)}")
         
         # 获取状态信息
@@ -57,7 +57,7 @@ def test_llm_initialization():
         
         return True
     except Exception as e:
-        logger.error(f"❌ LLM集成初始化失败: {str(e)}")
+        logger.error(f"[ERROR] LLM集成初始化失败: {str(e)}")
         return False
 
 def test_llm_tools_registration():
@@ -69,7 +69,7 @@ def test_llm_tools_registration():
         from src.tools.llm_tools import get_registered_tools
         
         tools = get_registered_tools()
-        logger.info(f"✅ 获取LLM工具列表成功")
+        logger.info(f"[OK] 获取LLM工具列表成功")
         logger.info(f"  - 可用工具数量: {len(tools)}")
         
         for tool_name, tool_info in tools.items():
@@ -79,7 +79,7 @@ def test_llm_tools_registration():
         
         return True
     except Exception as e:
-        logger.error(f"❌ 获取LLM工具列表失败: {str(e)}")
+        logger.error(f"[ERROR] 获取LLM工具列表失败: {str(e)}")
         return False
 
 def test_agent_integration():
@@ -105,18 +105,18 @@ def test_agent_integration():
         for keyword in keywords:
             if keyword in agent_content:
                 found_keywords += 1
-                logger.info(f"  ✅ 找到关键字: {keyword}")
+                logger.info(f"  [OK] 找到关键字: {keyword}")
             else:
-                logger.warning(f"  ❌ 未找到关键字: {keyword}")
+                logger.warning(f"  [WARN] 未找到关键字: {keyword}")
         
         if found_keywords >= 3:  # 至少找到3个关键字才算基本成功
-            logger.info(f"✅ Agent集成检查通过 (找到{found_keywords}/{len(keywords)}个关键字)")
+            logger.info(f"[OK] Agent集成检查通过 (找到{found_keywords}/{len(keywords)}个关键字)")
             return True
         else:
-            logger.warning(f"⚠️ Agent集成可能不完整 (仅找到{found_keywords}/{len(keywords)}个关键字)")
+            logger.warning(f"[WARN] Agent集成可能不完整 (仅找到{found_keywords}/{len(keywords)}个关键字)")
             return False
     except Exception as e:
-        logger.error(f"❌ Agent集成检查失败: {str(e)}")
+        logger.error(f"[ERROR] Agent集成检查失败: {str(e)}")
         return False
 
 def print_usage_instructions():
@@ -170,9 +170,9 @@ def main():
     print(f"通过测试: {passed_tests}/{total_tests}")
     
     if passed_tests == total_tests:
-        print("✅ 所有测试通过! LLM集成配置成功。")
+        print("[OK] 所有测试通过! LLM集成配置成功。")
     else:
-        print(f"⚠️  有{total_tests - passed_tests}个测试未通过，请检查配置。")
+        print(f"[WARN] 有{total_tests - passed_tests}个测试未通过，请检查配置。")
     
     # 打印使用说明
     print_usage_instructions()
