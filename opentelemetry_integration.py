@@ -13,16 +13,26 @@ from typing import Dict, Any, Optional, TYPE_CHECKING
 try:
     from opentelemetry import trace
     from opentelemetry.sdk.trace import TracerProvider, Span
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter, SimpleSpanProcessor
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
     from opentelemetry.sdk.resources import SERVICE_NAME, Resource
     from opentelemetry.instrumentation.http import HTTPInstrumentor
+    
+    # Agno Instrumentor 导入
+    try:
+        from openinference.instrumentation.agno import AgnoInstrumentor
+        AGNO_INSTRUMENTOR_AVAILABLE = True
+    except ImportError:
+        AGNO_INSTRUMENTOR_AVAILABLE = False
+        AgnoInstrumentor = None
+    
     OPENTELEMETRY_AVAILABLE = True
     
     if TYPE_CHECKING:
         from opentelemetry import trace
 except ImportError:
     OPENTELEMETRY_AVAILABLE = False
+    AGNO_INSTRUMENTOR_AVAILABLE = False
     # 为类型检查提供占位符
     if TYPE_CHECKING:
         from typing import Any as trace
@@ -67,13 +77,25 @@ class OpenTelemetryManager:
             
             if exporter_type == "otlp":
                 otlp_endpoint = otel_config.get("otlp_endpoint", "http://localhost:4318/v1/traces")
-                exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+                headers = otel_config.get("headers", {})
+                
+                # 如果配置了LangSmith端点，使用对应的配置
+                if "langchain.com" in otlp_endpoint:
+                    headers = {
+                        "x-api-key": otel_config.get("api_key", ""),
+                        "Langsmith-Project": otel_config.get("project_name", "zephyr_mcp_agent")
+                    }
+                
+                exporter = OTLPSpanExporter(endpoint=otlp_endpoint, headers=headers)
                 self.logger.info(f"使用OTLP导出器，端点: {otlp_endpoint}")
+                
+                # 使用SimpleSpanProcessor以获得更快的响应
+                span_processor = SimpleSpanProcessor(exporter)
             else:
                 exporter = ConsoleSpanExporter()
                 self.logger.info("使用控制台导出器")
+                span_processor = BatchSpanProcessor(exporter)
             
-            span_processor = BatchSpanProcessor(exporter)
             tracer_provider.add_span_processor(span_processor)
             
             # 设置全局追踪提供者
@@ -84,6 +106,13 @@ class OpenTelemetryManager:
             
             # 启用HTTP工具自动检测
             HTTPInstrumentor().instrument()
+            
+            # 启用Agno的自动埋点（如果可用）
+            if AGNO_INSTRUMENTOR_AVAILABLE and AgnoInstrumentor:
+                AgnoInstrumentor().instrument()
+                self.logger.info("Agno Instrumentor 已启用")
+            else:
+                self.logger.info("Agno Instrumentor 不可用，使用标准OpenTelemetry")
             
             self.initialized = True
             self.logger.info("OpenTelemetry 初始化成功")
@@ -144,5 +173,8 @@ def get_default_opentelemetry_config() -> Dict[str, Any]:
         "service_name": "zephyr_mcp_agent",
         "exporter": "console",  # console, otlp
         "otlp_endpoint": "http://localhost:4318/v1/traces",
-        "sampler": "always_on"
+        "sampler": "always_on",
+        "headers": {},  # OTLP导出器的自定义头部
+        "api_key": "",  # LangSmith等平台的API密钥
+        "project_name": "zephyr_mcp_agent"  # LangSmith项目名
     }

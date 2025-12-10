@@ -154,7 +154,11 @@ python main.py --create-config
     "enabled": false,
     "service_name": "zephyr_mcp_agent",
     "exporter": "console",
-    "otlp_endpoint": "http://localhost:4318/v1/traces"
+    "otlp_endpoint": "http://localhost:4318/v1/traces",
+    "sampler": "always_on",
+    "headers": {},
+    "api_key": "",
+    "project_name": "zephyr_mcp_agent"
   },
   "llm": {
     "enabled": false,
@@ -167,6 +171,56 @@ python main.py --create-config
   }
 }
 ```
+
+### 分布式追踪配置 / Distributed Tracing Configuration
+
+#### 基本配置 / Basic Configuration
+
+```json
+{
+  "opentelemetry": {
+    "enabled": false,
+    "service_name": "zephyr_mcp_agent",
+    "exporter": "console",
+    "otlp_endpoint": "http://localhost:4318/v1/traces",
+    "sampler": "always_on",
+    "headers": {},
+    "api_key": "",
+    "project_name": "zephyr_mcp_agent"
+  }
+}
+```
+
+#### LangSmith 集成配置 / LangSmith Integration Configuration
+
+```json
+{
+  "opentelemetry": {
+    "enabled": true,
+    "service_name": "zephyr_mcp_agent",
+    "exporter": "otlp",
+    "otlp_endpoint": "https://api.smith.langchain.com/otel/v1/traces",
+    "sampler": "always_on",
+    "headers": {
+      "x-api-key": "lsv2_pt_your_api_key_here",
+      "Langsmith-Project": "your_project_name"
+    },
+    "api_key": "lsv2_pt_your_api_key_here",
+    "project_name": "your_project_name"
+  }
+}
+```
+
+#### 支持的导出器 / Supported Exporters
+
+- **console**: 输出到控制台 / Output to console
+- **otlp**: 使用 OTLP 协议导出到远程服务 / Export to remote service using OTLP protocol
+
+#### Agno Instrumentor 集成 / Agno Instrumentor Integration
+
+项目现在支持使用 Agno Instrumentor 进行自动埋点。当 `openinference.instrumentation.agno` 包可用时，系统会自动启用 Agno 的自动埋点功能。
+
+The project now supports automatic instrumentation using Agno Instrumentor. When the `openinference.instrumentation.agno` package is available, the system will automatically enable Agno's automatic instrumentation.
 
 ### 命令行参数 / Command Line Arguments
 

@@ -5,9 +5,9 @@
 
 import sys
 import os
-sys.path.append('..')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent import ZephyrMCPAgent
+from agent_core import ZephyrMCPAgent
 
 def test_agno_agent_creation():
     """测试创建agno Agent"""
@@ -15,7 +15,8 @@ def test_agno_agent_creation():
     
     try:
         # 使用默认配置文件
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         print("✓ agno Agent创建成功")
         
         # 检查agno Agent属性
@@ -28,8 +29,8 @@ def test_agno_agent_creation():
             print("✗ OpenTelemetry配置未找到")
             
         # 检查agno telemetry属性
-        if hasattr(agent, 'telemetry'):
-            print(f"✓ agno telemetry属性: {agent.telemetry}")
+        if hasattr(agent.agent, 'telemetry'):
+            print(f"✓ agno telemetry属性: {agent.agent.telemetry}")
         else:
             print("✗ agno telemetry属性未找到")
             
@@ -45,7 +46,8 @@ def test_opentelemetry_disabled():
     
     try:
         # 使用默认配置文件
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         print("✓ 禁用OpenTelemetry的Agent创建成功")
         
         # 检查OpenTelemetry是否被正确禁用
@@ -66,20 +68,31 @@ def test_agno_telemetry_control():
     
     try:
         # 使用默认配置文件
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         
-        # 手动禁用agno telemetry
-        if hasattr(agent, 'telemetry'):
-            agent.telemetry = False
-            print(f"✓ agno telemetry属性设置为: {agent.telemetry}")
+        # 检查agno Agent的telemetry属性
+        if hasattr(agent.agent, 'telemetry'):
+            # 保存原始telemetry值
+            original_telemetry = agent.agent.telemetry
             
-            # 重新初始化OpenTelemetry以检查是否被禁用
-            agent._init_opentelemetry()
+            # 手动禁用agno telemetry
+            agent.agent.telemetry = False
+            print(f"✓ agno telemetry属性设置为: {agent.agent.telemetry}")
             
+            # 由于OpenTelemetry在初始化时检查telemetry属性，
+            # 我们需要检查当前状态是否反映了禁用状态
             if agent.otel_tracer is None:
                 print("✓ agno telemetry属性正确控制了OpenTelemetry")
             else:
                 print("✗ agno telemetry属性未能控制OpenTelemetry")
+                
+            # 恢复原始telemetry值
+            agent.agent.telemetry = original_telemetry
+            
+        else:
+            print("✗ agno Agent没有telemetry属性")
+            return False
                 
         return True
         

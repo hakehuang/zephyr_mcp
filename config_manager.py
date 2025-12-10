@@ -129,7 +129,10 @@ def get_default_opentelemetry_config() -> Dict[str, Any]:
         "service_name": get_text("agent_name"),
         "exporter": "console",  # console, otlp
         "otlp_endpoint": "http://localhost:4318/v1/traces",
-        "sampler": "always_on"
+        "sampler": "always_on",
+        "headers": {},  # OTLP导出器的自定义头部
+        "api_key": "",  # LangSmith等平台的API密钥
+        "project_name": "zephyr_mcp_agent"  # LangSmith项目名
     }
 
 

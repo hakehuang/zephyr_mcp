@@ -5,9 +5,9 @@
 
 import sys
 import os
-sys.path.append('..')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent import ZephyrMCPAgent
+from agent_core import ZephyrMCPAgent
 
 def test_tool_registration():
     """测试工具注册功能"""
@@ -15,7 +15,8 @@ def test_tool_registration():
     
     try:
         # 使用默认配置文件
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         
         # 检查工具注册表
         if hasattr(agent, 'tool_registry'):
@@ -45,7 +46,8 @@ def test_opentelemetry_integration():
     print("\n测试OpenTelemetry集成...")
     
     try:
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         
         # 检查OpenTelemetry配置
         if hasattr(agent, 'otel_config'):
@@ -79,7 +81,8 @@ def test_http_handler():
     print("\n测试HTTP请求处理器...")
     
     try:
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         
         # 检查HTTP服务器配置
         if hasattr(agent, 'config') and 'port' in agent.config:
@@ -105,7 +108,8 @@ def test_agno_api_compatibility():
     print("\n测试agno API兼容性...")
     
     try:
-        agent = ZephyrMCPAgent("../config.json")
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.json")
+        agent = ZephyrMCPAgent(config_path)
         
         # 检查agno Agent的可用方法
         agno_methods = [method for method in dir(agent.agent) if not method.startswith('_')]

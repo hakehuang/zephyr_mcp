@@ -1,7 +1,7 @@
 {
   "agent_name": "Zephyr MCP Agent",
   "version": "1.0.0",
-  "description": "Zephyr MCP Agent for Zephyr RTOS development",
+  "description": "Zephyr MCP Agent with Agno Instrumentor and LangSmith integration",
   "tools_directory": "./src/tools",
   "utils_directory": "./src/utils",
   "log_level": "INFO",
@@ -9,21 +9,21 @@
   "host": "localhost",
   "language": {
     "default": "zh",
-    "available": [
-      "zh",
-      "en"
-    ],
+    "available": ["zh", "en"],
     "auto_detect": true
   },
   "opentelemetry": {
-    "enabled": false,
+    "enabled": true,
     "service_name": "zephyr_mcp_agent",
-    "exporter": "console",
-    "otlp_endpoint": "http://localhost:4318/v1/traces",
+    "exporter": "otlp",
+    "otlp_endpoint": "https://api.smith.langchain.com/otel/v1/traces",
     "sampler": "always_on",
-    "headers": {},
-    "api_key": "",
-    "project_name": "zephyr_mcp_agent"
+    "headers": {
+      "x-api-key": "lsv2_pt_your_api_key_here",
+      "Langsmith-Project": "your_project_name"
+    },
+    "api_key": "lsv2_pt_your_api_key_here",
+    "project_name": "your_project_name"
   },
   "llm": {
     "enabled": false,
