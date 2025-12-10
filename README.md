@@ -1,601 +1,514 @@
-# Zephyr MCP Server
+# Zephyr MCP Agent
 
-A Model Context Protocol (MCP) server for Zephyr RTOS development workflows. This server provides a comprehensive set of tools for managing Zephyr projects, including project initialization, firmware flashing, testing, version management, and Git operations with authentication support.
+一个基于Agno框架的模块化Zephyr RTOS开发工作流MCP（Model Context Protocol）Agent。该Agent提供了一套完整的Zephyr项目管理工具，包括项目初始化、固件烧录、测试、版本管理和Git操作等功能。
 
-## Features
+A modular Zephyr RTOS development workflow MCP (Model Context Protocol) Agent based on the Agno framework. This Agent provides a comprehensive set of tools for Zephyr project management, including project initialization, firmware flashing, testing, version management, and Git operations.
 
-### 🔧 Core Zephyr Operations
-- **Project Initialization**: Initialize Zephyr projects with authentication support
-- **Firmware Flashing**: Flash firmware to target boards with various flashers
-- **Testing Framework**: Run Twister tests with comprehensive result reporting
-- **Version Management**: Switch between Zephyr versions and manage updates
+---
 
-### 🔐 Authentication Support
-- **Multiple Authentication Methods**: Embedded, environment variable, and Git config authentication
-- **Secure Credential Handling**: Support for username/token authentication
-- **Connection Testing**: Pre-flight Git connection validation
+## 🚀 新特性 / New Features
 
-### 🔄 Git Operations
-- **Branch Management**: Checkout specific Git references (SHA, tag, branch)
-- **Mirror Management**: Redirect to Zephyr Git mirrors
-- **Configuration Management**: Set and retrieve Git configuration status
+### 模块化架构 / Modular Architecture
+- **模块化设计** - 将大型单体文件拆分为专注的模块，提高可维护性
+- **职责分离** - 每个模块负责特定功能，便于团队协作开发
+- **易于扩展** - 新增功能只需在相应模块中添加
 
-## Installation
+- **Modular Design** - Split large monolithic files into focused modules for better maintainability
+- **Separation of Concerns** - Each module handles specific functionality for team collaboration
+- **Easy to Extend** - Add new features by extending corresponding modules
 
-### Prerequisites
+### Agno框架集成 / Agno Framework Integration
+- **Agno API兼容** - 使用Agno v2.3.2的现代Agent框架
+- **工具注册优化** - 使用`agent.add_tool()`方法注册工具
+- **Telemetry支持** - 与Agno的telemetry标志兼容
+
+- **Agno API Compatible** - Uses modern Agno v2.3.2 Agent framework
+- **Optimized Tool Registration** - Register tools using `agent.add_tool()` method
+- **Telemetry Support** - Compatible with Agno's telemetry flag
+
+### OpenTelemetry分布式追踪 / OpenTelemetry Distributed Tracing
+- **可配置追踪** - 支持控制台和OTLP导出器
+- **HTTP请求追踪** - 自动追踪API请求和工具调用
+- **优雅降级** - 当OpenTelemetry依赖未安装时自动禁用
+
+- **Configurable Tracing** - Supports console and OTLP exporters
+- **HTTP Request Tracing** - Automatically traces API requests and tool calls
+- **Graceful Degradation** - Automatically disables when OpenTelemetry dependencies are not installed
+
+### 多语言支持 / Multi-language Support
+- **国际化** - 支持中文和英文界面
+- **自动检测** - 根据HTTP请求头自动检测语言
+- **动态切换** - 运行时动态切换语言
+
+- **Internationalization** - Supports Chinese and English interfaces
+- **Auto-detection** - Automatically detects language from HTTP request headers
+- **Dynamic Switching** - Switch languages at runtime
+
+---
+
+## 📁 项目结构 / Project Structure
+
+```
+zephyr_mcp/
+├── main.py                      # 主入口文件 / Main entry point
+├── agent_core.py                # Agent核心类 / Agent core class
+├── opentelemetry_integration.py # OpenTelemetry集成模块 / OpenTelemetry integration module
+├── http_server.py               # HTTP服务器实现 / HTTP server implementation
+├── config_manager.py            # 配置管理模块 / Configuration management module
+├── language_manager.py          # 语言管理模块 / Language management module
+├── config.json                  # 配置文件（自动生成） / Configuration file (auto-generated)
+└── src/                         # 源代码目录 / Source code directory
+    ├── tools/                   # 工具模块 / Tools module
+    └── utils/                   # 工具类 / Utility classes
+```
+
+---
+
+## 🔧 核心功能 / Core Features
+
+### Zephyr操作 / Zephyr Operations
+- **项目初始化** - 支持认证的Zephyr项目初始化
+- **固件烧录** - 使用各种烧录器烧录固件到目标板
+- **测试框架** - 运行Twister测试并返回结构化结果
+- **版本管理** - 切换Zephyr版本和管理更新
+
+- **Project Initialization** - Initialize Zephyr projects with authentication support
+- **Firmware Flashing** - Flash firmware to target boards with various flashers
+- **Testing Framework** - Run Twister tests with comprehensive result reporting
+- **Version Management** - Switch between Zephyr versions and manage updates
+
+### 认证支持 / Authentication Support
+- **多种认证方法** - 嵌入式、环境变量和Git配置认证
+- **安全凭据处理** - 支持用户名/令牌认证
+- **连接测试** - Git连接预验证
+
+- **Multiple Authentication Methods** - Embedded, environment variable, and Git config authentication
+- **Secure Credential Handling** - Support for username/token authentication
+- **Connection Testing** - Pre-flight Git connection validation
+
+### Git操作 / Git Operations
+- **分支管理** - 检出特定Git引用（SHA、标签、分支）
+- **镜像管理** - 重定向到Zephyr Git镜像
+- **配置管理** - 设置和获取Git配置状态
+
+- **Branch Management** - Checkout specific Git references (SHA, tag, branch)
+- **Mirror Management** - Redirect to Zephyr Git mirrors
+- **Configuration Management** - Set and retrieve Git configuration status
+
+---
+
+## 🚀 快速开始 / Quick Start
+
+### 安装要求 / Prerequisites
 
 - Python 3.8+
-- Zephyr development environment with:
-  - `west` tool
-  - `git`
-  - `twister` (for testing)
+- Zephyr开发环境（包含west、git、twister）
+- Zephyr development environment (with west, git, twister)
 
-### Setup
+### 安装步骤 / Installation Steps
 
-1. Clone the repository:
+1. 克隆仓库：
 ```bash
 git clone https://github.com/your-username/zephyr_mcp.git
 cd zephyr_mcp
 ```
 
-2. Install dependencies:
+2. 安装依赖：
 ```bash
-pip install fastmcp
+pip install agno==2.3.2
 ```
 
-3. Run the server:
+3. 启动Agent：
 ```bash
-python src/mcp_server.py
+python main.py
 ```
 
-## Available Tools
+### 创建示例配置 / Create Sample Configuration
 
-### 1. `west_init` - Initialize Zephyr Project
-Initialize a Zephyr project with authentication support.
+```bash
+python main.py --create-config
+```
 
-**Parameters:**
-- `repo_url` (str): Git repository URL
-- `branch` (str): Git branch name
-- `project_dir` (str): Local project directory
-- `username` (Optional[str]): Git username for authentication
-- `token` (Optional[str]): Git token or password
-- `auth_method` (str): Authentication method ("embedded", "env", "config") - Default: "embedded"
+---
 
-**Example:**
+## ⚙️ 配置说明 / Configuration
+
+### 配置文件结构 / Configuration File Structure
+
 ```json
 {
-  "repo_url": "https://github.com/zephyrproject-rtos/zephyr.git",
-  "branch": "main",
-  "project_dir": "/path/to/project",
-  "username": "your_username",
-  "token": "your_token",
-  "auth_method": "embedded"
+  "agent_name": "Zephyr MCP Agent",
+  "version": "1.0.0",
+  "description": "Zephyr MCP Agent for Zephyr RTOS development",
+  "tools_directory": "./src/tools",
+  "utils_directory": "./src/utils",
+  "log_level": "INFO",
+  "port": 8001,
+  "host": "localhost",
+  "language": {
+    "default": "zh",
+    "available": ["zh", "en"],
+    "auto_detect": true
+  },
+  "opentelemetry": {
+    "enabled": false,
+    "service_name": "zephyr_mcp_agent",
+    "exporter": "console",
+    "otlp_endpoint": "http://localhost:4318/v1/traces"
+  },
+  "llm": {
+    "enabled": false,
+    "providers": {
+      "openai": {
+        "api_key": "your_openai_api_key_here",
+        "model": "gpt-3.5-turbo"
+      }
+    }
+  }
 }
 ```
 
-### 2. `west_flash` - Flash Firmware
-Execute west flash command to flash firmware to target board.
-
-**Parameters:**
-- `build_dir` (str): Build output directory
-- `board` (Optional[str]): Target hardware board model
-- `runner` (Optional[str]): Flasher type (jlink, pyocd, openocd, etc.)
-- `probe_id` (Optional[str]): Flasher ID/serial number
-- `flash_extra_args` (Optional[str]): Additional flash parameters
-
-### 3. `run_twister` - Run Twister Tests
-Execute twister test or build command and return structured results.
-
-**Parameters:**
-- `platform` (Optional[str]): Target hardware platform
-- `tests` (Optional[Union[List[str], str]]): Test path or suite name
-- `test_cases` (Optional[Union[List[str], str]]): Test case name
-- `enable_slow` (bool): Enable slow tests - Default: False
-- `build_only` (bool): Build only mode - Default: False
-- `extra_args` (Optional[str]): Additional twister parameters
-- `project_dir` (str): Zephyr project root directory
-
-### 4. `git_checkout` - Switch Git Reference
-Switch to specified Git reference (SHA, tag or branch) in Zephyr project directory.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-- `ref` (str): Git reference (SHA, tag or branch name)
-
-### 5. `west_update` - Update Zephyr Project
-Run west update command in Zephyr project directory.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-
-### 6. `switch_zephyr_version` - Switch Zephyr Version
-Switch to specified Zephyr version (SHA or tag) and run west update.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-- `ref` (str): Git reference (SHA, tag or branch name)
-
-### 7. `get_zephyr_status` - Get Project Status
-Get Git status information of Zephyr project.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-
-### 8. `git_redirect_zephyr_mirror` - Redirect to Git Mirror
-Redirect Zephyr Git repository to mirror address.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-- `mirror_url` (str): Mirror repository URL
-
-### 9. `get_git_redirect_status` - Get Redirect Status
-Get Git remote redirect status.
-
-**Parameters:**
-- `project_dir` (str): Zephyr project directory
-
-### 10. `set_git_credentials` - Set Git Credentials
-Set Git authentication credentials (global or project-specific).
-
-**Parameters:**
-- `username` (str): Git username
-- `password` (str): Git password/token
-- `project_dir` (Optional[str]): Project directory for local config
-
-### 11. `test_git_connection` - Test Git Connection
-Test Git repository connection with authentication.
-
-**Parameters:**
-- `repo_url` (str): Git repository URL
-- `username` (Optional[str]): Git username
-- `password` (Optional[str]): Git password/token
-- `project_dir` (Optional[str]): Project directory for config
-
-### 12. `get_git_config_status` - Get Git Config Status
-Get Git configuration status (global or project-specific).
-
-**Parameters:**
-- `project_dir` (Optional[str]): Project directory for local config
-
-## Agent使用说明
-
-Zephyr MCP Agent是一个命令行工具，用于启动和管理Zephyr MCP服务，将Zephyr MCP工具包装成可通过HTTP API访问的服务。
-
-### 基本使用
+### 命令行参数 / Command Line Arguments
 
 ```bash
-# 启动Agent服务
-python agent.py
+# 基本使用 / Basic usage
+python main.py
 
-# 指定配置文件
-python agent.py --config path/to/custom_config.json
+# 指定配置文件 / Specify config file
+python main.py --config custom_config.json
+
+# 创建示例配置文件 / Create sample config
+python main.py --create-config
+
+# 覆盖配置参数 / Override config parameters
+python main.py --port 8080 --host 0.0.0.0 --language en --log-level DEBUG
 ```
 
-### 命令行参数
+---
 
-- `--config`: 指定配置文件路径（默认: config.json）
-- `--list-tools`: 列出所有可用工具（按分类显示）
-- `--health-check`: 执行工具健康检查（显示健康状态摘要和LLM集成状态）
-- `--generate-docs`: 生成工具文档并保存到指定文件（需要提供文件名参数）
-- `--doc-format`: 文档格式（可选值: markdown, json, text，默认: markdown）
-- `--filter`: 使用正则表达式过滤工具
-- `--search`: 搜索包含关键词的工具
-- `--test`: 测试模式，验证工具注册但不启动服务
-
-### API使用
+## 🌐 API接口 / API Endpoints
 
 启动服务后，可以通过以下API端点与Agent交互：
+After starting the service, you can interact with the Agent through the following API endpoints:
 
-```
-# 执行工具调用
-POST http://localhost:8000/api/tool
-
-# AI助手对话接口（如果启用）
-POST http://localhost:8000/api/ai_assistant
-```
-
-### 工具调用示例
-
+### 工具调用 / Tool Execution
 ```bash
-curl -X POST http://localhost:8000/api/tool -H 'Content-Type: application/json' -H 'X-Trace-ID: your-trace-id' -d '{
-  "tool": "test_git_connection",
+POST http://localhost:8001/api/tool
+Content-Type: application/json
+X-Trace-ID: your-trace-id
+
+{
+  "tool": "tool_name",
   "params": {
-    "url": "https://github.com/zephyrproject-rtos/zephyr"
+    "param1": "value1",
+    "param2": "value2"
   }
-}'
-```
-
-响应格式：
-```json
-{
-  "success": true,
-  "result": {...},  // 工具执行结果
-  "tool": "tool_name",
-  "trace_id": "your-trace-id"
 }
 ```
 
-### 健康检查功能
+### 获取工具列表 / Get Tool List
+```bash
+GET http://localhost:8001/api/tools
+```
 
-运行健康检查命令可以获取工具的健康状态报告：
+### 获取工具信息 / Get Tool Information
+```bash
+GET http://localhost:8001/api/tool/info?name=tool_name
+```
+
+### API文档 / API Documentation
+```bash
+GET http://localhost:8001/api/docs
+```
+
+---
+
+## 🔧 可用工具 / Available Tools
+
+### Zephyr项目管理工具 / Zephyr Project Management Tools
+
+#### `setup_zephyr_environment` - 设置Zephyr开发环境 / Set up Zephyr Development Environment
+根据west.yml文件设置完整的Zephyr RTOS开发环境。
+Set up a complete Zephyr RTOS development environment according to west.yml file.
+
+**参数 / Parameters：**
+- `west_yml_url` (str): west.yml文件的URL / URL of west.yml file
+- `project_dir` (str): 项目目录路径 / Project directory path
+- `manifest_rev` (Optional[str]): manifest修订版本 / Manifest revision
+
+#### `west_flash` - 烧录固件 / Flash Firmware
+执行west flash命令将固件烧录到目标板。
+Execute west flash command to flash firmware to target board.
+
+**参数 / Parameters：**
+- `build_dir` (str): 构建输出目录 / Build output directory
+- `board` (Optional[str]): 目标硬件板型号 / Target hardware board model
+- `runner` (Optional[str]): 烧录器类型 / Flasher type
+
+#### `run_twister` - 运行Twister测试 / Run Twister Tests
+执行twister测试或构建命令并返回结构化结果。
+Execute twister test or build command and return structured results.
+
+**参数 / Parameters：**
+- `platform` (Optional[str]): 目标硬件平台 / Target hardware platform
+- `tests` (Optional[List[str]]): 测试路径或套件名称 / Test path or suite name
+- `project_dir` (str): Zephyr项目根目录 / Zephyr project root directory
+
+### Git操作工具 / Git Operation Tools
+
+#### `git_checkout` - 切换Git引用 / Switch Git Reference
+在Zephyr项目目录中切换到指定的Git引用（SHA、标签或分支）。
+Switch to specified Git reference (SHA, tag or branch) in Zephyr project directory.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+- `ref` (str): Git引用 / Git reference
+
+#### `west_update` - 更新Zephyr项目 / Update Zephyr Project
+在Zephyr项目目录中运行west update命令。
+Run west update command in Zephyr project directory.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+
+#### `switch_zephyr_version` - 切换Zephyr版本 / Switch Zephyr Version
+切换到指定的Zephyr版本（SHA或标签）并运行west update。
+Switch to specified Zephyr version (SHA or tag) and run west update.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+- `ref` (str): Git引用 / Git reference
+
+#### `get_zephyr_status` - 获取项目状态 / Get Project Status
+获取Zephyr项目的Git状态信息。
+Get Git status information of Zephyr project.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+
+### Git认证和配置工具 / Git Authentication and Configuration Tools
+
+#### `git_redirect_zephyr_mirror` - 重定向到Git镜像 / Redirect to Git Mirror
+将Zephyr Git仓库重定向到镜像地址。
+Redirect Zephyr Git repository to mirror address.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+- `mirror_url` (str): 镜像仓库URL / Mirror repository URL
+
+#### `get_git_redirect_status` - 获取重定向状态 / Get Redirect Status
+获取Git远程重定向状态。
+Get Git remote redirect status.
+
+**参数 / Parameters：**
+- `project_dir` (str): Zephyr项目目录 / Zephyr project directory
+
+#### `set_git_credentials` - 设置Git凭据 / Set Git Credentials
+设置Git认证凭据（全局或项目特定）。
+Set Git authentication credentials (global or project-specific).
+
+**参数 / Parameters：**
+- `username` (str): Git用户名 / Git username
+- `password` (str): Git密码/令牌 / Git password/token
+- `project_dir` (Optional[str]): 项目目录（用于本地配置） / Project directory (for local config)
+
+#### `test_git_connection` - 测试Git连接 / Test Git Connection
+使用认证测试Git仓库连接。
+Test Git repository connection with authentication.
+
+**参数 / Parameters：**
+- `repo_url` (str): Git仓库URL / Git repository URL
+- `username` (Optional[str]): Git用户名 / Git username
+- `password` (Optional[str]): Git密码/令牌 / Git password/token
+
+#### `get_git_config_status` - 获取Git配置状态 / Get Git Configuration Status
+获取Git配置状态（全局或项目特定）。
+Get Git configuration status (global or project-specific).
+
+**参数 / Parameters：**
+- `project_dir` (Optional[str]): 项目目录（用于本地配置） / Project directory (for local config)
+
+### 高级Git操作 / Advanced Git Operations
+
+#### `fetch_branch_or_pr` - 获取分支或Pull Request / Fetch Branch or Pull Request
+从远程仓库获取分支或Pull Request。
+Fetch a branch or pull request from a remote repository.
+
+#### `git_rebase` - 执行Git rebase操作 / Execute Git Rebase Operation
+在Zephyr项目目录中执行Git rebase操作。
+Execute Git rebase operation in Zephyr project directory.
+
+---
+
+## 🔍 模块说明 / Module Documentation
+
+### agent_core.py
+Agent核心类，包含主要的`ZephyrMCPAgent`类，负责：
+Agent core class containing the main `ZephyrMCPAgent` class, responsible for:
+- Agent初始化和配置加载 / Agent initialization and configuration loading
+- 工具注册和管理 / Tool registration and management
+- 语言管理 / Language management
+- 与Agno框架的集成 / Integration with Agno framework
+
+### opentelemetry_integration.py
+OpenTelemetry集成模块，提供：
+OpenTelemetry integration module, providing:
+- 分布式追踪初始化 / Distributed tracing initialization
+- Span创建和管理 / Span creation and management
+- 多种导出器支持（控制台、OTLP） / Multiple exporter support (console, OTLP)
+- HTTP请求自动追踪 / HTTP request automatic tracing
+
+### http_server.py
+HTTP服务器模块，实现：
+HTTP server module, implementing:
+- JSON API服务器 / JSON API server
+- 工具调用请求处理 / Tool execution request handling
+- 错误处理和追踪ID管理 / Error handling and trace ID management
+- 多语言请求头检测 / Multi-language request header detection
+
+### config_manager.py
+配置管理模块，负责：
+Configuration management module, responsible for:
+- 配置文件加载和验证 / Configuration file loading and validation
+- 默认配置生成 / Default configuration generation
+- 配置参数覆盖 / Configuration parameter overriding
+
+### language_manager.py
+语言管理模块，提供：
+Language management module, providing:
+- 多语言资源管理 / Multi-language resource management
+- 语言切换功能 / Language switching functionality
+- 请求头语言检测 / Request header language detection
+
+---
+
+## 🛠️ 开发指南 / Development Guide
+
+### 添加新工具 / Adding New Tools
+
+1. 在`src/tools/`目录中创建新的工具模块
+2. 定义工具函数并使用适当的装饰器
+3. 在工具注册表中注册新工具
+4. 更新相关文档
+
+1. Create new tool module in `src/tools/` directory
+2. Define tool function with appropriate decorators
+3. Register new tool in tool registry
+4. Update relevant documentation
+
+### 模块开发 / Module Development
+
+每个模块应该：
+Each module should:
+- 职责单一，功能专注 / Have single responsibility and focused functionality
+- 提供清晰的接口和文档 / Provide clear interfaces and documentation
+- 包含适当的错误处理 / Include proper error handling
+- 遵循项目的代码风格 / Follow project code style
+
+### 测试 / Testing
 
 ```bash
-python agent.py --health-check
+# 测试模块导入 / Test module imports
+python -c "from agent_core import ZephyrMCPAgent; print('导入成功 / Import successful')"
+
+# 测试配置加载 / Test configuration loading
+python -c "from config_manager import load_config; config = load_config('config.json'); print('配置加载成功 / Config loaded successfully')"
+
+# 测试Agent启动 / Test Agent startup
+python main.py --help
 ```
 
-健康检查会显示：
-- 工具健康状态摘要（健康、警告、错误数量）
-- LLM集成状态
-- 每个工具的详细信息（状态、参数数量、描述等）
+---
 
-### 搜索和过滤工具
+## 🔄 重构优势 / Refactoring Benefits
 
-可以使用关键词搜索工具：
+### 代码质量提升 / Code Quality Improvement
+- **可读性** - 模块化设计使代码更易于理解和维护
+- **可测试性** - 可以单独测试每个模块
+- **可维护性** - 修改一个模块不会影响其他功能
 
-```bash
-python agent.py --search "git"
-```
+- **Readability** - Modular design makes code easier to understand and maintain
+- **Testability** - Each module can be tested independently
+- **Maintainability** - Modifying one module doesn't affect other functionality
 
-### 测试模式
+### 开发效率提升 / Development Efficiency Improvement
+- **并行开发** - 多个开发者可以同时开发不同模块
+- **快速定位** - 问题定位更快速，职责更明确
+- **扩展便捷** - 新增功能只需在相应模块中添加
 
-测试模式可以验证工具注册是否成功，而不需要启动服务：
+- **Parallel Development** - Multiple developers can work on different modules simultaneously
+- **Quick Troubleshooting** - Faster problem identification with clear responsibilities
+- **Easy Extension** - Add new features by extending corresponding modules
 
-```bash
-python agent.py --test
-```
+### 架构现代化 / Architecture Modernization
+- **Agno框架** - 使用现代Agent框架，提供更好的工具管理
+- **OpenTelemetry** - 集成分布式追踪，便于监控和调试
+- **模块化设计** - 符合现代软件工程最佳实践
 
-测试模式会显示：
-- 注册的工具数量
-- LLM集成状态
-- 工具分类信息
+- **Agno Framework** - Uses modern Agent framework for better tool management
+- **OpenTelemetry** - Integrated distributed tracing for monitoring and debugging
+- **Modular Design** - Follows modern software engineering best practices
 
-### LLM集成（可选）
+---
 
-如果在配置中启用了LLM集成，还可以使用AI助手接口。Agent启动时会自动注册LLM相关工具（如果配置中启用）。
+## 🐛 故障排除 / Troubleshooting
 
-AI助手示例请求：
+### 常见问题 / Common Issues
 
-```bash
-curl -X POST http://localhost:8000/api/ai_assistant -H 'Content-Type: application/json' -H 'X-Trace-ID: your-trace-id' -d '{
-  "messages": [{
-    "role": "user",
-    "content": "请解释什么是Zephyr项目？"
-  }]
-}'
-### 错误处理
+1. **OpenTelemetry依赖未安装** / **OpenTelemetry Dependencies Not Installed**
+   ```
+   警告: OpenTelemetry 依赖未安装，将禁用分布式追踪功能
+   Warning: OpenTelemetry dependencies not installed, distributed tracing will be disabled
+   ```
+   解决方案：安装OpenTelemetry依赖或保持禁用状态
+   Solution: Install OpenTelemetry dependencies or keep disabled
 
-Agent具有完善的错误处理机制，所有API响应都包含trace_id，便于问题追踪和调试。错误响应格式：
+2. **工具注册警告** / **Tool Registration Warnings**
+   ```
+   警告: 注册工具 tool_name 时出错: validation error
+   Warning: Error registering tool tool_name: validation error
+   ```
+   解决方案：检查工具参数定义是否正确
+   Solution: Check if tool parameter definitions are correct
 
-```json
-{
-  "success": false,
-  "error": "错误描述",
-  "tool": "tool_name",
-  "trace_id": "your-trace-id",
-  "error_code": "TOOL_EXECUTION_ERROR"
-}
-```## Authentication Methods
+3. **端口冲突** / **Port Conflict**
+   ```
+   错误: 端口 8001 已被占用
+   Error: Port 8001 is already in use
+   ```
+   解决方案：使用`--port`参数指定其他端口
+   Solution: Use `--port` parameter to specify different port
 
-The server supports three authentication methods:
+### 日志级别 / Log Levels
 
-### 1. Embedded Authentication
-Embed credentials directly in the repository URL:
-```
-https://username:token@github.com/zephyrproject-rtos/zephyr.git
-```
+使用`--log-level`参数控制日志详细程度：
+Use `--log-level` parameter to control log verbosity:
+- `DEBUG` - 详细调试信息 / Detailed debug information
+- `INFO` - 常规运行信息（默认） / Regular runtime information (default)
+- `WARNING` - 警告信息 / Warning information
+- `ERROR` - 错误信息 / Error information
 
-### 2. Environment Variable Authentication
-Set credentials via environment variables:
-- `GIT_USERNAME`
-- `GIT_PASSWORD`
-- `GIT_TERMINAL_PROMPT=0`
+---
 
-### 3. Git Configuration Authentication
-Configure Git credentials globally or per-project:
-- Global username configuration
-- Credential caching
-- Project-specific settings
+## 📄 许可证 / License
 
-## Usage Examples
-
-### Basic Project Initialization
-```python
-# Initialize Zephyr project
-result = west_init(
-    repo_url="https://github.com/zephyrproject-rtos/zephyr.git",
-    branch="main",
-    project_dir="/path/to/zephyr_project"
-)
-```
-
-### Authentication with Private Repository
-```python
-# Initialize with authentication
-result = west_init(
-    repo_url="https://github.com/private-org/zephyr.git",
-    branch="main",
-    project_dir="/path/to/project",
-    username="your_username",
-    token="your_token",
-    auth_method="embedded"
-)
-```
-
-### Interactive Mode with User Prompting
-```python
-# Use interactive mode to prompt for missing parameters
-result = west_init_interactive(
-    # Leave parameters empty to prompt user
-    require_confirmation=True,
-    auto_prompt=True
-)
-```
-
-### Parameter Validation
-```python
-# Validate parameters before initialization
-validation = validate_west_init_params(
-    repo_url="https://github.com/zephyrproject-rtos/zephyr.git",
-    branch="main",
-    project_dir="c:/temp/zephyr-project"
-)
-
-if validation["status"] == "valid":
-    print("参数验证通过，可以安全执行")
-else:
-    print("发现以下问题:")
-    for warning in validation["warnings"]:
-        print(f"⚠️  {warning}")
-    for suggestion in validation["suggestions"]:
-        print(f"💡 {suggestion}")
-```
-
-### Advanced Interactive Example
-```python
-# Interactive initialization with validation
-validation = validate_west_init_params()
-if validation["status"] in ["missing_params", "warnings"]:
-    print("参数验证结果:")
-    print(f"状态: {validation['status']}")
-    print(f"缺失参数: {validation['missing_params']}")
-    print(f"警告: {validation['warnings']}")
-    print(f"建议: {validation['suggestions']}")
-
-# Then use interactive mode to fill in missing parameters
-result = west_init_interactive(
-    require_confirmation=True,
-    auto_prompt=True
-)
-```
-
-## Interactive Features
-
-### New Interactive Tools
-
-#### `west_init_interactive` - Interactive Project Initialization
-Enhanced version of `west_init` with user-friendly features:
-
-**Key Features:**
-- **Automatic Parameter Prompting**: Prompts for missing required parameters
-- **User Confirmation**: Shows configuration summary and asks for confirmation
-- **Parameter Validation**: Validates inputs before execution
-- **Friendly Error Messages**: Provides helpful suggestions and examples
-- **Cancellation Support**: Allows users to cancel at any step
-
-**Parameters:**
-- All parameters from `west_init` are optional
-- `require_confirmation` (bool): Whether to require user confirmation - Default: True
-- `auto_prompt` (bool): Whether to automatically prompt for missing parameters - Default: True
-
-**Usage Examples:**
-```python
-# Minimal call - will prompt for all required parameters
-result = west_init_interactive()
-
-# Partial parameters - will prompt for missing ones
-result = west_init_interactive(
-    repo_url="https://github.com/zephyrproject-rtos/zephyr.git",
-    # branch and project_dir will be prompted
-)
-
-# Disable confirmation for automated workflows
-result = west_init_interactive(
-    repo_url="https://github.com/zephyrproject-rtos/zephyr.git",
-    branch="main", 
-    project_dir="/path/to/project",
-    require_confirmation=False
-)
-```
-
-#### `validate_west_init_params` - Parameter Validation
-Validates west init parameters and provides helpful suggestions:
-
-**Features:**
-- **Missing Parameter Detection**: Identifies missing required parameters
-- **URL Format Validation**: Checks Git repository URL format
-- **Branch Name Suggestions**: Provides common branch names
-- **Directory Validation**: Checks project directory status
-- **Authentication Method Validation**: Validates auth method selection
-- **Helpful Suggestions**: Provides specific recommendations
-
-**Return Values:**
-- `status`: "valid", "missing_params", or "warnings"
-- `missing_params`: List of missing required parameters
-- `warnings`: List of potential issues
-- `suggestions`: List of helpful recommendations
-- `validation_details`: Detailed validation information
-
-## Error Handling
-
-The server provides comprehensive error handling with detailed error messages:
-
-### Common Error Scenarios
-
-1. **Missing Tools**: Returns clear error if west/git/twister not installed
-2. **Authentication Failures**: Detailed auth error messages with suggestions
-3. **Connection Issues**: Git connection test failures with troubleshooting tips
-4. **Permission Errors**: File system permission issues with resolution steps
-5. **Invalid Parameters**: Parameter validation with helpful suggestions
-
-### Error Response Format
-```json
-{
-  "status": "error",
-  "log": "detailed execution log",
-  "error": "user-friendly error message",
-  "suggestions": ["helpful suggestion 1", "suggestion 2"]
-}
-```
-
-## Configuration
-
-### Environment Variables
-- `mcp_name`: MCP server name (default: "ZephyrMcpServer")
-- `GIT_USERNAME`: Git username for authentication
-- `GIT_PASSWORD`: Git password/token for authentication
-- `GIT_TERMINAL_PROMPT`: Disable Git terminal prompts (set to "0")
-
-### Git Mirror Configuration
-Configure Git to use Zephyr mirrors for faster access:
-```python
-# Enable mirror redirect
-git_redirect_zephyr_mirror(enable=True)
-
-# Check redirect status
-status = get_git_redirect_status()
-```
-
-## Development
-
-### Adding New Tools
-1. Define the function with proper docstring (bilingual)
-2. Add `@mcp.tool()` decorator
-3. Include comprehensive parameter validation
-4. Add error handling with helpful messages
-5. Update README documentation
-
-### Testing
-```bash
-# Test basic functionality
-python -m pytest tests/
-
-# Test with real Zephyr project (requires Zephyr environment)
-python src/mcp_server.py
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Update documentation
-5. Submit a pull request
-
-## License
-
+本项目采用MIT许可证 - 详见[LICENSE](LICENSE)文件。
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🤝 贡献 / Contributing
 
+欢迎贡献代码！请：
+Contributions are welcome! Please:
+1. Fork仓库 / Fork the repository
+2. 创建功能分支 / Create a feature branch
+3. 为新功能添加测试 / Add tests for new functionality
+4. 更新文档 / Update documentation
+5. 提交Pull Request / Submit a Pull Request
+
+## 📞 支持 / Support
+
+如有问题和疑问：
 For issues and questions:
-- Create an issue on GitHub
-- Check existing documentation
-- Review error messages and suggestions provided by the tools
-    username="your_username",
-    token="your_personal_access_token",
-    auth_method="embedded"
-)
-```
-
-### Firmware Flashing
-```python
-# Flash firmware to board
-result = west_flash(
-    build_dir="/path/to/build",
-    board="nrf52840dk_nrf52840",
-    runner="jlink"
-)
-```
-
-### Running Tests
-```python
-# Run Twister tests
-result = run_twister(
-    platform="nrf52840dk_nrf52840",
-    tests=["samples/hello_world"],
-    project_dir="/path/to/zephyr_project"
-)
-```
-
-## Error Handling
-
-All tools return structured responses with:
-- `status`: "success" or "error"
-- `log`: Command output logs
-- `error`: Error message (if any)
-- Additional tool-specific fields
-
-## Development
-
-### Project Structure
-```
-zephyr_mcp/
-├── src/
-│   └── mcp_server.py    # Main MCP server implementation
-├── .vscode/             # VS Code configuration
-├── LICENSE              # License file
-└── README.md           # This file
-```
-
-### Adding New Tools
-
-To add a new tool:
-
-1. Define the function with `@mcp.tool()` decorator
-2. Add comprehensive docstring with parameters and return values
-3. Implement error handling
-4. Update this README with tool documentation
-
-Example:
-```python
-@mcp.tool()
-def new_tool(param1: str, param2: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Function Description: Description of the tool
-    功能描述: 工具的功能描述
-    
-    Parameters:
-    参数说明:
-    - param1 (str): Required. Parameter description
-    - param1 (str): 必须。参数说明
-    - param2 (Optional[str]): Optional. Parameter description
-    - param2 (Optional[str]): 可选。参数说明
-    
-    Returns:
-    返回值:
-    - Dict[str, Any]: Return description
-    - Dict[str, Any]: 返回值说明
-    
-    Exception Handling:
-    异常处理:
-    - Exception handling description
-    - 异常处理说明
-    """
-    # Implementation here
-    pass
-```
-
-## License
-
-This project is licensed under the terms of the LICENSE file in the root of this repository.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
-## Support
-
-For support and questions:
-- Open an issue on GitHub
-- Check the documentation
-- Review the tool examples above
+- 在GitHub上创建Issue / Create an issue on GitHub
+- 查看现有文档 / Check existing documentation
+- 检查工具提供的错误消息和建议 / Review error messages and suggestions provided by tools

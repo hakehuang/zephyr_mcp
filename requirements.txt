@@ -14,3 +14,10 @@ anthropic>=0.20.0  # Claude API客户端
 # Zephyr 相关工具（通常通过系统安装）
 # west (通过Zephyr SDK安装)
 # git (系统工具)
+
+# OpenTelemetry 相关依赖
+opentelemetry-sdk>=1.23.0
+opentelemetry-api>=1.23.0
+opentelemetry-exporter-otlp>=1.23.0
+opentelemetry-instrumentation>=0.41b0
+opentelemetry-instrumentation-http>=0.41b0

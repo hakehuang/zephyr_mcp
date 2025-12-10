@@ -17,7 +17,7 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 
 # 服务器地址
-BASE_URL = "http://localhost:8001"
+BASE_URL = "http://localhost:8002"
 
 
 class TestEdgeCasesTraceId(unittest.TestCase):

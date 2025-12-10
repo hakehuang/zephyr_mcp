@@ -94,7 +94,7 @@ class ToolWrapper:
         # Extract exception handling information and module
         # 提取异常处理信息和模块
         tool_info["exception_handling"] = ToolWrapper._extract_exception_handling(tool_func)
-        tool_info["module"] = tool_func.__module__
+        tool_info["module"] = str(tool_func.__module__)  # 转换为字符串避免JSON序列化错误
         
         return tool_info
     

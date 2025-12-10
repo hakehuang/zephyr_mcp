@@ -1,13 +1,12 @@
 # Zephyr MCP Agent 工具文档
 
-## 可用工具列表
+生成时间: 2025-12-11 01:20:28
 
-**总工具数量:** 16
+## git_operations (15)
 
-### Git Operations (15)
+### fetch_branch_or_pr
 
-#### fetch_branch_or_pr
-**描述:** Function Description: Fetch a branch or pull request from a Git repository and checkout
+**描述**: Function Description: Fetch a branch or pull request from a Git repository and checkout
 功能描述: 从Git仓库获取分支或拉取请求并检出
 
 Parameters:
@@ -31,11 +30,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** fetch_branch_or_pr 模块
+### get_git_config_status
 
-#### get_git_config_status
-**描述:** Function Description: Get current Git configuration status
+**描述**: Function Description: Get current Git configuration status
 功能描述: 获取当前Git配置状态
 
 Parameters:
@@ -53,11 +50,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** get_git_config_status 模块
+### get_git_redirect_status
 
-#### get_git_redirect_status
-**描述:** Function Description: Get current Git redirect configuration status
+**描述**: Function Description: Get current Git redirect configuration status
 功能描述: 获取当前Git重定向配置状态
 
 Parameters:
@@ -75,11 +70,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** get_git_redirect_status 模块
+### get_zephyr_status
 
-#### get_zephyr_status
-**描述:** Function Description: Get Git status information of Zephyr project
+**描述**: Function Description: Get Git status information of Zephyr project
 功能描述: 获取Zephyr项目的Git状态信息
 
 Parameters:
@@ -97,11 +90,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** get_zephyr_status 模块
+### git_checkout
 
-#### git_checkout
-**描述:** Function Description: Switch to specified Git reference (SHA, tag or branch) in Zephyr project directory
+**描述**: Function Description: Switch to specified Git reference (SHA, tag or branch) in Zephyr project directory
 功能描述: 在Zephyr项目目录中切换到指定的Git引用（SHA号、tag或分支）
 
 Parameters:
@@ -121,11 +112,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** git_checkout 模块
+### git_rebase
 
-#### git_rebase
-**描述:** Function Description: Execute Git rebase operation
+**描述**: Function Description: Execute Git rebase operation
 功能描述: 执行Git rebase操作
 
 Parameters:
@@ -151,11 +140,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** git_rebase 模块
+### git_redirect_zephyr_mirror
 
-#### git_redirect_zephyr_mirror
-**描述:** Function Description: Configure Git global redirect to redirect GitHub Zephyr repository to specified mirror
+**描述**: Function Description: Configure Git global redirect to redirect GitHub Zephyr repository to specified mirror
 功能描述: 配置Git全局重定向，将GitHub的Zephyr仓库地址重定向到指定的镜像源
 
 Parameters:
@@ -175,11 +162,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** git_redirect_zephyr_mirror 模块
+### run_twister
 
-#### run_twister
-**描述:** Function Description: Execute twister test or build command and return structured results
+**描述**: Function Description: Execute twister test or build command and return structured results
 功能描述: 执行twister测试或编译命令并返回结构化结果
 
 Parameters:
@@ -209,11 +194,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** run_twister 模块
+### setup_zephyr_environment
 
-#### setup_zephyr_environment
-**描述:** Set up a complete Zephyr RTOS development environment according to official getting started guide.
+**描述**: Set up a complete Zephyr RTOS development environment according to official getting started guide.
 
 This tool automates the process of setting up a Zephyr RTOS development environment by:
 1. Creating the workspace directory structure
@@ -243,11 +226,9 @@ Example:
     >>> if result["status"] == "success":
     ...     print(f"Zephyr environment set up at: {result['details']['workspace_path']}")
 
-**返回值:** []
-**来源:** setup_zephyr_environment 模块
+### set_git_credentials
 
-#### set_git_credentials
-**描述:** Function Description: Set Git credentials for authentication
+**描述**: Function Description: Set Git credentials for authentication
 功能描述: 设置Git认证凭据
 
 Parameters:
@@ -269,11 +250,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** set_git_credentials 模块
+### switch_zephyr_version
 
-#### switch_zephyr_version
-**描述:** Function Description: Switch to specified Zephyr version (SHA or tag) and run west update
+**描述**: Function Description: Switch to specified Zephyr version (SHA or tag) and run west update
 功能描述: 切换到指定的Zephyr版本（SHA号或tag）并运行west update
 
 Parameters:
@@ -293,11 +272,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** switch_zephyr_version 模块
+### test_git_connection
 
-#### test_git_connection
-**描述:** Function Description: Test Git connection with provided credentials
+**描述**: Function Description: Test Git connection with provided credentials
 功能描述: 使用提供的凭据测试Git连接
 
 Parameters:
@@ -321,11 +298,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** test_git_connection 模块
+### validate_west_init_params
 
-#### validate_west_init_params
-**描述:** Function Description: Validate west init parameters and provide helpful suggestions
+**描述**: Function Description: Validate west init parameters and provide helpful suggestions
 功能描述: 验证west init参数并提供有用的建议
 
 Parameters:
@@ -349,11 +324,9 @@ Exception Handling:
 - Does not throw exceptions, only returns validation results
 - 不抛出异常，仅返回验证结果
 
-**返回值:** []
-**来源:** validate_west_init_params 模块
+### west_flash
 
-#### west_flash
-**描述:** Function Description: Execute west flash command to flash firmware
+**描述**: Function Description: Execute west flash command to flash firmware
 功能描述: 执行west flash命令烧录固件
 
 Parameters:
@@ -379,11 +352,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** west_flash 模块
+### west_update
 
-#### west_update
-**描述:** Function Description: Run west update command in Zephyr project directory
+**描述**: Function Description: Run west update command in Zephyr project directory
 功能描述: 在Zephyr项目目录中运行west update命令
 
 Parameters:
@@ -401,13 +372,9 @@ Exception Handling:
 - Tool detection failure or command execution exception will be reflected in the returned error information
 - 工具检测失败或命令执行异常会体现在返回的错误信息中
 
-**返回值:** []
-**来源:** west_update 模块
+## other_tools (1)
 
-### Other Tools (1)
+### llm_tools
 
-#### llm_tools
-**描述:** LLM工具类，提供与大语言模型交互的功能
+**描述**: LLM工具类，提供与大语言模型交互的功能
 
-**返回值:** []
-**来源:** llm_tools 模块

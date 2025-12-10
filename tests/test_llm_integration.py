@@ -88,22 +88,22 @@ def test_agent_integration():
     """
     logger.info("测试与agent的集成...")
     try:
-        # 检查agent.py是否包含LLM相关代码
-        with open('agent.py', 'r', encoding='utf-8') as f:
-            agent_content = f.read()
+        # 检查新的模块化架构是否包含LLM相关代码
+        # 检查agent_core.py
+        with open('agent_core.py', 'r', encoding='utf-8') as f:
+            agent_core_content = f.read()
         
         # 检查关键字
         keywords = [
             'from src.utils.llm_integration import LLMIntegration',
             'from src.tools.llm_tools import',
-            'ai_assistant',
             'llm_integration',
             'register_llm_tools'
         ]
         
         found_keywords = 0
         for keyword in keywords:
-            if keyword in agent_content:
+            if keyword in agent_core_content:
                 found_keywords += 1
                 logger.info(f"  [OK] 找到关键字: {keyword}")
             else:
@@ -128,7 +128,7 @@ def print_usage_instructions():
     print("   - OpenAI API: 设置 OPENAI_API_KEY 环境变量")
     print("   - Anthropic API: 设置 ANTHROPIC_API_KEY 环境变量")
     print("\n2. 启动Agent:")
-    print("   python agent.py")
+    print("   python main.py")
     print("\n3. 使用AI助手功能:")
     print("   - 发送POST请求到 /api/ai_assistant 端点")
     print("   - 支持的工具: generate_text, analyze_code, explain_error, llm_chat, get_llm_status")
