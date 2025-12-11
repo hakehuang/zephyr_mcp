@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-配置管理模块
-处理配置文件的加载、验证和管理
+配置管理模块 / Configuration Management Module
+处理配置文件的加载、验证和管理 / Handle configuration file loading, validation and management
 """
 
 import json
@@ -14,7 +14,7 @@ from src.utils.language_resources import get_text
 
 
 def load_config(config_path: str = "config.json") -> Dict[str, Any]:
-    """加载配置文件"""
+    """加载配置文件 / Load configuration file"""
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
@@ -29,8 +29,8 @@ def load_config(config_path: str = "config.json") -> Dict[str, Any]:
 
 
 def validate_and_complete_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    """验证和补充配置"""
-    # 确保必需字段存在
+    """验证和补充配置 / Validate and complete configuration"""
+    # 确保必需字段存在 / Ensure required fields exist
     if "agent_name" not in config:
         config["agent_name"] = get_text("agent_name")
     
@@ -40,18 +40,18 @@ def validate_and_complete_config(config: Dict[str, Any]) -> Dict[str, Any]:
     if "description" not in config:
         config["description"] = get_text("agent_description")
     
-    # 确保工具目录配置
+    # 确保工具目录配置 / Ensure tool directory configuration
     if "tools_directory" not in config:
         config["tools_directory"] = "./src/tools"
     
     if "utils_directory" not in config:
         config["utils_directory"] = "./src/utils"
     
-    # 确保日志级别配置
+    # 确保日志级别配置 / Ensure log level configuration
     if "log_level" not in config:
         config["log_level"] = "INFO"
     
-    # 确保语言配置
+    # 确保语言配置 / Ensure language configuration
     if "language" not in config:
         config["language"] = {
             "default": "zh",
@@ -59,18 +59,18 @@ def validate_and_complete_config(config: Dict[str, Any]) -> Dict[str, Any]:
             "auto_detect": True
         }
     
-    # 确保OpenTelemetry配置
+    # 确保OpenTelemetry配置 / Ensure OpenTelemetry configuration
     if "opentelemetry" not in config:
         config["opentelemetry"] = get_default_opentelemetry_config()
     
-    # 确保服务器配置
+    # 确保服务器配置 / Ensure server configuration
     if "port" not in config:
         config["port"] = 8001
     
     if "host" not in config:
         config["host"] = "localhost"
     
-    # 确保LLM配置
+    # 确保LLM配置 / Ensure LLM configuration
     if "llm" not in config:
         config["llm"] = {
             "enabled": False,
@@ -90,7 +90,7 @@ def validate_and_complete_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def get_default_config() -> Dict[str, Any]:
-    """获取默认配置"""
+    """获取默认配置 / Get default configuration"""
     return {
         "agent_name": get_text("agent_name"),
         "version": "1.0.0",
@@ -123,21 +123,21 @@ def get_default_config() -> Dict[str, Any]:
 
 
 def get_default_opentelemetry_config() -> Dict[str, Any]:
-    """获取默认的OpenTelemetry配置"""
+    """获取默认的OpenTelemetry配置 / Get default OpenTelemetry configuration"""
     return {
         "enabled": False,
         "service_name": get_text("agent_name"),
-        "exporter": "console",  # console, otlp
+        "exporter": "console",  # console, otlp / 控制台, OTLP
         "otlp_endpoint": "http://localhost:4318/v1/traces",
         "sampler": "always_on",
-        "headers": {},  # OTLP导出器的自定义头部
-        "api_key": "",  # LangSmith等平台的API密钥
-        "project_name": "zephyr_mcp_agent"  # LangSmith项目名
+        "headers": {},  # OTLP导出器的自定义头部 / Custom headers for OTLP exporter
+        "api_key": "",  # LangSmith等平台的API密钥 / API key for platforms like LangSmith
+        "project_name": "zephyr_mcp_agent"  # LangSmith项目名 / LangSmith project name
     }
 
 
 def save_config(config: Dict[str, Any], config_path: str = "config.json") -> bool:
-    """保存配置到文件"""
+    """保存配置到文件 / Save configuration to file"""
     try:
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
@@ -148,10 +148,11 @@ def save_config(config: Dict[str, Any], config_path: str = "config.json") -> boo
 
 
 def get_config_value(config: Dict[str, Any], key_path: str, default: Any = None) -> Any:
-    """通过路径获取配置值"""
+    """通过路径获取配置值 / Get configuration value by path"""
     keys = key_path.split('.')
     current = config
     
+    # 遍历路径键 / Traverse path keys
     for key in keys:
         if isinstance(current, dict) and key in current:
             current = current[key]
@@ -162,48 +163,48 @@ def get_config_value(config: Dict[str, Any], key_path: str, default: Any = None)
 
 
 def set_config_value(config: Dict[str, Any], key_path: str, value: Any) -> bool:
-    """通过路径设置配置值"""
+    """通过路径设置配置值 / Set configuration value by path"""
     keys = key_path.split('.')
     current = config
     
-    # 遍历到最后一个键的父级
+    # 遍历到最后一个键的父级 / Traverse to the parent of the last key
     for key in keys[:-1]:
         if key not in current or not isinstance(current[key], dict):
             current[key] = {}
         current = current[key]
     
-    # 设置最终值
+    # 设置最终值 / Set the final value
     current[keys[-1]] = value
     return True
 
 
 def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    """验证配置的有效性"""
+    """验证配置的有效性 / Validate configuration validity"""
     errors = []
     
-    # 验证必需字段
+    # 验证必需字段 / Validate required fields
     if not config.get("agent_name"):
         errors.append("agent_name is required")
     
     if not config.get("version"):
         errors.append("version is required")
     
-    # 验证端口范围
+    # 验证端口范围 / Validate port range
     port = config.get("port", 8001)
     if not isinstance(port, int) or port < 1 or port > 65535:
         errors.append("port must be an integer between 1 and 65535")
     
-    # 验证日志级别
+    # 验证日志级别 / Validate log level
     valid_log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     if config.get("log_level") not in valid_log_levels:
         errors.append(f"log_level must be one of {valid_log_levels}")
     
-    # 验证语言配置
+    # 验证语言配置 / Validate language configuration
     language_config = config.get("language", {})
     if language_config.get("default") not in language_config.get("available", []):
         errors.append("default language must be in available languages")
     
-    # 验证OpenTelemetry配置
+    # 验证OpenTelemetry配置 / Validate OpenTelemetry configuration
     otel_config = config.get("opentelemetry", {})
     if otel_config.get("enabled", False):
         if otel_config.get("exporter") not in ["console", "otlp"]:
@@ -216,7 +217,7 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def create_sample_config(config_path: str = "config.json") -> bool:
-    """创建示例配置文件"""
+    """创建示例配置文件 / Create sample configuration file"""
     sample_config = {
         "agent_name": "Zephyr MCP Agent",
         "version": "1.0.0",
