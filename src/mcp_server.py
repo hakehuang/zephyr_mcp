@@ -3,6 +3,16 @@
 import os
 import sys
 
+# Import virtual environment manager
+# 导入虚拟环境管理器
+try:
+    from src.utils.venv_manager import ensure_venv_activated, check_venv_dependencies
+    VENV_MANAGER_AVAILABLE = True
+except ImportError:
+    VENV_MANAGER_AVAILABLE = False
+    print("Warning: venv_manager module not available")
+    print("警告: venv_manager 模块不可用")
+
 # Import MCP related libraries
 # 导入 MCP 相关库
 try:
@@ -135,6 +145,25 @@ def __ensure_tools_are_registered(server):
 # Ensure all tools are registered before running the server
 # 运行服务器前确保所有工具都已注册
 if __name__ == "__main__":
+    # Ensure virtual environment is activated before proceeding
+    # 确保虚拟环境已激活后再继续
+    if VENV_MANAGER_AVAILABLE:
+        print("[Venv] Checking virtual environment status...")
+        print("[Venv] 检查虚拟环境状态...")
+        
+        # Try to activate virtual environment
+        # 尝试激活虚拟环境
+        if ensure_venv_activated():
+            # Check dependencies after potential restart
+            # 在可能的重新启动后检查依赖
+            check_venv_dependencies()
+        else:
+            print("[Venv] Virtual environment activation failed, continuing with current environment")
+            print("[Venv] 虚拟环境激活失败，继续使用当前环境")
+    else:
+        print("[Venv] Virtual environment manager not available, continuing with current environment")
+        print("[Venv] 虚拟环境管理器不可用，继续使用当前环境")
+    
     # Use dictionary to register tools in batch for better code maintainability
     # 使用字典批量注册工具，提高代码可维护性
     tools_to_register = {

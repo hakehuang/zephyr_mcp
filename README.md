@@ -99,6 +99,41 @@ zephyr_mcp/
 
 ## 🚀 快速开始 / Quick Start
 
+### 虚拟环境自动激活 / Virtual Environment Auto-activation
+
+项目现在支持自动虚拟环境检测和激活功能，确保MCP服务器始终在正确的环境中运行。
+
+The project now supports automatic virtual environment detection and activation, ensuring the MCP server always runs in the correct environment.
+
+#### 启动方式 / Startup Methods
+
+**方式1: 使用启动器（推荐） / Method 1: Using Launcher (Recommended)**
+```bash
+# 从项目根目录启动 / Start from project root
+python start_mcp_server.py
+```
+
+**方式2: 直接运行MCP服务器 / Method 2: Direct MCP Server Execution**
+```bash
+# MCP服务器会自动检测并激活虚拟环境
+# MCP server will automatically detect and activate virtual environment
+python src/mcp_server.py
+```
+
+#### 虚拟环境管理 / Virtual Environment Management
+
+- **自动检测** - 自动查找项目根目录下的`.venv`、`venv`等虚拟环境目录
+- **跨平台支持** - 支持Windows、Linux和macOS的虚拟环境激活
+- **依赖检查** - 启动时自动检查必需的Python包是否已安装
+- **优雅降级** - 如果虚拟环境不可用，会继续使用当前环境
+
+- **Auto-detection** - Automatically finds virtual environment directories like `.venv`, `venv` in project root
+- **Cross-platform Support** - Supports virtual environment activation on Windows, Linux, and macOS
+- **Dependency Checking** - Automatically checks if required Python packages are installed at startup
+- **Graceful Degradation** - Continues with current environment if virtual environment is unavailable
+
+### 环境设置 / Environment Setup
+
 ### 安装要求 / Prerequisites
 
 - Python 3.8+
