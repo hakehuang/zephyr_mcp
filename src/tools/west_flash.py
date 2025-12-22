@@ -1,34 +1,27 @@
+#!/bin/env python3
+# coding=utf-8
+"""
+Function Description: west flash tool for flashing firmware using west command
+功能描述: 使用 west 命令烧录固件的 west flash 工具
+"""
+
 from typing import Dict, Any, Optional
 import os
 import subprocess
-from ..utils.common_tools import check_tools
+from src.utils.common_tools import check_tools
 
-# 尝试导入mcp或fastmcp
-mcp = None
-try:
-    from mcp import FastMCP
-    mcp = FastMCP()
-except ImportError:
-    try:
-        from fastmcp import FastMCP
-        mcp = FastMCP()
-    except ImportError:
-        # 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
-        class MockMCP:
-            def tool(self):
-                def decorator(func):
-                    return func
-                return decorator
-        mcp = MockMCP()
 
-@mcp.tool()
-def west_flash(build_dir: str, board: Optional[str] = None, 
-             runner: Optional[str] = None, probe_id: Optional[str] = None, 
-             flash_extra_args: Optional[str] = None) -> Dict[str, Any]:
+def west_flash(
+    build_dir: str,
+    board: Optional[str] = None,
+    runner: Optional[str] = None,
+    probe_id: Optional[str] = None,
+    flash_extra_args: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Function Description: Execute west flash command to flash firmware
     功能描述: 执行west flash命令烧录固件
-    
+
     Parameters:
     参数说明:
     - build_dir (str): Required. Build output directory
@@ -41,12 +34,12 @@ def west_flash(build_dir: str, board: Optional[str] = None,
     - probe_id (Optional[str]): 可选。烧录器ID/序列号
     - flash_extra_args (Optional[str]): Optional. Additional flash parameters
     - flash_extra_args (Optional[str]): 可选。额外的flash参数
-    
+
     Returns:
     返回值:
     - Dict[str, Any]: Contains status, log and error information
     - Dict[str, Any]: 包含状态、日志和错误信息
-    
+
     Exception Handling:
     异常处理:
     - Tool detection failure or command execution exception will be reflected in the returned error information
@@ -56,15 +49,15 @@ def west_flash(build_dir: str, board: Optional[str] = None,
     tools_status = check_tools(["west"])
     if not tools_status.get("west", False):
         return {"status": "error", "log": "", "error": "west工具未安装"}
-    
+
     # 检查构建目录是否存在
     if not os.path.exists(build_dir):
         return {"status": "error", "log": "", "error": f"构建目录不存在: {build_dir}"}
-    
+
     try:
         # 构建west flash命令
         cmd = ["west", "flash"]
-        
+
         # 添加可选参数
         if board:
             cmd.extend(["--board", board])
@@ -76,25 +69,13 @@ def west_flash(build_dir: str, board: Optional[str] = None,
             # 将额外参数作为字符串解析并添加
             extra_args = flash_extra_args.split()
             cmd.extend(extra_args)
-        
+
         # 执行命令
         process = subprocess.run(cmd, cwd=build_dir, capture_output=True, text=True)
-        
+
         if process.returncode == 0:
-            return {
-                "status": "success",
-                "log": process.stdout,
-                "error": ""
-            }
+            return {"status": "success", "log": process.stdout, "error": ""}
         else:
-            return {
-                "status": "error",
-                "log": process.stdout,
-                "error": process.stderr
-            }
+            return {"status": "error", "log": process.stdout, "error": process.stderr}
     except Exception as e:
-        return {
-            "status": "error",
-            "log": "",
-            "error": f"执行west flash失败: {str(e)}"
-        }
+        return {"status": "error", "log": "", "error": f"执行west flash失败: {str(e)}"}

@@ -20,22 +20,24 @@ from language_manager import setup_language
 
 def main():
     """主函数"""
-    parser = argparse.ArgumentParser(description='Zephyr MCP Agent')
-    parser.add_argument('--config', '-c', default='config.json', 
-                       help='配置文件路径 (默认: config.json)')
-    parser.add_argument('--create-config', action='store_true',
-                       help='创建示例配置文件')
-    parser.add_argument('--port', '-p', type=int, 
-                       help='HTTP服务器端口 (覆盖配置文件)')
-    parser.add_argument('--host', '-H', 
-                       help='HTTP服务器主机 (覆盖配置文件)')
-    parser.add_argument('--language', '-l', choices=['zh', 'en'],
-                       help='设置语言 (覆盖配置文件)')
-    parser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                       help='设置日志级别 (覆盖配置文件)')
-    
+    parser = argparse.ArgumentParser(description="Zephyr MCP Agent")
+    parser.add_argument(
+        "--config", "-c", default="config.json", help="配置文件路径 (默认: config.json)"
+    )
+    parser.add_argument("--create-config", action="store_true", help="创建示例配置文件")
+    parser.add_argument("--port", "-p", type=int, help="HTTP服务器端口 (覆盖配置文件)")
+    parser.add_argument("--host", "-H", help="HTTP服务器主机 (覆盖配置文件)")
+    parser.add_argument(
+        "--language", "-l", choices=["zh", "en"], help="设置语言 (覆盖配置文件)"
+    )
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="设置日志级别 (覆盖配置文件)",
+    )
+
     args = parser.parse_args()
-    
+
     # 处理创建配置文件选项
     if args.create_config:
         if create_sample_config(args.config):
@@ -44,23 +46,23 @@ def main():
         else:
             print(f"创建配置文件失败: {args.config}")
             return 1
-    
+
     # 加载配置
     config = load_config(args.config)
-    
+
     # 应用命令行参数覆盖
     if args.port:
-        config['port'] = args.port
+        config["port"] = args.port
     if args.host:
-        config['host'] = args.host
+        config["host"] = args.host
     if args.language:
-        config['language']['default'] = args.language
+        config["language"]["default"] = args.language
     if args.log_level:
-        config['log_level'] = args.log_level
-    
+        config["log_level"] = args.log_level
+
     # 设置全局语言
-    setup_language(config.get('language', {}).get('default', 'zh'))
-    
+    setup_language(config.get("language", {}).get("default", "zh"))
+
     try:
         # 创建并启动Agent
         agent = ZephyrMCPAgent(config)

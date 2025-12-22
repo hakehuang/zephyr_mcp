@@ -1,29 +1,14 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Function Description: Set Git credentials for authentication
+功能描述: 设置Git认证凭据
+"""
 from typing import Dict, Any
 import os
 import subprocess
-from ..utils.common_tools import check_tools
+from src.utils.common_tools import check_tools
 
-# Try to import mcp or fastmcp
-# 尝试导入mcp或fastmcp
-mcp = None
-try:
-    from mcp import FastMCP
-    mcp = FastMCP()
-except ImportError:
-    try:
-        from fastmcp import FastMCP
-        mcp = FastMCP()
-    except ImportError:
-        # In test environments, if mcp cannot be imported, create a simple mock object
-# 在测试环境中，如果无法导入mcp，创建一个简单的模拟对象
-        class MockMCP:
-            def tool(self):
-                def decorator(func):
-                    return func
-                return decorator
-        mcp = MockMCP()
-
-@mcp.tool()
 def set_git_credentials(username: str, password: str, project_dir: str = None) -> Dict[str, Any]:
     """
     Function Description: Set Git credentials for authentication

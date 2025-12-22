@@ -12,7 +12,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         # 代理基本信息
         "agent_name": "zephyr_mcp_agent",
         "agent_description": "Zephyr MCP Agent - 提供Zephyr项目管理和Git操作工具集",
-        
         # 日志和错误消息
         "loading_config": "加载配置文件...",
         "config_loaded_success": "配置文件加载成功",
@@ -58,7 +57,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "tools_to_note": "Tools that need attention:",
         "cannot_get_details": "Unable to get detailed status",
         "parameter_required": "{} requires required parameter: {}",
-        
         # 服务器启动消息
         "available_tools": "可用工具:",
         "example_request": "示例请求:",
@@ -67,14 +65,13 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "server_started_full": "JSON HTTP服务器启动在 http://{}",
         "available_endpoints": "可用端点:",
         "endpoint_get_tools": "获取可用工具列表",
-        "endpoint_get_tool_info": "获取工具详细信息", 
+        "endpoint_get_tool_info": "获取工具详细信息",
         "endpoint_execute_tool": "执行工具",
         "endpoint_get_docs": "获取API文档",
         "endpoint_ai_assistant": "AI助手对话",
         "server_interrupted": "服务器被用户中断",
         "server_error": "服务器错误: {}",
         "server_closed": "服务器已关闭",
-        
         # 命令行输出
         "list_tools_header": "可用工具列表:",
         "tool_search_header": "找到 {} 个匹配 '{}' 的工具:",
@@ -99,7 +96,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "test_status_success": "状态: 成功",
         "test_status_warning": "状态: 警告 - 没有注册到工具",
         "test_failed": "测试失败: {}",
-        
         # API文档
         "api_docs_title": "Zephyr MCP Agent API Documentation",
         "api_docs_base_url": "基础URL",
@@ -130,7 +126,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "api_docs_ai_response": "AI响应",
         "api_docs_used_model": "使用的模型",
         "api_docs_token_usage": "令牌使用情况",
-        
         # 工具参数描述
         "param_name": "名称",
         "param_type": "类型",
@@ -139,12 +134,10 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "request_format": "请求格式",
         "response_format": "响应格式",
         "example": "示例",
-        
         # 健康检查图标
         "status_healthy": "✅",
         "status_warning": "⚠️",
         "status_error": "❌",
-        
         # 工具分类
         "tool_category_git": "Git操作",
         "tool_category_west": "West命令",
@@ -152,7 +145,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "tool_category_validation": "验证工具",
         "tool_category_ai": "AI助手",
         "tool_category_other": "其他工具",
-        
         # 兼容模式和依赖
         "agno_import_failed": "Warning: agno库导入失败，使用兼容模式...",
         "dependency_import_error": "Error: 导入依赖失败: {}",
@@ -178,7 +170,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         # 代理基本信息
         "agent_name": "zephyr_mcp_agent",
         "agent_description": "Zephyr MCP Agent - Provides Zephyr project management and Git operation tools",
-        
         # 日志和错误消息
         "loading_config": "Loading configuration file...",
         "config_loaded_success": "Configuration file loaded successfully",
@@ -224,7 +215,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "tools_to_note": "Tools that need attention:",
         "cannot_get_details": "Unable to get detailed status",
         "parameter_required": "{} requires required parameter: {}",
-        
         # 服务器启动消息
         "available_tools": "Available tools:",
         "example_request": "Example request:",
@@ -233,14 +223,13 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "server_started_full": "JSON HTTP server started at http://{}",
         "available_endpoints": "Available endpoints:",
         "endpoint_get_tools": "Get available tools list",
-        "endpoint_get_tool_info": "Get tool details", 
+        "endpoint_get_tool_info": "Get tool details",
         "endpoint_execute_tool": "Execute tool",
         "endpoint_get_docs": "Get API documentation",
         "endpoint_ai_assistant": "AI assistant conversation",
         "server_interrupted": "Server interrupted by user",
         "server_error": "Server error: {}",
         "server_closed": "Server closed",
-        
         # 命令行输出
         "list_tools_header": "Available tools list:",
         "tool_search_header": "Found {} tools matching '{}':",
@@ -265,7 +254,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "test_status_success": "Status: Success",
         "test_status_warning": "Status: Warning - No tools registered",
         "test_failed": "Test failed: {}",
-        
         # API文档
         "api_docs_title": "Zephyr MCP Agent API Documentation",
         "api_docs_base_url": "Base URL",
@@ -296,7 +284,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "api_docs_ai_response": "AI response",
         "api_docs_used_model": "Model used",
         "api_docs_token_usage": "Token usage",
-        
         # 工具参数描述
         "param_name": "Name",
         "param_type": "Type",
@@ -305,12 +292,10 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "request_format": "Request Format",
         "response_format": "Response Format",
         "example": "Example",
-        
         # 健康检查图标
         "status_healthy": "✅",
         "status_warning": "⚠️",
         "status_error": "❌",
-        
         # 工具分类
         "tool_category_git": "Git Operations",
         "tool_category_west": "West Commands",
@@ -318,7 +303,6 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "tool_category_validation": "Validation Tools",
         "tool_category_ai": "AI Assistant",
         "tool_category_other": "Other Tools",
-        
         # 兼容模式和依赖
         "agno_import_failed": "Warning: Failed to import agno library, using compatibility mode...",
         "dependency_import_error": "Error: Failed to import dependencies: {}",
@@ -339,7 +323,7 @@ LANGUAGE_RESOURCES: Dict[str, Dict[str, Any]] = {
         "total": "Total",
         "enabled": "Enabled",
         "available": "Available",
-    }
+    },
 }
 
 
@@ -347,21 +331,21 @@ class LanguageManager:
     """
     语言管理器类，用于处理多语言支持
     """
-    
+
     def __init__(self, language: str = "zh"):
         """
         初始化语言管理器
-        
+
         Args:
             language: 语言代码，默认为中文(zh)
         """
         self.language = language
         self.resources = LANGUAGE_RESOURCES.get(language, LANGUAGE_RESOURCES["zh"])
-        
+
     def set_language(self, language: str):
         """
         设置当前语言
-        
+
         Args:
             language: 语言代码
         """
@@ -372,16 +356,16 @@ class LanguageManager:
             # 如果指定的语言不存在，使用中文作为默认语言
             self.language = "zh"
             self.resources = LANGUAGE_RESOURCES["zh"]
-    
+
     def get(self, key: str, *args, **kwargs) -> str:
         """
         获取指定键的翻译文本
-        
+
         Args:
             key: 资源键名
             *args: 格式化参数
             **kwargs: 格式化关键字参数
-            
+
         Returns:
             翻译后的文本
         """
@@ -389,20 +373,20 @@ class LanguageManager:
         if args or kwargs:
             return text.format(*args, **kwargs)
         return text
-    
+
     def get_language(self) -> str:
         """
         获取当前语言
-        
+
         Returns:
             当前语言代码
         """
         return self.language
-    
+
     def get_available_languages(self) -> list:
         """
         获取可用的语言列表
-        
+
         Returns:
             可用语言代码列表
         """
@@ -416,12 +400,12 @@ global_language_manager = LanguageManager()
 def get_text(key: str, *args, **kwargs) -> str:
     """
     获取翻译文本的便捷函数
-    
+
     Args:
         key: 资源键名
         *args: 格式化参数
         **kwargs: 格式化关键字参数
-        
+
     Returns:
         翻译后的文本
     """
@@ -431,7 +415,7 @@ def get_text(key: str, *args, **kwargs) -> str:
 def set_language(language: str):
     """
     设置全局语言
-    
+
     Args:
         language: 语言代码
     """
@@ -441,7 +425,7 @@ def set_language(language: str):
 def get_current_language() -> str:
     """
     获取当前全局语言
-    
+
     Returns:
         当前语言代码
     """
@@ -451,7 +435,7 @@ def get_current_language() -> str:
 def get_available_languages() -> list:
     """
     获取可用的语言列表
-    
+
     Returns:
         可用语言代码列表
     """

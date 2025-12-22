@@ -1,12 +1,14 @@
 # Zephyr MCP Agent Dependencies
-# 基础依赖
+
 python-dotenv>=1.0.0
 requests>=2.31.0
+dotenv
+fastmcp
+venv_manager
 
 # Agno Agent 相关依赖
-agno>=0.1.0  # 假设的版本，需要根据实际情况调整
+agno
 
-# 大模型相关依赖
 openai>=1.0.0  # OpenAI API客户端
 anthropic>=0.20.0  # Claude API客户端
 # DeepSeek API通过requests调用，无需额外安装特定客户端
@@ -19,5 +21,4 @@ anthropic>=0.20.0  # Claude API客户端
 opentelemetry-sdk>=1.23.0
 opentelemetry-api>=1.23.0
 opentelemetry-exporter-otlp>=1.23.0
-opentelemetry-instrumentation>=0.41b0
-opentelemetry-instrumentation-http>=0.41b0
+opentelemetry-instrumentation

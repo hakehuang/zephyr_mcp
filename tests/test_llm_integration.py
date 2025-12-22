@@ -24,7 +24,7 @@ def test_llm_import():
     try:
         # 尝试导入LLM集成模块
         from src.utils.llm_integration import LLMIntegration
-        from src.tools.llm_tools import init_llm, get_llm, get_llm_status, get_registered_tools
+        from tools.llm_tools import init_llm, get_llm, get_llm_status, get_registered_tools
         logger.info("[OK] LLM模块导入成功")
         return True
     except ImportError as e:
@@ -66,7 +66,7 @@ def test_llm_tools_registration():
     """
     logger.info("测试LLM工具注册信息...")
     try:
-        from src.tools.llm_tools import get_registered_tools
+        from tools.llm_tools import get_registered_tools
         
         tools = get_registered_tools()
         logger.info(f"[OK] 获取LLM工具列表成功")
