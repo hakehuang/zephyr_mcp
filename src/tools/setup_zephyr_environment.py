@@ -1062,11 +1062,11 @@ def _check_visual_studio_tools() -> bool:
         # Check for common Visual Studio installation paths
         vs_paths = [
             os.path.join(
-                os.environ.get("ProgramFiles(x86)", "C:\Program Files (x86)"),
+                os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
                 "Microsoft Visual Studio",
             ),
             os.path.join(
-                os.environ.get("ProgramFiles", "C:\Program Files"),
+                os.environ.get("ProgramFiles", r"C:\Program Files"),
                 "Microsoft Visual Studio",
             ),
         ]
@@ -1082,7 +1082,7 @@ def _check_visual_studio_tools() -> bool:
 
         # Check for BuildTools specifically
         build_tools_path = os.path.join(
-            os.environ.get("ProgramFiles(x86)", "C:\Program Files (x86)"),
+            os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),
             "Microsoft Visual Studio",
             "2022",
             "BuildTools",
