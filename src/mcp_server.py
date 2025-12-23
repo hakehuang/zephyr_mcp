@@ -3,11 +3,18 @@
 import os
 import io
 import sys
+from pathlib import Path
 import asyncio
 import contextlib
 import functools
 import inspect
 from typing import Any
+
+# Allow running as a script: `python src/mcp_server.py`
+# When run this way, the repo root isn't automatically on sys.path.
+_repo_root = Path(__file__).resolve().parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 from src.utils.logging_utils import get_logger
 
