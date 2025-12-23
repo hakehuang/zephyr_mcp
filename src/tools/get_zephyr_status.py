@@ -9,6 +9,7 @@ from typing import Dict, Any
 import os
 import subprocess
 from src.utils.common_tools import check_tools
+from src.utils.logging_utils import get_logger
 
 
 def _is_git_repo(path: str) -> bool:
@@ -69,22 +70,31 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
+    logger = get_logger(__name__)
+
     # Check if git tool is installed
     # 检查git工具是否安装
-    print("Checking git tool installation...")
+    logger.info("Checking git tool installation...")
     tools_status = check_tools(["git"])
     if not tools_status.get("git", False):
+        logger.error("git tool not installed")
         return {"status": "error", "log": "", "error": "git工具未安装"}
 
     # Check if project directory exists
     # 检查项目目录是否存在
     if not os.path.exists(project_dir):
+        logger.error("Project directory does not exist: %s", project_dir)
         return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
 
     # Resolve which directory to treat as the Git repo.
     # For west workspaces, the root may not be a Git repo.
     git_dir, tried_dirs = _resolve_git_dir(project_dir)
     if not git_dir:
+        logger.error(
+            "Not a git repo (including common west locations). project_dir=%s tried=%s",
+            project_dir,
+            tried_dirs,
+        )
         return {
             "status": "error",
             "log": "",
@@ -107,6 +117,7 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
         )
         current_branch = process.stdout.strip()
     except (OSError, subprocess.SubprocessError) as e:
+        logger.exception("Failed to get current branch")
         return {"status": "error", "log": "", "error": f"获取当前分支失败: {str(e)}"}
 
     # Get recent commit information (latest 5)
@@ -158,6 +169,7 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
         else:
             commit_hash = author_name = author_email = commit_date = commit_message = ""
     except (OSError, subprocess.SubprocessError) as e:
+        logger.exception("Failed to get recent commits")
         return {"status": "error", "log": "", "error": f"获取提交信息失败: {str(e)}"}
 
     # Get Git status
@@ -173,6 +185,7 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
         )
         git_status = process.stdout.strip()
     except (OSError, subprocess.SubprocessError) as e:
+        logger.exception("Failed to get git status")
         return {"status": "error", "log": "", "error": f"获取Git状态失败: {str(e)}"}
 
     return {

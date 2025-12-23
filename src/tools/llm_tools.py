@@ -9,8 +9,9 @@ import os
 import sys
 import json
 from typing import Dict, Any, List, Optional
-import logging
 from dotenv import load_dotenv
+
+from src.utils.logging_utils import get_logger
 
 
 # Load environment variables
@@ -28,16 +29,14 @@ try:
 
     LLM_AVAILABLE = True
 except ImportError as e:
-    print(
-        f"Warning: Failed to import LLM integration module: {str(e)}",
-        file=sys.stderr,
-    )
-    print(f"警告: 无法导入LLM集成模块: {str(e)}", file=sys.stderr)
+    logger = get_logger(__name__)
+    logger.error("Warning: Failed to import LLM integration module: %s", str(e))
+    logger.error("警告: 无法导入LLM集成模块: %s", str(e))
     LLM_AVAILABLE = False
 
 # Configure logging
 # 配置日志
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Global LLM integration instance
 # 全局LLM集成实例

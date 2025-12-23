@@ -12,6 +12,9 @@ import re
 
 from typing import Dict, Any, List, Optional
 from src.utils.tool_wrapper import create_agno_tool, ToolWrapper    
+from src.utils.logging_utils import get_logger
+
+logger = get_logger(__name__)
 
 class ToolRegistry:
     """
@@ -48,7 +51,7 @@ class ToolRegistry:
             工具名称列表
         """
         if not os.path.exists(self.tools_dir):
-            print(f"警告: 工具目录不存在: {self.tools_dir}")
+            logger.warning("警告: 工具目录不存在: %s", self.tools_dir)
             return []
 
         tool_names = []
@@ -87,7 +90,7 @@ class ToolRegistry:
             self.loaded_modules[tool_name] = module
             return module
         except Exception as e:
-            print(f"错误: 加载工具模块 {tool_name} 失败: {str(e)}")
+            logger.error("错误: 加载工具模块 %s 失败: %s", tool_name, str(e))
             return None
 
     def get_tool_functions(self, module: Any, module_name: str) -> Dict[str, Any]:
@@ -197,7 +200,7 @@ class ToolRegistry:
                     results = {tool_name: True}
                     return results
             except Exception as e:
-                print(f"错误: 直接注册失败: {str(e)}")
+                logger.error("错误: 直接注册失败: %s", str(e))
 
         # 如果直接方法失败，使用get_tool_functions
         tool_functions = self.get_tool_functions(module, tool_name)
@@ -248,10 +251,10 @@ class ToolRegistry:
 
                     results[func_name] = True
                 except Exception as e:
-                    print(f"错误: 注册工具 {func_name} 失败: {str(e)}")
+                    logger.error("错误: 注册工具 %s 失败: %s", func_name, str(e))
                     results[func_name] = False
             else:
-                print(f"警告: {func_name} 不是可调用对象，跳过")
+                logger.warning("警告: %s 不是可调用对象，跳过", func_name)
                 results[func_name] = False
 
         return results
@@ -280,10 +283,10 @@ class ToolRegistry:
             pattern = re.compile(filter_pattern)
             tool_names = [name for name in tool_names if pattern.match(name)]
 
-        print(f"开始注册 {len(tool_names)} 个工具模块...")
+        logger.info("开始注册 %s 个工具模块...", len(tool_names))
 
         for tool_name in tool_names:
-            print(f"处理模块: {tool_name}")
+            logger.info("处理模块: %s", tool_name)
             module_results = self.register_tool(tool_name)
             if module_results:
                 results[tool_name] = module_results
@@ -291,7 +294,7 @@ class ToolRegistry:
                 # 显示模块内工具的注册结果
                 for func_name, success in module_results.items():
                     status = "✅" if success else "❌"
-                    print(f"  {status} {func_name}")
+                    logger.info("  %s %s", status, func_name)
 
         # Calculate overall statistics
         # 计算总体统计
@@ -301,8 +304,12 @@ class ToolRegistry:
             for module_results in results.values()
         )
 
-        print(
-            f"工具注册完成: 模块 {len(results)}, 工具总数 {total_tools}, 成功 {success_tools}, 失败 {total_tools - success_tools}"
+        logger.info(
+            "工具注册完成: 模块 %s, 工具总数 %s, 成功 %s, 失败 %s",
+            len(results),
+            total_tools,
+            success_tools,
+            total_tools - success_tools,
         )
 
         return results
@@ -556,9 +563,9 @@ class ToolRegistry:
             try:
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(documentation)
-                print(f"工具文档已生成: {output_file}")
+                logger.info("工具文档已生成: %s", output_file)
             except Exception as e:
-                print(f"错误: 生成工具文档失败: {str(e)}")
+                logger.error("错误: 生成工具文档失败: %s", str(e))
 
         return documentation
 

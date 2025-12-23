@@ -10,11 +10,15 @@ import subprocess
 import platform
 from pathlib import Path
 
+from src.utils.logging_utils import get_logger, print_to_logger
+
+logger = get_logger(__name__)
+
 
 def _eprint(*args, **kwargs):
     """Print to stderr (avoid corrupting stdio JSON-RPC)."""
     kwargs.setdefault("file", sys.stderr)
-    print(*args, **kwargs)
+    print_to_logger(logger, *args, **kwargs)
 
 
 def detect_venv_path():
@@ -216,25 +220,25 @@ def check_venv_dependencies():
 if __name__ == "__main__":
     # Test the virtual environment manager
     # 测试虚拟环境管理器
-    print("=== Virtual Environment Manager Test ===")
-    print("=== 虚拟环境管理器测试 ===")
+    _eprint("=== Virtual Environment Manager Test ===")
+    _eprint("=== 虚拟环境管理器测试 ===")
 
     venv_path = detect_venv_path()
-    print(f"Detected venv path: {venv_path}")
-    print(f"检测到的venv路径: {venv_path}")
+    _eprint(f"Detected venv path: {venv_path}")
+    _eprint(f"检测到的venv路径: {venv_path}")
 
     is_active = is_venv_active()
-    print(f"Venv active: {is_active}")
-    print(f"虚拟环境激活状态: {is_active}")
+    _eprint(f"Venv active: {is_active}")
+    _eprint(f"虚拟环境激活状态: {is_active}")
 
     current_python = get_current_python_path()
-    print(f"Current Python: {current_python}")
-    print(f"当前Python: {current_python}")
+    _eprint(f"Current Python: {current_python}")
+    _eprint(f"当前Python: {current_python}")
 
     if venv_path:
         venv_python = get_venv_python_path(venv_path)
-        print(f"Venv Python: {venv_python}")
-        print(f"虚拟环境Python: {venv_python}")
+        _eprint(f"Venv Python: {venv_python}")
+        _eprint(f"虚拟环境Python: {venv_python}")
 
-    print("Test completed successfully")
-    print("测试成功完成")
+    _eprint("Test completed successfully")
+    _eprint("测试成功完成")

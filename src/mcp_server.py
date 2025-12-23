@@ -9,6 +9,10 @@ import functools
 import inspect
 from typing import Any
 
+from src.utils.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
 os.environ['PYTHONUNBUFFERED'] = '1'
 
 if sys.platform == 'win32':
@@ -27,8 +31,8 @@ try:
     VENV_MANAGER_AVAILABLE = True
 except ImportError:
     VENV_MANAGER_AVAILABLE = False
-    print("Warning: venv_manager module not available", file=sys.stderr)
-    print("警告: venv_manager 模块不可用", file=sys.stderr)
+    logger.warning("Warning: venv_manager module not available")
+    logger.warning("警告: venv_manager 模块不可用")
 
 
 _VENV_DEPS_OK: bool | None = None
@@ -153,19 +157,19 @@ except ImportError:
                 return list(self.tools.keys())
 
             def run(self):
-                print(
-                    f"Mock MCP Server '{self.name}' is running with {len(self.tools)} tools",
-                    file=sys.stderr,
+                logger.warning(
+                    "Mock MCP Server '%s' is running with %s tools",
+                    self.name,
+                    len(self.tools),
                 )
 
         # Use mock class
         # 使用模拟类
         FastMCP = MockMCP
-        print(
-            "Warning: fastmcp or mcp package not found, using mock MCP class",
-            file=sys.stderr,
+        logger.warning(
+            "Warning: fastmcp or mcp package not found, using mock MCP class"
         )
-        print("警告: 未找到 fastmcp 或 mcp 包，使用模拟的 MCP 类", file=sys.stderr)
+        logger.warning("警告: 未找到 fastmcp 或 mcp 包，使用模拟的 MCP 类")
 
 # Create MCP server instance
 # 创建 MCP 服务器实例
@@ -303,8 +307,8 @@ def register_all_tools(server) -> None:
 try:
     register_all_tools(mcp)
 except Exception as e:
-    print(f"Error registering tools at import time: {str(e)}", file=sys.stderr)
-    print(f"导入时注册工具失败: {str(e)}", file=sys.stderr)
+    logger.exception("Error registering tools at import time: %s", str(e))
+    logger.error("导入时注册工具失败: %s", str(e))
 
 
 def __ensure_tools_are_registered(server):
@@ -351,16 +355,16 @@ def __ensure_tools_are_registered(server):
             registered_tool_names = set()
 
         for tool in required_tools:
-            print(f"  - {tool}", file=sys.stderr)
+            logger.info("  - %s", tool)
             if tool not in registered_tool_names:
-                print(f"Warning: Tool {tool} not registered", file=sys.stderr)
-                print(f"警告: 工具 {tool} 未注册", file=sys.stderr)
+                logger.warning("Warning: Tool %s not registered", tool)
+                logger.warning("警告: 工具 %s 未注册", tool)
 
-        print(f"Registered {len(registered_tool_names)} tools", file=sys.stderr)
-        print(f"已注册 {len(registered_tool_names)} 个工具", file=sys.stderr)
+        logger.info("Registered %s tools", len(registered_tool_names))
+        logger.info("已注册 %s 个工具", len(registered_tool_names))
     except Exception as e:
-        print(f"Error checking tool registration status: {str(e)}", file=sys.stderr)
-        print(f"检查工具注册状态时出错: {str(e)}", file=sys.stderr)
+        logger.exception("Error checking tool registration status: %s", str(e))
+        logger.error("检查工具注册状态时出错: %s", str(e))
 
 
 # Ensure all tools are registered before running the server
@@ -369,8 +373,8 @@ if __name__ == "__main__":
     # Ensure virtual environment is activated before proceeding
     # 确保虚拟环境已激活后再继续
     if VENV_MANAGER_AVAILABLE:
-        print("[Venv] Checking virtual environment status...", file=sys.stderr)
-        print("[Venv] 检查虚拟环境状态...", file=sys.stderr)
+        logger.info("[Venv] Checking virtual environment status...")
+        logger.info("[Venv] 检查虚拟环境状态...")
 
         # Try to activate virtual environment
         # 尝试激活虚拟环境
@@ -379,15 +383,15 @@ if __name__ == "__main__":
             # 在可能的重新启动后检查依赖
             check_venv_dependencies()
         else:
-            print(
+            logger.warning(
                 "[Venv] Virtual environment activation failed, continuing with current environment"
-            , file=sys.stderr)
-            print("[Venv] 虚拟环境激活失败，继续使用当前环境", file=sys.stderr)
+            )
+            logger.warning("[Venv] 虚拟环境激活失败，继续使用当前环境")
     else:
-        print(
+        logger.warning(
             "[Venv] Virtual environment manager not available, continuing with current environment"
-        , file=sys.stderr)
-        print("[Venv] 虚拟环境管理器不可用，继续使用当前环境", file=sys.stderr)
+        )
+        logger.warning("[Venv] 虚拟环境管理器不可用，继续使用当前环境")
 
     # Tools are registered at import time; only register again if tool list is empty.
     try:
@@ -405,20 +409,18 @@ if __name__ == "__main__":
         if not existing_names:
             register_all_tools(mcp)
     except Exception as e:
-        print(f"Error ensuring tools are registered: {str(e)}", file=sys.stderr)
-        print(f"确保工具注册时出错: {str(e)}", file=sys.stderr)
+        logger.exception("Error ensuring tools are registered: %s", str(e))
+        logger.error("确保工具注册时出错: %s", str(e))
 
     # Ensure all tools are properly registered
     # 确保所有工具都已正确注册
     __ensure_tools_are_registered(mcp)
     # Run the server
     # 运行服务器
-    print(f"\n[Starting] Starting MCP server {mcp_name}...", file=sys.stderr)
-    print(f"\n[启动] 正在启动 MCP 服务器 {mcp_name}...", file=sys.stderr)
-    import traceback
+    logger.info("[Starting] Starting MCP server %s...", mcp_name)
+    logger.info("[启动] 正在启动 MCP 服务器 %s...", mcp_name)
     try:
         mcp.run()
     except Exception as e:
-        print(f"Server runtime error: {str(e)}", file=sys.stderr)
-        print(f"服务器运行时出错: {str(e)}", file=sys.stderr)
-        traceback.print_exc()
+        logger.exception("Server runtime error: %s", str(e))
+        logger.error("服务器运行时出错: %s", str(e))

@@ -65,7 +65,12 @@ import platform
 import subprocess
 import shutil
 import argparse
+import builtins
 from typing import Dict, Any, List
+
+from src.utils.logging_utils import get_logger, print_to_logger
+
+logger = get_logger(__name__)
 
 
 def setup_zephyr_environment(
@@ -105,10 +110,17 @@ def setup_zephyr_environment(
     Example:
         >>> result = setup_zephyr_environment("C:/zephyr", zephyr_version="v3.5.0")
         >>> if result["status"] == "success":
-        ...     print(f"Zephyr environment set up at: {result['details']['workspace_path']}")
+        ...     logger.info(f"Zephyr environment set up at: {result['details']['workspace_path']}")
     """
 
     # Function implementation starts here
+    original_print = builtins.print
+
+    def _logged_print(*print_args, **print_kwargs):
+        return print_to_logger(logger, *print_args, **print_kwargs)
+
+    builtins.print = _logged_print
+
     try:
         # Validate parameters
         if not workspace_path:
@@ -157,6 +169,8 @@ def setup_zephyr_environment(
             "status": "error",
             "message": f"Error setting up Zephyr environment: {str(e)}",
         }
+    finally:
+        builtins.print = original_print
 
 
 def _setup_windows_environment(
@@ -1438,6 +1452,12 @@ if __name__ == "__main__":
     Parses command line arguments and invokes the setup function, providing
     user-friendly output and error handling.
     """
+
+    # Route all CLI prints to the log file.
+    def _logged_print(*print_args, **print_kwargs):
+        return print_to_logger(logger, *print_args, **print_kwargs)
+
+    builtins.print = _logged_print
 
     parser = argparse.ArgumentParser(
         description="Zephyr RTOS Development Environment Setup Tool",
