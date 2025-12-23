@@ -11,6 +11,44 @@ import subprocess
 from src.utils.common_tools import check_tools
 
 
+def _is_git_repo(path: str) -> bool:
+    try:
+        process = subprocess.run(
+            ["git", "rev-parse", "--is-inside-work-tree"],
+            cwd=path,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        return process.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def _resolve_git_dir(project_dir: str) -> tuple[str | None, list[str]]:
+    """Return (git_dir, tried_dirs).
+
+    Zephyr "west" workspaces often are not Git repos at the workspace root.
+    Common Git repos are:
+    - <workspace>/zephyr
+    - <workspace>/.west/manifest
+    """
+
+    tried: list[str] = []
+    candidates = [
+        project_dir,
+        os.path.join(project_dir, "zephyr"),
+        os.path.join(project_dir, ".west", "manifest"),
+    ]
+
+    for candidate in candidates:
+        tried.append(candidate)
+        if os.path.isdir(candidate) and _is_git_repo(candidate):
+            return candidate, tried
+
+    return None, tried
+
+
 def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
     """
     Function Description: Get Git status information of Zephyr project
@@ -33,6 +71,7 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
     """
     # Check if git tool is installed
     # 检查git工具是否安装
+    print("Checking git tool installation...")
     tools_status = check_tools(["git"])
     if not tools_status.get("git", False):
         return {"status": "error", "log": "", "error": "git工具未安装"}
@@ -42,62 +81,98 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
     if not os.path.exists(project_dir):
         return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
 
-    # Check if it's a Git repository
-    # 检查是否是Git仓库
-    try:
-        cmd = ["git", "rev-parse", "--is-inside-work-tree"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        if process.returncode != 0:
-            return {
-                "status": "error",
-                "log": "",
-                "error": f"指定目录不是Git仓库: {project_dir}",
-            }
-    except Exception as e:
-        return {"status": "error", "log": "", "error": f"检查Git仓库失败: {str(e)}"}
+    # Resolve which directory to treat as the Git repo.
+    # For west workspaces, the root may not be a Git repo.
+    git_dir, tried_dirs = _resolve_git_dir(project_dir)
+    if not git_dir:
+        return {
+            "status": "error",
+            "log": "",
+            "error": "指定目录不是Git仓库（也未找到west常见Git目录）: "
+            + project_dir
+            + "。已尝试: "
+            + ", ".join(tried_dirs),
+        }
 
     # Get current branch
     # 获取当前分支
     try:
         cmd = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
+        process = subprocess.run(
+            cmd,
+            cwd=git_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         current_branch = process.stdout.strip()
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         return {"status": "error", "log": "", "error": f"获取当前分支失败: {str(e)}"}
 
-    # Get recent commit information
-    # 获取最近的提交信息
+    # Get recent commit information (latest 5)
+    # 获取最近的提交信息（最近5条）
     try:
-        cmd = ["git", "log", "-1", "--pretty=format:%H%n%an%n%ae%n%ad%n%s"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        commit_info = process.stdout.strip().split("\n")
+        # Use ASCII unit/record separators to make parsing robust.
+        # Each record: hash<US>author<US>email<US>date<US>subject<RS>
+        cmd = [
+            "git",
+            "log",
+            "-5",
+            "--date=iso-strict",
+            "--pretty=format:%H%x1f%an%x1f%ae%x1f%ad%x1f%s%x1e",
+        ]
+        process = subprocess.run(
+            cmd,
+            cwd=git_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
-        if len(commit_info) >= 5:
-            commit_hash, author_name, author_email, commit_date, commit_message = (
-                commit_info[0],
-                commit_info[1],
-                commit_info[2],
-                commit_info[3],
-                commit_info[4],
+        recent_commits: list[dict[str, str]] = []
+        raw = process.stdout or ""
+        for record in raw.split("\x1e"):
+            record = record.strip()
+            if not record:
+                continue
+            parts = record.split("\x1f")
+            if len(parts) < 5:
+                continue
+            recent_commits.append(
+                {
+                    "commit_hash": parts[0],
+                    "author_name": parts[1],
+                    "author_email": parts[2],
+                    "commit_date": parts[3],
+                    "commit_message": parts[4],
+                }
             )
+
+        # Backward-compatible top-level fields reflect the latest commit.
+        if recent_commits:
+            commit_hash = recent_commits[0].get("commit_hash", "")
+            author_name = recent_commits[0].get("author_name", "")
+            author_email = recent_commits[0].get("author_email", "")
+            commit_date = recent_commits[0].get("commit_date", "")
+            commit_message = recent_commits[0].get("commit_message", "")
         else:
-            commit_hash, author_name, author_email, commit_date, commit_message = (
-                "",
-                "",
-                "",
-                "",
-                "",
-            )
-    except Exception as e:
+            commit_hash = author_name = author_email = commit_date = commit_message = ""
+    except (OSError, subprocess.SubprocessError) as e:
         return {"status": "error", "log": "", "error": f"获取提交信息失败: {str(e)}"}
 
     # Get Git status
     # 获取Git状态
     try:
         cmd = ["git", "status"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
+        process = subprocess.run(
+            cmd,
+            cwd=git_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         git_status = process.stdout.strip()
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         return {"status": "error", "log": "", "error": f"获取Git状态失败: {str(e)}"}
 
     return {
@@ -108,5 +183,6 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
         "author_email": author_email,
         "commit_date": commit_date,
         "commit_message": commit_message,
+        "recent_commits": recent_commits,
         "git_status": git_status,
     }
