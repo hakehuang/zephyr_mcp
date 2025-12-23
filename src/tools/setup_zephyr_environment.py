@@ -66,11 +66,59 @@ import subprocess
 import shutil
 import argparse
 import builtins
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from src.utils.logging_utils import get_logger, print_to_logger
+from src.utils.common_tools import run_command
 
 logger = get_logger(__name__)
+
+
+DEFAULT_ZEPHYR_REPO_URL = "https://github.com/zephyrproject-rtos/zephyr"
+
+
+def _get_zephyr_repo_url() -> str:
+    # Allow users to route around GitHub connectivity issues using a mirror.
+    # Example (PowerShell):
+    #   $env:ZEPHYR_REPO_URL = 'https://<your-mirror>/zephyr'
+    return (
+        os.environ.get("ZEPHYR_WEST_ZEPHYR_URL")
+        or os.environ.get("ZEPHYR_REPO_URL")
+        or DEFAULT_ZEPHYR_REPO_URL
+    )
+
+
+def _run_or_raise(
+    cmd: List[str],
+    *,
+    cwd: Optional[str] = None,
+    env: Optional[Dict[str, str]] = None,
+    timeout: Optional[int] = None,
+    retries: int = 3,
+    retry_backoff_seconds: float = 1.0,
+) -> None:
+    cmd_result = run_command(
+        cmd,
+        cwd=cwd,
+        env=env,
+        timeout=timeout,
+        retries=retries,
+        retry_backoff_seconds=retry_backoff_seconds,
+    )
+    if cmd_result.get("status") != "success":
+        logger.error(
+            "Command failed (attempts=%s): %s\nstdout: %s\nstderr: %s",
+            cmd_result.get("attempts"),
+            " ".join(cmd),
+            (cmd_result.get("stdout") or "").strip(),
+            (cmd_result.get("stderr") or "").strip(),
+        )
+        raise subprocess.CalledProcessError(
+            cmd_result.get("returncode", 1),
+            cmd,
+            output=cmd_result.get("stdout"),
+            stderr=cmd_result.get("stderr"),
+        )
 
 
 def setup_zephyr_environment(
@@ -184,6 +232,8 @@ def _setup_windows_environment(
     Set up Zephyr environment on Windows according to official guidelines.
     """
     try:
+        zephyr_repo_url = _get_zephyr_repo_url()
+
         # Ensure PowerShell can execute locally generated scripts (CurrentUser scope)
         _ensure_windows_powershell_execution_policy()
 
@@ -219,7 +269,7 @@ def _setup_windows_environment(
         print(
             "Installing West tool with required dependencies in virtual environment..."
         )
-        subprocess.check_call([venv_pip, "install", "west", "pyelftools"])
+        _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
         print(f"Initializing Zephyr workspace in {workspace_path}...")
@@ -230,62 +280,51 @@ def _setup_windows_environment(
 
         try:
             if zephyr_version == "latest":
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
             else:
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        "--mr",
-                        zephyr_version,
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
                 print("Retry with proxy settings...")
                 if zephyr_version == "latest":
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
                 else:
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            "--mr",
-                            zephyr_version,
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
             else:
                 raise
 
         # Update West with progress indicator
         print("Updating West dependencies (this may take several minutes)...")
-        subprocess.check_call([venv_west, "update"])
+        _run_or_raise(
+            [venv_west, "update"],
+            cwd=workspace_path,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         # Install Zephyr Python dependencies in virtual environment
         print("Installing Zephyr Python dependencies in virtual environment...")
@@ -293,7 +332,12 @@ def _setup_windows_environment(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
         if os.path.exists(requirements_file):
-            subprocess.check_call([venv_pip, "install", "-r", requirements_file])
+            _run_or_raise(
+                [venv_pip, "install", "-r", requirements_file],
+                cwd=workspace_path,
+                retries=3,
+                retry_backoff_seconds=2.0,
+            )
         else:
             return {
                 "status": "error",
@@ -409,6 +453,8 @@ def _setup_linux_environment(
     Set up Zephyr environment on Linux according to official guidelines.
     """
     try:
+        zephyr_repo_url = _get_zephyr_repo_url()
+
         # Check and install dependencies
         check_result = _check_linux_dependencies()
         if check_result["status"] != "success":
@@ -436,7 +482,7 @@ def _setup_linux_environment(
         print(
             "Installing West tool with required dependencies in virtual environment..."
         )
-        subprocess.check_call([venv_pip, "install", "west", "pyelftools"])
+        _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
         print(f"Initializing Zephyr workspace in {workspace_path}...")
@@ -447,62 +493,51 @@ def _setup_linux_environment(
 
         try:
             if zephyr_version == "latest":
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
             else:
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        "--mr",
-                        zephyr_version,
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
                 print("Retry with proxy settings...")
                 if zephyr_version == "latest":
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
                 else:
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            "--mr",
-                            zephyr_version,
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
             else:
                 raise
 
         # Update West with progress indicator
         print("Updating West dependencies (this may take several minutes)...")
-        subprocess.check_call([venv_west, "update"])
+        _run_or_raise(
+            [venv_west, "update"],
+            cwd=workspace_path,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         # Install Zephyr Python dependencies in virtual environment
         print("Installing Zephyr Python dependencies in virtual environment...")
@@ -510,7 +545,12 @@ def _setup_linux_environment(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
         if os.path.exists(requirements_file):
-            subprocess.check_call([venv_pip, "install", "-r", requirements_file])
+            _run_or_raise(
+                [venv_pip, "install", "-r", requirements_file],
+                cwd=workspace_path,
+                retries=3,
+                retry_backoff_seconds=2.0,
+            )
         else:
             return {
                 "status": "error",
@@ -657,6 +697,8 @@ def _setup_macos_environment(
     Set up Zephyr environment on macOS according to official guidelines.
     """
     try:
+        zephyr_repo_url = _get_zephyr_repo_url()
+
         # Check and install dependencies
         check_result = _check_macos_dependencies()
         if check_result["status"] != "success":
@@ -679,7 +721,7 @@ def _setup_macos_environment(
         print(
             "Installing West tool with required dependencies in virtual environment..."
         )
-        subprocess.check_call([venv_pip, "install", "west", "pyelftools"])
+        _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
         print(f"Initializing Zephyr workspace in {workspace_path}...")
@@ -690,62 +732,51 @@ def _setup_macos_environment(
 
         try:
             if zephyr_version == "latest":
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
             else:
-                subprocess.check_call(
-                    [
-                        venv_west,
-                        "init",
-                        "-m",
-                        "https://github.com/zephyrproject-rtos/zephyr",
-                        "--mr",
-                        zephyr_version,
-                        ".",
-                    ]
+                _run_or_raise(
+                    [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                    cwd=workspace_path,
+                    retries=3,
+                    retry_backoff_seconds=1.5,
                 )
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
                 print("Retry with proxy settings...")
                 if zephyr_version == "latest":
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
                 else:
-                    subprocess.check_call(
-                        [
-                            venv_west,
-                            "init",
-                            "-m",
-                            "https://github.com/zephyrproject-rtos/zephyr",
-                            "--mr",
-                            zephyr_version,
-                            ".",
-                        ],
+                    _run_or_raise(
+                        [venv_west, "init", "-m", zephyr_repo_url, "--mr", zephyr_version, "."],
+                        cwd=workspace_path,
                         env=env,
+                        retries=3,
+                        retry_backoff_seconds=2.0,
                     )
             else:
                 raise
 
         # Update West with progress indicator
         print("Updating West dependencies (this may take several minutes)...")
-        subprocess.check_call([venv_west, "update"])
+        _run_or_raise(
+            [venv_west, "update"],
+            cwd=workspace_path,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         # Install Zephyr Python dependencies in virtual environment
         print("Installing Zephyr Python dependencies in virtual environment...")
@@ -753,7 +784,12 @@ def _setup_macos_environment(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
         if os.path.exists(requirements_file):
-            subprocess.check_call([venv_pip, "install", "-r", requirements_file])
+            _run_or_raise(
+                [venv_pip, "install", "-r", requirements_file],
+                cwd=workspace_path,
+                retries=3,
+                retry_backoff_seconds=2.0,
+            )
         else:
             return {
                 "status": "error",

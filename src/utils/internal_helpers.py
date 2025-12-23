@@ -103,7 +103,12 @@ def _west_update_internal(project_dir: str) -> Dict[str, Any]:
     # Execute west update
     # 执行west update
     log.append("开始执行west update...")
-    update_result = run_command(["west", "update"], cwd=project_dir)
+    update_result = run_command(
+        ["west", "update"],
+        cwd=project_dir,
+        retries=3,
+        retry_backoff_seconds=2.0,
+    )
 
     if update_result["status"] != "success":
         error_msg = format_error_message("west update", update_result["stderr"])
@@ -219,7 +224,12 @@ def _fetch_branch_or_pr_internal(
         # First try to fetch PR directly
         # 首先尝试直接fetch PR
         fetch_cmd = ["git", "fetch", remote_name, f"{pr_ref}:{local_branch}"]
-        fetch_result = run_command(fetch_cmd, cwd=project_dir)
+        fetch_result = run_command(
+            fetch_cmd,
+            cwd=project_dir,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         if fetch_result["status"] != "success":
             error_msg = format_error_message("获取PR", fetch_result["stderr"])
@@ -244,7 +254,12 @@ def _fetch_branch_or_pr_internal(
         # First fetch branch
         # 首先fetch分支
         fetch_cmd = ["git", "fetch", remote_name, branch_name]
-        fetch_result = run_command(fetch_cmd, cwd=project_dir)
+        fetch_result = run_command(
+            fetch_cmd,
+            cwd=project_dir,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         if fetch_result["status"] != "success":
             error_msg = format_error_message("获取分支", fetch_result["stderr"])

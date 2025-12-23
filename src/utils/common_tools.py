@@ -8,6 +8,8 @@ Common utility functions for the project
 from typing import Dict, Any, Optional
 import subprocess
 import os
+import time
+import random
 
 from src.utils.venv_manager import activate_venv
 
@@ -127,7 +129,12 @@ def is_branch_exists(
 
 
 def run_command(
-    cmd: list, cwd: Optional[str] = None, timeout: Optional[int] = None
+    cmd: list,
+    cwd: Optional[str] = None,
+    timeout: Optional[int] = None,
+    env: Optional[Dict[str, str]] = None,
+    retries: int = 0,
+    retry_backoff_seconds: float = 1.0,
 ) -> Dict[str, Any]:
     """
     Execute command and return results
@@ -145,15 +152,85 @@ def run_command(
         Dict[str, Any]: Dictionary containing execution status, output and error information
         Dict[str, Any]: 包含执行状态、输出和错误信息的字典
     """
+    def _is_transient_network_error(stdout: str, stderr: str) -> bool:
+        combined = f"{stdout}\n{stderr}".lower()
+        patterns = [
+            # Git / curl
+            "could not resolve host",
+            "failed to connect",
+            "connection timed out",
+            "connection reset",
+            "connection was reset",
+            "recv failure",
+            "send failure",
+            "http2",
+            "http/2",
+            "rpc failed",
+            "gnutls_recv_error",
+            "schannel",
+            "ssl_connect",
+            "tls",
+            "remote end hung up unexpectedly",
+            "the remote end hung up",
+            "fatal: unable to access",
+            "fatal: unable to look up",
+            "http 5",
+            "503",
+            "502",
+            "504",
+            # Pip
+            "read timed out",
+            "temporary failure in name resolution",
+            "name or service not known",
+            "max retries exceeded",
+            "chunked encoding error",
+            "connection aborted",
+        ]
+        return any(p in combined for p in patterns)
+
     try:
-        process = subprocess.run(
-            cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout
-        )
+        attempts = max(1, int(retries) + 1)
+        last_process: Optional[subprocess.CompletedProcess] = None
+
+        for attempt in range(attempts):
+            last_process = subprocess.run(
+                cmd,
+                cwd=cwd,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+
+            if last_process.returncode == 0:
+                return {
+                    "status": "success",
+                    "returncode": 0,
+                    "stdout": last_process.stdout,
+                    "stderr": last_process.stderr,
+                    "attempts": attempt + 1,
+                }
+
+            # Retry only for likely transient network problems.
+            can_retry = (
+                attempt < attempts - 1
+                and _is_transient_network_error(last_process.stdout, last_process.stderr)
+            )
+            if not can_retry:
+                break
+
+            # Exponential backoff with small jitter.
+            sleep_seconds = (retry_backoff_seconds * (2**attempt)) + random.uniform(
+                0.0, 0.5
+            )
+            time.sleep(sleep_seconds)
+
         return {
-            "status": "success" if process.returncode == 0 else "error",
-            "returncode": process.returncode,
-            "stdout": process.stdout,
-            "stderr": process.stderr,
+            "status": "success" if last_process and last_process.returncode == 0 else "error",
+            "returncode": -1 if last_process is None else last_process.returncode,
+            "stdout": "" if last_process is None else last_process.stdout,
+            "stderr": "" if last_process is None else last_process.stderr,
+            "attempts": attempts,
         }
     except subprocess.TimeoutExpired:
         return {
