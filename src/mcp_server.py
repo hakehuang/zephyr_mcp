@@ -4,6 +4,10 @@ import os
 import io
 import sys
 import asyncio
+import contextlib
+import functools
+import inspect
+from typing import Any
 
 os.environ['PYTHONUNBUFFERED'] = '1'
 
@@ -14,13 +18,104 @@ if sys.platform == 'win32':
 # Import virtual environment manager
 # 导入虚拟环境管理器
 try:
-    from src.utils.venv_manager import ensure_venv_activated, check_venv_dependencies
+    from src.utils.venv_manager import (
+        ensure_venv_activated,
+        check_venv_dependencies,
+        is_venv_active,
+    )
 
     VENV_MANAGER_AVAILABLE = True
 except ImportError:
     VENV_MANAGER_AVAILABLE = False
     print("Warning: venv_manager module not available", file=sys.stderr)
     print("警告: venv_manager 模块不可用", file=sys.stderr)
+
+
+_VENV_DEPS_OK: bool | None = None
+
+
+def _ensure_venv_ready_for_tool() -> tuple[bool, str, str]:
+    """Return (ok, error_en, error_zh). Never restarts the process."""
+    global _VENV_DEPS_OK
+
+    if not VENV_MANAGER_AVAILABLE:
+        return True, "", ""
+
+    if not is_venv_active():
+        # Never restart inside a running stdio server.
+        ensure_venv_activated(allow_restart=False)
+        return (
+            False,
+            "Virtual environment is not active. Start the server using the venv Python (.venv) before calling tools.",
+            "虚拟环境未激活。请先使用虚拟环境(.venv)的Python启动服务器，然后再调用工具。",
+        )
+
+    if _VENV_DEPS_OK is None:
+        _VENV_DEPS_OK = bool(check_venv_dependencies())
+
+    if not _VENV_DEPS_OK:
+        return (
+            False,
+            "Missing required Python packages in the active venv. Install dependencies (e.g. pip install -r requirements.txt).",
+            "当前虚拟环境缺少必需的Python包。请安装依赖（例如：pip install -r requirements.txt）。",
+        )
+
+    return True, "", ""
+
+
+def _wrap_tool_with_venv_step(func):
+    """Wrap a tool so venv check is mandatory and stdout is redirected to stderr."""
+
+    sig = inspect.signature(func)
+    for p in sig.parameters.values():
+        if p.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+            # fastmcp doesn't support *args/**kwargs tools anyway; fail early.
+            raise TypeError("Functions with *args/**kwargs are not supported as tools")
+
+    # Build a signature string without annotations (avoid runtime annotation evaluation).
+    param_chunks: list[str] = []
+    saw_kwonly = False
+    for p in sig.parameters.values():
+        if p.kind == inspect.Parameter.KEYWORD_ONLY and not saw_kwonly:
+            param_chunks.append("*")
+            saw_kwonly = True
+
+        if p.default is inspect._empty:
+            param_chunks.append(p.name)
+        else:
+            param_chunks.append(f"{p.name}={repr(p.default)}")
+
+    params_src = ", ".join(param_chunks)
+
+    # Build call argument list.
+    call_chunks: list[str] = []
+    for p in sig.parameters.values():
+        if p.kind == inspect.Parameter.KEYWORD_ONLY:
+            call_chunks.append(f"{p.name}={p.name}")
+        else:
+            call_chunks.append(p.name)
+    call_src = ", ".join(call_chunks)
+
+    wrapped_name = getattr(func, "__name__", "wrapped_tool")
+    src = (
+        f"def {wrapped_name}({params_src}):\n"
+        f"    with contextlib.redirect_stdout(sys.stderr):\n"
+        f"        ok, err_en, err_zh = _ensure_venv_ready_for_tool()\n"
+        f"        if not ok:\n"
+        f"            return {{'status': 'error', 'success': False, 'error': err_en, 'chinese_error': err_zh}}\n"
+        f"        return _orig({call_src})\n"
+    )
+
+    ns: dict[str, Any] = {
+        "_orig": func,
+        "contextlib": contextlib,
+        "sys": sys,
+        "_ensure_venv_ready_for_tool": _ensure_venv_ready_for_tool,
+    }
+    exec(src, ns)
+    wrapped = ns[wrapped_name]
+    wrapped = functools.wraps(func)(wrapped)
+    return wrapped
 
 # Import MCP related libraries
 # 导入 MCP 相关库
@@ -109,6 +204,8 @@ def _register_tool(server, name: str, func) -> None:
 
     if name in _get_registered_tool_names():
         return
+
+    func = _wrap_tool_with_venv_step(func)
 
     tool_attr = getattr(server, "tool", None)
     if callable(tool_attr):

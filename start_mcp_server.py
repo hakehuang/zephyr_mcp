@@ -26,6 +26,21 @@ def main():
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
+        # Install dependencies using winget
+        install_cmd = (
+            "winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf "
+            "Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip "
+            "-e --accept-package-agreements --accept-source-agreements"
+        )
+        try:
+            print("Installing dependencies with winget...")
+            subprocess.run(install_cmd, shell=True, check=True)
+            print("Dependencies installed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Dependency installation failed (exit code {e.returncode}): {e}")
+        except OSError as e:
+            print(f"Dependency installation failed (OS error): {e}")
+
     # Get project root directory
     # 获取项目根目录
     project_root = Path(__file__).parent

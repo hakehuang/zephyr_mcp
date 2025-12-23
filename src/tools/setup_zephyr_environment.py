@@ -58,6 +58,7 @@ For more information, visit the official Zephyr Project documentation:
 https://docs.zephyrproject.org/latest/getting_started/index.html
 """
 
+import io
 import os
 import sys
 import platform
@@ -118,9 +119,7 @@ def setup_zephyr_environment(
 
         # Check if workspace already exists
         if os.path.exists(workspace_path):
-            if force:
-                shutil.rmtree(workspace_path)
-            else:
+            if not force:
                 return {
                     "status": "error",
                     "message": f"Directory {workspace_path} already exists. Use force=True to overwrite.",
@@ -171,6 +170,9 @@ def _setup_windows_environment(
     Set up Zephyr environment on Windows according to official guidelines.
     """
     try:
+        # Ensure PowerShell can execute locally generated scripts (CurrentUser scope)
+        _ensure_windows_powershell_execution_policy()
+
         # Check and install dependencies
         check_result = _check_windows_dependencies()
         if check_result["status"] != "success":
@@ -181,7 +183,7 @@ def _setup_windows_environment(
         print(f"Created workspace directory: {workspace_path}")
 
         # Create and activate Python virtual environment
-        venv_path = os.path.join(workspace_path, "venv")
+        venv_path = os.path.join(workspace_path, ".venv")
         print(f"Creating Python virtual environment in {venv_path}...")
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
@@ -322,6 +324,66 @@ def _setup_windows_environment(
         }
 
 
+def _ensure_windows_powershell_execution_policy() -> None:
+    """Best-effort: set PowerShell execution policy for CurrentUser to RemoteSigned.
+
+    Command requested:
+      Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+    This function is non-fatal: it prints warnings if it cannot apply the setting.
+    """
+
+    if platform.system().lower() != "windows":
+        return
+
+    ps_exe = shutil.which("powershell") or shutil.which("pwsh")
+    if not ps_exe:
+        print("WARNING: PowerShell not found; cannot set execution policy.")
+        print(
+            "Please run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+        )
+        return
+
+    try:
+        current = (
+            subprocess.check_output(
+                [
+                    ps_exe,
+                    "-NoProfile",
+                    "-Command",
+                    "Get-ExecutionPolicy -Scope CurrentUser",
+                ],
+                text=True,
+                stderr=subprocess.STDOUT,
+            )
+            .strip()
+            .lower()
+        )
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"WARNING: Could not read PowerShell execution policy: {e}")
+        current = ""
+
+    # RemoteSigned is requested; treat more permissive settings as OK.
+    if current in {"remotesigned", "unrestricted", "bypass"}:
+        return
+
+    try:
+        subprocess.check_call(
+            [
+                ps_exe,
+                "-NoProfile",
+                "-Command",
+                "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force",
+            ]
+        )
+        print("PowerShell execution policy set to RemoteSigned (CurrentUser).")
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"WARNING: Failed to set PowerShell execution policy: {e}")
+        print(
+            "Please run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+        )
+
+
 def _setup_linux_environment(
     workspace_path: str,
     zephyr_version: str,
@@ -349,7 +411,7 @@ def _setup_linux_environment(
             print("Please consider using a regular user account for development.")
 
         # Create and activate Python virtual environment
-        venv_path = os.path.join(workspace_path, "venv")
+        venv_path = os.path.join(workspace_path, ".venv")
         print(f"Creating Python virtual environment in {venv_path}...")
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
@@ -592,7 +654,7 @@ def _setup_macos_environment(
         print(f"Created workspace directory: {workspace_path}")
 
         # Create and activate Python virtual environment
-        venv_path = os.path.join(workspace_path, "venv")
+        venv_path = os.path.join(workspace_path, ".venv")
         print(f"Creating Python virtual environment in {venv_path}...")
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
@@ -725,6 +787,22 @@ def _check_windows_dependencies() -> Dict[str, Any]:
     """
     Check and install required dependencies on Windows.
     """
+    if sys.platform == "win32":
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+
+        # Install dependencies using winget
+        install_cmd = (
+            "winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf "
+            "Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip -e --accept-package-agreements --accept-source-agreements"
+        )
+        try:
+            print("Installing dependencies with winget...")
+            subprocess.run(install_cmd, shell=True, check=True)
+            print("Dependencies installed successfully.")
+        except Exception as e:
+            print(f"Dependency installation failed: {e}")
+
     try:
         # Check Python version
         if sys.version_info < (3, 8):
@@ -776,7 +854,8 @@ def _check_windows_dependencies() -> Dict[str, Any]:
             print(f"Ninja: {ninja_version} (OK)")
         else:
             print(
-                "Ninja not found (optional but recommended). Install from https://github.com/ninja-build/ninja/releases"
+                """Ninja not found (optional but recommended).
+                Install from https://github.com/ninja-build/ninja/releases"""
             )
 
         return {
@@ -804,8 +883,9 @@ def _check_linux_dependencies() -> Dict[str, Any]:
         print(f"Python version: {platform.python_version()} (OK)")
 
         # Check if running as root (not recommended)
-        if os.geteuid() == 0:
-            print("Warning: Running as root is not recommended")
+        if hasattr(os, "geteuid"):
+            if os.geteuid() == 0:
+                print("Warning: Running as root is not recommended")
 
         # Check Git
         if shutil.which("git") is None:

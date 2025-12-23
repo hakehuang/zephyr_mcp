@@ -9,6 +9,8 @@ from typing import Dict, Any, Optional
 import subprocess
 import os
 
+from src.utils.venv_manager import activate_venv
+
 
 def check_tools(tools: list) -> Dict[str, bool]:
     """
@@ -24,6 +26,7 @@ def check_tools(tools: list) -> Dict[str, bool]:
         Dict[str, bool]: 包含每个工具安装状态的字典
     """
     result = {}
+    activate_venv(True)
     for tool in tools:
         # Use 'where' on Windows, 'which' on other systems
         # 在Windows上使用where，在其他系统上使用which

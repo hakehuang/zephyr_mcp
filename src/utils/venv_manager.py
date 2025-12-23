@@ -11,6 +11,12 @@ import platform
 from pathlib import Path
 
 
+def _eprint(*args, **kwargs):
+    """Print to stderr (avoid corrupting stdio JSON-RPC)."""
+    kwargs.setdefault("file", sys.stderr)
+    print(*args, **kwargs)
+
+
 def detect_venv_path():
     """Detect virtual environment path
     检测虚拟环境路径"""
@@ -82,50 +88,57 @@ def get_venv_python_path(venv_path):
     return python_exe if python_exe.exists() else None
 
 
-def activate_venv():
+def activate_venv(allow_restart: bool = True):
     """Activate virtual environment if not already active
     如果虚拟环境未激活，则激活它"""
 
     # Check if already in virtual environment
     # 检查是否已在虚拟环境中
     if is_venv_active():
-        print("[Venv] Virtual environment is already active")
-        print("[Venv] 虚拟环境已激活")
-        print(f"[Venv] Python executable: {get_current_python_path()}")
-        print(f"[Venv] Python 可执行文件: {get_current_python_path()}")
+        _eprint("[Venv] Virtual environment is already active")
+        _eprint("[Venv] 虚拟环境已激活")
+        _eprint(f"[Venv] Python executable: {get_current_python_path()}")
+        _eprint(f"[Venv] Python 可执行文件: {get_current_python_path()}")
         return True
 
     # Detect virtual environment
     # 检测虚拟环境
     venv_path = detect_venv_path()
     if not venv_path:
-        print("[Venv] No virtual environment found in project directory")
-        print("[Venv] 在项目目录中未找到虚拟环境")
+        _eprint("[Venv] No virtual environment found in project directory")
+        _eprint("[Venv] 在项目目录中未找到虚拟环境")
         return False
 
-    print(f"[Venv] Found virtual environment: {venv_path}")
-    print(f"[Venv] 找到虚拟环境: {venv_path}")
+    _eprint(f"[Venv] Found virtual environment: {venv_path}")
+    _eprint(f"[Venv] 找到虚拟环境: {venv_path}")
 
     # Get virtual environment Python path
     # 获取虚拟环境Python路径
     venv_python = get_venv_python_path(venv_path)
     if not venv_python:
-        print("[Venv] Could not find Python executable in virtual environment")
-        print("[Venv] 在虚拟环境中找不到Python可执行文件")
+        _eprint("[Venv] Could not find Python executable in virtual environment")
+        _eprint("[Venv] 在虚拟环境中找不到Python可执行文件")
         return False
 
     # Check if we're already using the virtual environment Python
     # 检查是否已经在使用虚拟环境的Python
     current_python = get_current_python_path()
     if str(venv_python).lower() == current_python.lower():
-        print("[Venv] Already using virtual environment Python")
-        print("[Venv] 已经在使用虚拟环境的Python")
+        _eprint("[Venv] Already using virtual environment Python")
+        _eprint("[Venv] 已经在使用虚拟环境的Python")
         return True
+
+    if not allow_restart:
+        _eprint("[Venv] Virtual environment not active and restart is disabled")
+        _eprint("[Venv] 虚拟环境未激活且已禁用重新启动")
+        _eprint(f"[Venv] Current Python: {current_python}")
+        _eprint(f"[Venv] Expected venv Python: {venv_python}")
+        return False
 
     # Restart with virtual environment Python
     # 使用虚拟环境Python重新启动
-    print(f"[Venv] Restarting with virtual environment Python: {venv_python}")
-    print(f"[Venv] 使用虚拟环境Python重新启动: {venv_python}")
+    _eprint(f"[Venv] Restarting with virtual environment Python: {venv_python}")
+    _eprint(f"[Venv] 使用虚拟环境Python重新启动: {venv_python}")
 
     # Get current script and arguments
     # 获取当前脚本和参数
@@ -142,16 +155,16 @@ def activate_venv():
         result = subprocess.run(command, check=True)
         sys.exit(result.returncode)
     except subprocess.CalledProcessError as e:
-        print(f"[Venv] Failed to restart with virtual environment: {e}")
-        print(f"[Venv] 使用虚拟环境重新启动失败: {e}")
+        _eprint(f"[Venv] Failed to restart with virtual environment: {e}")
+        _eprint(f"[Venv] 使用虚拟环境重新启动失败: {e}")
         return False
     except Exception as e:
-        print(f"[Venv] Unexpected error during restart: {e}")
-        print(f"[Venv] 重新启动过程中出现意外错误: {e}")
+        _eprint(f"[Venv] Unexpected error during restart: {e}")
+        _eprint(f"[Venv] 重新启动过程中出现意外错误: {e}")
         return False
 
 
-def ensure_venv_activated():
+def ensure_venv_activated(allow_restart: bool = True):
     """Ensure virtual environment is activated, restart if necessary
     确保虚拟环境已激活，必要时重新启动"""
 
@@ -162,7 +175,7 @@ def ensure_venv_activated():
 
     # Try to activate virtual environment
     # 尝试激活虚拟环境
-    return activate_venv()
+    return activate_venv(allow_restart=allow_restart)
 
 
 def check_venv_dependencies():
@@ -170,8 +183,8 @@ def check_venv_dependencies():
     检查虚拟环境中是否安装了必需的依赖"""
 
     if not is_venv_active():
-        print("[Venv] Cannot check dependencies: virtual environment not active")
-        print("[Venv] 无法检查依赖: 虚拟环境未激活")
+        _eprint("[Venv] Cannot check dependencies: virtual environment not active")
+        _eprint("[Venv] 无法检查依赖: 虚拟环境未激活")
         return False
 
     required_packages = [
@@ -191,12 +204,12 @@ def check_venv_dependencies():
             missing_packages.append(package)
 
     if missing_packages:
-        print(f"[Venv] Missing required packages: {', '.join(missing_packages)}")
-        print(f"[Venv] 缺少必需的包: {', '.join(missing_packages)}")
+        _eprint(f"[Venv] Missing required packages: {', '.join(missing_packages)}")
+        _eprint(f"[Venv] 缺少必需的包: {', '.join(missing_packages)}")
         return False
 
-    print("[Venv] All required dependencies are available")
-    print("[Venv] 所有必需的依赖都可用")
+    _eprint("[Venv] All required dependencies are available")
+    _eprint("[Venv] 所有必需的依赖都可用")
     return True
 
 
