@@ -5,10 +5,12 @@ File Description: Twister test tool for Zephyr project
 文件描述: Zephyr项目的Twister测试工具
 """
 
+
 import os
 import subprocess
 from typing import Dict, Any, Optional, Union, List
 from src.utils.common_tools import check_tools
+from src.utils.logging_utils import get_logger, print_to_logger
 
 
 def run_twister(
@@ -51,66 +53,92 @@ def run_twister(
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
+
+    logger = get_logger("run_twister")
+    print_to_logger(logger, f"[run_twister] Start twister execution with params: platform={platform}, tests={tests}, test_cases={test_cases}, enable_slow={enable_slow}, build_only={build_only}, extra_args={extra_args}, project_dir={project_dir}")
+
     # 检查twister工具是否可用
     # 尝试找到twister脚本的位置（通常在zephyr/scripts目录下）
     twister_path = os.path.join(project_dir, "scripts", "twister")
+    print_to_logger(logger, f"[run_twister] Checking twister path: {twister_path}")
     if not os.path.exists(twister_path):
-        # 尝试使用系统PATH中的twister
+        print_to_logger(logger, f"[run_twister] twister not found at {twister_path}, checking system PATH...")
         tools_status = check_tools(["twister"])
+        print_to_logger(logger, f"[run_twister] check_tools result: {tools_status}")
         if not tools_status.get("twister", False):
+            print_to_logger(logger, "[run_twister] twister tool not found in system PATH.")
             return {
                 "status": "error",
                 "log": "",
                 "error": "twister工具未找到，请确保正确设置了Zephyr环境",
             }
         twister_path = "twister"
+    else:
+        print_to_logger(logger, f"[run_twister] twister found at {twister_path}")
+
 
     # 检查项目目录是否存在
     if not os.path.exists(project_dir):
+        print_to_logger(logger, f"[run_twister] 项目目录不存在: {project_dir}")
         return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
+
 
     try:
         # 构建twister命令
         cmd = [twister_path]
+        print_to_logger(logger, f"[run_twister] Initial command: {cmd}")
 
         # 添加平台参数
         if platform:
             cmd.extend(["-p", platform])
+            print_to_logger(logger, f"[run_twister] Added platform: {platform}")
 
         # 添加测试路径参数
         if tests:
             if isinstance(tests, list):
                 for test in tests:
                     cmd.extend(["-T", test])
+                    print_to_logger(logger, f"[run_twister] Added test path: {test}")
             else:
                 cmd.extend(["-T", tests])
+                print_to_logger(logger, f"[run_twister] Added test path: {tests}")
 
         # 添加测试用例参数
         if test_cases:
             if isinstance(test_cases, list):
                 for test_case in test_cases:
                     cmd.extend(["-s", test_case])
+                    print_to_logger(logger, f"[run_twister] Added test case: {test_case}")
             else:
                 cmd.extend(["-s", test_cases])
+                print_to_logger(logger, f"[run_twister] Added test case: {test_cases}")
 
         # 添加其他可选参数
         if enable_slow:
             cmd.append("--enable-slow")
+            print_to_logger(logger, f"[run_twister] Enabled slow tests")
         if build_only:
             cmd.append("--build-only")
+            print_to_logger(logger, f"[run_twister] Build only mode enabled")
 
         # 添加额外参数
         if extra_args:
             # 将额外参数作为字符串解析并添加
             extra_args_list = extra_args.split()
             cmd.extend(extra_args_list)
+            print_to_logger(logger, f"[run_twister] Added extra args: {extra_args_list}")
+
+        print_to_logger(logger, f"[run_twister] Final command: {' '.join(cmd)} (cwd={project_dir})")
 
         # 执行命令
         process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
+        print_to_logger(logger, f"[run_twister] Command executed. Return code: {process.returncode}")
 
         # 解析输出，提取统计信息
         stdout = process.stdout
         stderr = process.stderr
+        print_to_logger(logger, f"[run_twister] STDOUT:\n{stdout}")
+        print_to_logger(logger, f"[run_twister] STDERR:\n{stderr}")
 
         # 尝试从输出中提取测试统计信息
         stats = {
@@ -125,18 +153,20 @@ def run_twister(
         # 简单的统计提取逻辑
         if "Total tests selected" in stdout:
             import re
-
             match = re.search(r"Total tests selected: (\d+)", stdout)
             if match:
                 stats["total"] = int(match.group(1))
+                print_to_logger(logger, f"[run_twister] Total tests selected: {stats['total']}")
 
         # 提取各种结果的数量
         for key in ["passed", "failed", "skipped", "error", "timeout"]:
             match = re.search(rf"\b{key}: (\d+)", stdout, re.IGNORECASE)
             if match:
                 stats[key] = int(match.group(1))
+                print_to_logger(logger, f"[run_twister] {key}: {stats[key]}")
 
         if process.returncode == 0:
+            print_to_logger(logger, f"[run_twister] Twister run successful.")
             return {
                 "status": "success",
                 "log": stdout,
@@ -144,6 +174,7 @@ def run_twister(
                 "error": "",
             }
         else:
+            print_to_logger(logger, f"[run_twister] Twister run failed with return code {process.returncode}.")
             return {
                 "status": "error",
                 "log": stdout,
@@ -151,6 +182,7 @@ def run_twister(
                 "error": stderr,
             }
     except Exception as e:
+        print_to_logger(logger, f"[run_twister] Exception occurred: {str(e)}")
         return {
             "status": "error",
             "log": "",
