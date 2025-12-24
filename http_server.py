@@ -8,17 +8,23 @@ HTTP服务器模块 / HTTP Server Module
 import http.server
 import socketserver
 import json
-import threading
 import subprocess
+import os
 import sys
 import uuid
 import traceback
 import urllib.parse
-from typing import Dict, Any, List, Optional
-from http import HTTPStatus
+from typing import Dict, Any, List
+import time
 
 # 导入OpenTelemetry集成 / Import OpenTelemetry integration
 from opentelemetry_integration import OpenTelemetryManager
+from src.utils.logging_utils import (
+    capture_debug_logs,
+    get_logger,
+    print_to_logger,
+    redirect_stdio_to_logger,
+)
 
 
 class JSONToolHandler(http.server.BaseHTTPRequestHandler):
@@ -45,8 +51,6 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
         if tool_name not in registered_tools:
             self.send_error(404, self.server.agent.get_text('tool_not_found', tool_name))
             return
-        
-        tool_info = registered_tools[tool_name]
         
         # 特定工具的参数验证 / Parameter validation for specific tools
         if tool_name == 'west_flash':
@@ -84,6 +88,18 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
         
         post_data = self.rfile.read(content_length)
         
+        debug: List[str] = []
+
+        def _mask_params(d: Dict[str, Any]) -> Dict[str, Any]:
+            masked: Dict[str, Any] = {}
+            for k, v in d.items():
+                key = str(k).lower()
+                if any(s in key for s in ("password", "passwd", "token", "secret", "apikey", "api_key", "pat", "private_key")):
+                    masked[k] = "<redacted>"
+                else:
+                    masked[k] = v
+            return masked
+
         try:
             # 解析JSON请求 / Parse JSON request
             request = json.loads(post_data.decode('utf-8'))
@@ -122,6 +138,10 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
             
             # 记录工具调用，包含trace_id / Log tool call, including trace_id
             self.server.agent.logger.info(f"[{trace_id}] 执行工具: {tool_name}，参数: {params}")
+
+            debug.append(f"INFO http_server: Invoking tool {tool_name}")
+            debug.append(f"INFO http_server: Params: {_mask_params(params)}")
+            started = time.time()
             
             # 导入必要的模块并注入到工具函数的全局命名空间 / Import necessary modules and inject into tool function's global namespace
             tool_func_globals = tool_func.__globals__
@@ -132,7 +152,43 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
             tool_func_globals['traceback'] = traceback
             
             # 执行工具函数 / Execute tool function
-            result = tool_func(**params)
+            with capture_debug_logs(debug):
+                import builtins
+
+                tool_logger = get_logger(f"tools.{tool_name}")
+                old_print = builtins.print
+                strict_stdio = os.getenv("ZEPHYR_MCP_STRICT_STDIO", "1") != "0"
+                debug.append(f"INFO http_server: Strict stdio={strict_stdio}")
+
+                def tool_print(*args, **kwargs):
+                    return print_to_logger(tool_logger, *args, **kwargs)
+
+                builtins.print = tool_print
+                try:
+                    with redirect_stdio_to_logger(tool_logger, strict=strict_stdio):
+                        result = tool_func(**params)
+                finally:
+                    builtins.print = old_print
+
+            debug.append(f"INFO http_server: Finished in {round(time.time() - started, 3)}s")
+
+            # Ensure debug is visible to caller (and merge if tool already returns debug)
+            if isinstance(result, dict):
+                existing = result.get("debug")
+                if isinstance(existing, list):
+                    merged: List[Any] = []
+                    seen: set[str] = set()
+                    for item in existing + debug:
+                        key = str(item)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        merged.append(item)
+                    result["debug"] = merged
+                else:
+                    result["debug"] = debug
+            else:
+                result = {"status": "success", "result": result, "debug": debug}
             
             # 构造响应 / Construct response
             response = {
@@ -159,14 +215,15 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
                 "trace_id": trace_id
             }
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # 发送错误响应 / Send error response
             error_response = {
                 "success": False,
                 "error": str(e),
                 "tool": tool_name if 'tool_name' in locals() else None,
                 "trace_id": trace_id,
-                "error_code": "TOOL_EXECUTION_ERROR"
+                "error_code": "TOOL_EXECUTION_ERROR",
+                "debug": debug,
             }
             self.send_response(500)
             self.send_header('Content-Type', 'application/json')
@@ -181,6 +238,7 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
     
     def _handle_api_tools_request(self, trace_id: str, span=None):
         """处理/api/tools端点请求 / Handle /api/tools endpoint request"""
+        _ = trace_id
         registered_tools = self.server.agent.tool_registry.get_registered_tools()
         
         # 构建工具信息列表 / Build tool information list
@@ -211,6 +269,7 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
     
     def _handle_api_docs_request(self, trace_id: str, span=None):
         """处理/api/docs端点请求 / Handle /api/docs endpoint request"""
+        _ = trace_id
         host = self.server.server_address[0]
         port = self.server.server_address[1]
         
@@ -346,7 +405,7 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
                     span.set_attribute("http.status_code", 404)
                     span.set_attribute("error", True)
                     span.set_attribute("error.message", f"Path not found: {self.path}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.server.agent.logger.error(f"[{trace_id}] POST请求处理错误: {str(e)}")
                 span.set_attribute("error", True)
                 span.set_attribute("error.message", str(e))
@@ -466,7 +525,7 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
                     span.set_attribute("http.status_code", 404)
                     span.set_attribute("error", True)
                     span.set_attribute("error.message", f"Path not found: {path}")
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.server.agent.logger.error(f"[{trace_id}] GET请求处理错误: {str(e)}")
                 span.set_attribute("error", True)
                 span.set_attribute("error.message", str(e))
@@ -529,9 +588,11 @@ class JSONToolHandler(http.server.BaseHTTPRequestHandler):
                 }
                 self.wfile.write(json.dumps(error_response).encode('utf-8'))
 
-    def log_message(self, format, *args):
+    def log_message(self, format_str, *args):
         """自定义日志消息格式 / Custom log message format"""
-        self.server.agent.logger.info(f"[{self.headers.get('X-Trace-ID', 'unknown')}] {format % args}")
+        self.server.agent.logger.info(
+            f"[{self.headers.get('X-Trace-ID', 'unknown')}] {format_str % args}"
+        )
 
 
 def start_json_server(agent):
@@ -566,7 +627,7 @@ def start_json_server(agent):
             httpd.serve_forever()
         except KeyboardInterrupt:
             agent.logger.info(agent.get_text('server_interrupted'))
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             agent.logger.error(agent.get_text('server_error', str(e)))
         finally:
             httpd.server_close()

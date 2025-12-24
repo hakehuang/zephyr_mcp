@@ -65,13 +65,22 @@ import platform
 import subprocess
 import shutil
 import argparse
-import builtins
 from typing import Dict, Any, List, Optional
 
 from src.utils.logging_utils import get_logger, print_to_logger
 from src.utils.common_tools import run_command
 
 logger = get_logger(__name__)
+
+
+def print(*args: Any, **kwargs: Any) -> None:  # type: ignore[override]
+    """Module-local print that logs to file.
+
+    This keeps legacy `print(...)` call sites working while ensuring output goes to
+    the repo `logs/` folder (and can be captured by debug capture handlers).
+    """
+
+    print_to_logger(logger, *args, **kwargs)
 
 
 DEFAULT_ZEPHYR_REPO_URL = "https://github.com/zephyrproject-rtos/zephyr"
@@ -161,14 +170,6 @@ def setup_zephyr_environment(
         ...     logger.info(f"Zephyr environment set up at: {result['details']['workspace_path']}")
     """
 
-    # Function implementation starts here
-    original_print = builtins.print
-
-    def _logged_print(*print_args, **print_kwargs):
-        return print_to_logger(logger, *print_args, **print_kwargs)
-
-    builtins.print = _logged_print
-
     try:
         # Validate parameters
         if not workspace_path:
@@ -217,8 +218,7 @@ def setup_zephyr_environment(
             "status": "error",
             "message": f"Error setting up Zephyr environment: {str(e)}",
         }
-    finally:
-        builtins.print = original_print
+
 
 
 def _setup_windows_environment(
@@ -1488,13 +1488,6 @@ if __name__ == "__main__":
     Parses command line arguments and invokes the setup function, providing
     user-friendly output and error handling.
     """
-
-    # Route all CLI prints to the log file.
-    def _logged_print(*print_args, **print_kwargs):
-        return print_to_logger(logger, *print_args, **print_kwargs)
-
-    builtins.print = _logged_print
-
     parser = argparse.ArgumentParser(
         description="Zephyr RTOS Development Environment Setup Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,

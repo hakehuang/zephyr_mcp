@@ -8,6 +8,7 @@ import asyncio
 import contextlib
 import functools
 import inspect
+import time
 from typing import Any
 
 # Allow running as a script: `python src/mcp_server.py`
@@ -16,7 +17,13 @@ _repo_root = Path(__file__).resolve().parent.parent
 if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
-from src.utils.logging_utils import get_logger
+from src.utils.logging_utils import (  # noqa: E402  # pylint: disable=wrong-import-position
+    get_logger,
+    capture_debug_logs,
+    print_to_logger,
+    StdioLoggerWriter,
+    redirect_stdio_to_logger,
+)
 
 logger = get_logger(__name__)
 
@@ -42,12 +49,8 @@ except ImportError:
     logger.warning("警告: venv_manager 模块不可用")
 
 
-_VENV_DEPS_OK: bool | None = None
-
-
 def _ensure_venv_ready_for_tool() -> tuple[bool, str, str]:
     """Return (ok, error_en, error_zh). Never restarts the process."""
-    global _VENV_DEPS_OK
 
     if not VENV_MANAGER_AVAILABLE:
         return True, "", ""
@@ -61,10 +64,7 @@ def _ensure_venv_ready_for_tool() -> tuple[bool, str, str]:
             "虚拟环境未激活。请先使用虚拟环境(.venv)的Python启动服务器，然后再调用工具。",
         )
 
-    if _VENV_DEPS_OK is None:
-        _VENV_DEPS_OK = bool(check_venv_dependencies())
-
-    if not _VENV_DEPS_OK:
+    if not bool(check_venv_dependencies()):
         return (
             False,
             "Missing required Python packages in the active venv. Install dependencies (e.g. pip install -r requirements.txt).",
@@ -76,6 +76,12 @@ def _ensure_venv_ready_for_tool() -> tuple[bool, str, str]:
 
 def _wrap_tool_with_venv_step(func):
     """Wrap a tool so venv check is mandatory and stdout is redirected to stderr."""
+
+    def _mask_param(param_name: str, value: Any) -> Any:
+        name = (param_name or "").lower()
+        if any(s in name for s in ("password", "passwd", "token", "secret", "apikey", "api_key", "pat", "private_key")):
+            return "<redacted>"
+        return value
 
     sig = inspect.signature(func)
     for p in sig.parameters.values():
@@ -91,7 +97,7 @@ def _wrap_tool_with_venv_step(func):
             param_chunks.append("*")
             saw_kwonly = True
 
-        if p.default is inspect._empty:
+        if p.default is inspect.Parameter.empty:
             param_chunks.append(p.name)
         else:
             param_chunks.append(f"{p.name}={repr(p.default)}")
@@ -108,22 +114,78 @@ def _wrap_tool_with_venv_step(func):
     call_src = ", ".join(call_chunks)
 
     wrapped_name = getattr(func, "__name__", "wrapped_tool")
+
+    strict_stdio = os.getenv("ZEPHYR_MCP_STRICT_STDIO", "1") != "0"
+
+    # Build a masked params dict expression like:
+    # {'a': _mask_param('a', a), 'b': _mask_param('b', b)}
+    masked_param_items: list[str] = []
+    for p in sig.parameters.values():
+        masked_param_items.append(f"'{p.name}': _mask_param('{p.name}', {p.name})")
+    masked_params_expr = "{" + ", ".join(masked_param_items) + "}"
+
     src = (
         f"def {wrapped_name}({params_src}):\n"
-        f"    with contextlib.redirect_stdout(sys.stderr):\n"
-        f"        ok, err_en, err_zh = _ensure_venv_ready_for_tool()\n"
-        f"        if not ok:\n"
-        f"            return {{'status': 'error', 'success': False, 'error': err_en, 'chinese_error': err_zh}}\n"
-        f"        return _orig({call_src})\n"
+        f"    debug = []\n"
+        f"    debug.append('INFO mcp_server: Invoking tool {wrapped_name}')\n"
+        f"    debug.append('INFO mcp_server: Params: ' + repr({masked_params_expr}))\n"
+        f"    debug.append('INFO mcp_server: Strict stdio=' + str(STRICT_STDIO))\n"
+        f"    started = time.time()\n"
+        f"    with capture_debug_logs(debug):\n"
+        f"        tool_logger = get_logger('tools.' + '{wrapped_name}')\n"
+        f"        _old_print = builtins.print\n"
+        f"        def _tool_print(*args, **kwargs):\n"
+        f"            return print_to_logger(tool_logger, *args, **kwargs)\n"
+        f"        builtins.print = _tool_print\n"
+        f"        try:\n"
+        f"            with redirect_stdio_to_logger(tool_logger, strict=STRICT_STDIO):\n"
+        f"                ok, err_en, err_zh = _ensure_venv_ready_for_tool()\n"
+        f"                if not ok:\n"
+        f"                    debug.append('ERROR mcp_server: ' + err_en)\n"
+        f"                    return {{'status': 'error', 'success': False, 'error': err_en, 'chinese_error': err_zh, 'debug': debug}}\n"
+        f"                try:\n"
+        f"                    result = _orig({call_src})\n"
+        f"                except Exception as e:\n"
+        f"                    debug.append('ERROR mcp_server: Tool raised exception: ' + str(e))\n"
+        f"                    return {{'status': 'error', 'success': False, 'error': str(e), 'exception_type': type(e).__name__, 'debug': debug}}\n"
+        f"        finally:\n"
+        f"            builtins.print = _old_print\n"
+        f"    debug.append('INFO mcp_server: Finished in ' + str(round(time.time() - started, 3)) + 's')\n"
+        f"    if isinstance(result, dict):\n"
+        f"        existing = result.get('debug')\n"
+        f"        if isinstance(existing, list):\n"
+        f"            merged = []\n"
+        f"            seen = set()\n"
+        f"            for item in existing + debug:\n"
+        f"                key = str(item)\n"
+        f"                if key in seen:\n"
+        f"                    continue\n"
+        f"                seen.add(key)\n"
+        f"                merged.append(item)\n"
+        f"            result['debug'] = merged\n"
+        f"        else:\n"
+        f"            result['debug'] = debug\n"
+        f"        return result\n"
+        f"    return {{'status': 'success', 'success': True, 'result': result, 'debug': debug}}\n"
     )
 
     ns: dict[str, Any] = {
         "_orig": func,
         "contextlib": contextlib,
         "sys": sys,
+        "os": os,
         "_ensure_venv_ready_for_tool": _ensure_venv_ready_for_tool,
+        "capture_debug_logs": capture_debug_logs,
+        "get_logger": get_logger,
+        "print_to_logger": print_to_logger,
+        "StdioLoggerWriter": StdioLoggerWriter,
+        "redirect_stdio_to_logger": redirect_stdio_to_logger,
+        "builtins": __import__("builtins"),
+        "time": time,
+        "_mask_param": _mask_param,
+        "STRICT_STDIO": strict_stdio,
     }
-    exec(src, ns)
+    exec(src, ns)  # noqa: S102
     wrapped = ns[wrapped_name]
     wrapped = functools.wraps(func)(wrapped)
     return wrapped
@@ -192,19 +254,19 @@ def _register_tool(server, name: str, func) -> None:
     """
 
     def _get_registered_tool_names() -> set[str]:
-        get_tools_method = getattr(server, "get_tools", None)
-        if not callable(get_tools_method):
+        tools_method = getattr(server, "get_tools", None)
+        if not callable(tools_method):
             return set()
         try:
-            if asyncio.iscoroutinefunction(get_tools_method):
+            if asyncio.iscoroutinefunction(tools_method):
                 try:
-                    tools = asyncio.run(get_tools_method())
+                    tools = asyncio.run(tools_method())
                 except RuntimeError:
                     # If we're already in an event loop, skip pre-check.
                     return set()
             else:
-                tools = get_tools_method()
-        except Exception:
+                tools = tools_method()
+        except Exception:  # noqa: BLE001
             return set()
 
         if isinstance(tools, dict):
@@ -256,7 +318,6 @@ try:
     from src.tools.fetch_branch_or_pr import fetch_branch_or_pr
     from src.tools.git_rebase import git_rebase
     from src.tools.setup_zephyr_environment import setup_zephyr_environment
-    from src.tools.llm_tools import llm_tools, register_llm_tools
 except ImportError:
     # Alternative import method, import directly from tools directory
     # 备选导入方案，直接从tools目录导入
@@ -275,7 +336,6 @@ except ImportError:
     from tools.fetch_branch_or_pr import fetch_branch_or_pr
     from tools.git_rebase import git_rebase
     from tools.setup_zephyr_environment import setup_zephyr_environment
-    from tools.llm_tools import llm_tools, register_llm_tools
 
 
 def register_all_tools(server) -> None:
@@ -307,7 +367,14 @@ def register_all_tools(server) -> None:
         _register_tool(server, tool_name, tool_func)
 
     # Register LLM tools (multiple tool functions)
-    register_llm_tools(server)
+    try:
+        try:
+            from src.tools.llm_tools import register_llm_tools  # type: ignore
+        except ImportError:
+            from tools.llm_tools import register_llm_tools  # type: ignore
+        register_llm_tools(server)
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.exception("Error registering LLM tools")
 
 
 # Register tools on import so stdio transport works reliably.
@@ -347,11 +414,11 @@ def __ensure_tools_are_registered(server):
     ]
 
     try:
-        get_tools_method = server.get_tools
-        if asyncio.iscoroutinefunction(get_tools_method):
-            registered_tools = asyncio.run(get_tools_method())
+        server_tools_method = server.get_tools
+        if asyncio.iscoroutinefunction(server_tools_method):
+            registered_tools = asyncio.run(server_tools_method())
         else:
-            registered_tools = get_tools_method()
+            registered_tools = server_tools_method()
 
         # FastMCP may return a dict of tool_name -> tool metadata.
         if isinstance(registered_tools, dict):
@@ -369,7 +436,7 @@ def __ensure_tools_are_registered(server):
 
         logger.info("Registered %s tools", len(registered_tool_names))
         logger.info("已注册 %s 个工具", len(registered_tool_names))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Error checking tool registration status: %s", str(e))
         logger.error("检查工具注册状态时出错: %s", str(e))
 
@@ -402,12 +469,12 @@ if __name__ == "__main__":
 
     # Tools are registered at import time; only register again if tool list is empty.
     try:
-        get_tools_method = getattr(mcp, "get_tools", None)
-        if callable(get_tools_method):
+        mcp_tools_method = getattr(mcp, "get_tools", None)
+        if callable(mcp_tools_method):
             existing = (
-                asyncio.run(get_tools_method())
-                if asyncio.iscoroutinefunction(get_tools_method)
-                else get_tools_method()
+                asyncio.run(mcp_tools_method())
+                if asyncio.iscoroutinefunction(mcp_tools_method)
+                else mcp_tools_method()
             )
         else:
             existing = None
@@ -415,7 +482,7 @@ if __name__ == "__main__":
         existing_names = set(existing.keys()) if isinstance(existing, dict) else set(existing or [])
         if not existing_names:
             register_all_tools(mcp)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Error ensuring tools are registered: %s", str(e))
         logger.error("确保工具注册时出错: %s", str(e))
 
@@ -428,6 +495,6 @@ if __name__ == "__main__":
     logger.info("[启动] 正在启动 MCP 服务器 %s...", mcp_name)
     try:
         mcp.run()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Server runtime error: %s", str(e))
         logger.error("服务器运行时出错: %s", str(e))
