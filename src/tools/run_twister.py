@@ -7,6 +7,7 @@ File Description: Twister test tool for Zephyr project
 
 
 import os
+import re
 import subprocess
 from typing import Dict, Any, Optional, Union, List
 from src.utils.common_tools import check_tools
@@ -169,7 +170,6 @@ def run_twister(
 
         # 简单的统计提取逻辑
         if "Total tests selected" in stdout:
-            import re
             match = re.search(r"Total tests selected: (\d+)", stdout)
             if match:
                 stats["total"] = int(match.group(1))
