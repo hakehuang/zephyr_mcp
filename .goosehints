@@ -78,19 +78,44 @@ Function Description: Get Git status information of Zephyr project
 
 Parameters:
 参数说明:
-- project_dir (str): Required. Zephyr project directory
-- project_dir (str): 必须。Zephyr项目目录
 
 Returns:
 返回值:
-- Dict[str, Any]: Contains status, current branch, commit information, etc.
-- Dict[str, Any]: 包含状态、当前分支、提交信息等
 
 Exception Handling:
 异常处理:
-- Tool detection failure or command execution exception will be reflected in the returned error information
-- 工具检测失败或命令执行异常会体现在返回的错误信息中
 
+
+=== trigger_remote_test ===
+Source: src/tools/trigger_remote_test.py
+
+Function Description: Create a remote test trigger prompt template
+功能描述: 生成远程测试触发请求的模板
+
+Parameters:
+参数说明:
+- jobFullName (str): Remote job full name. Default: "zephyr_test_pipe_quick".
+- jobFullName (str): 远程作业完整名称，默认为 "zephyr_test_pipe_quick"。
+- parameters (Optional[Dict[str, Any]]): Optional parameter overrides (structured output only).
+- parameters (Optional[Dict[str, Any]]): 可选参数覆盖（仅结构化输出）。
+
+Returns:
+返回值:
+- Dict[str, Any]:
+    - status: "success"
+    - prompt: The template text to paste/edit
+    - request: A machine-readable request object (jobFullName + parameters)
+    - instructions: Short instructions asking user to update content
+- Dict[str, Any]:
+    - status: "success"
+    - prompt: 可粘贴/编辑的模板文本
+    - request: 机器可读的请求对象（jobFullName + parameters）
+    - instructions: 提示用户更新内容的简短说明
+
+Exception Handling:
+异常处理:
+- No direct remote execution is performed; only prompt/template generation.
+- 不直接执行远程操作，仅生成请求模板。
 === git_checkout ===
 Source: src/tools/git_checkout.py
 
