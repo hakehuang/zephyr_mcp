@@ -67,20 +67,10 @@ import shutil
 import argparse
 from typing import Dict, Any, List, Optional
 
-from src.utils.logging_utils import get_logger, print_to_logger
+from src.utils.logging_utils import get_logger
 from src.utils.common_tools import run_command
 
 logger = get_logger(__name__)
-
-
-def print(*args: Any, **kwargs: Any) -> None:  # type: ignore[override]
-    """Module-local print that logs to file.
-
-    This keeps legacy `print(...)` call sites working while ensuring output goes to
-    the repo `logs/` folder (and can be captured by debug capture handlers).
-    """
-
-    print_to_logger(logger, *args, **kwargs)
 
 
 DEFAULT_ZEPHYR_REPO_URL = "https://github.com/zephyrproject-rtos/zephyr"
@@ -244,11 +234,11 @@ def _setup_windows_environment(
 
         # Create workspace directory
         os.makedirs(workspace_path, exist_ok=True)
-        print(f"Created workspace directory: {workspace_path}")
+        logger.info("Created workspace directory: %s", workspace_path)
 
         # Create and activate Python virtual environment
         venv_path = os.path.join(workspace_path, ".venv")
-        print(f"Creating Python virtual environment in {venv_path}...")
+        logger.info("Creating Python virtual environment in %s...", venv_path)
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
         # Get path to pip in virtual environment
@@ -257,22 +247,22 @@ def _setup_windows_environment(
         # Check for Visual Studio Build Tools
         vs_tools_installed = _check_visual_studio_tools()
         if not vs_tools_installed:
-            print("WARNING: Visual Studio Build Tools not found.")
-            print(
+            logger.warning("Visual Studio Build Tools not found.")
+            logger.warning(
                 "It's recommended to install Visual Studio Build Tools for C++ development."
             )
-            print(
-                "You can download it from: https://visualstudio.microsoft.com/downloads/"
+            logger.warning(
+                "Download: https://visualstudio.microsoft.com/downloads/"
             )
 
         # Install West with specific version requirements in virtual environment
-        print(
+        logger.info(
             "Installing West tool with required dependencies in virtual environment..."
         )
         _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
-        print(f"Initializing Zephyr workspace in {workspace_path}...")
+        logger.info("Initializing Zephyr workspace in %s...", workspace_path)
         os.chdir(workspace_path)
 
         # Get path to west in virtual environment
@@ -297,7 +287,7 @@ def _setup_windows_environment(
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
-                print("Retry with proxy settings...")
+                logger.info("Retry with proxy settings...")
                 if zephyr_version == "latest":
                     _run_or_raise(
                         [venv_west, "init", "-m", zephyr_repo_url, "."],
@@ -318,7 +308,7 @@ def _setup_windows_environment(
                 raise
 
         # Update West with progress indicator
-        print("Updating West dependencies (this may take several minutes)...")
+        logger.info("Updating West dependencies (this may take several minutes)...")
         _run_or_raise(
             [venv_west, "update"],
             cwd=workspace_path,
@@ -327,7 +317,7 @@ def _setup_windows_environment(
         )
 
         # Install Zephyr Python dependencies in virtual environment
-        print("Installing Zephyr Python dependencies in virtual environment...")
+        logger.info("Installing Zephyr Python dependencies in virtual environment...")
         requirements_file = os.path.join(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
@@ -388,7 +378,7 @@ def _ensure_windows_powershell_execution_policy() -> None:
     Command requested:
       Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
-    This function is non-fatal: it prints warnings if it cannot apply the setting.
+    This function is non-fatal: it logs warnings if it cannot apply the setting.
     """
 
     if platform.system().lower() != "windows":
@@ -396,9 +386,9 @@ def _ensure_windows_powershell_execution_policy() -> None:
 
     ps_exe = shutil.which("powershell") or shutil.which("pwsh")
     if not ps_exe:
-        print("WARNING: PowerShell not found; cannot set execution policy.")
-        print(
-            "Please run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+        logger.warning("PowerShell not found; cannot set execution policy.")
+        logger.warning(
+            "Run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
         )
         return
 
@@ -418,7 +408,7 @@ def _ensure_windows_powershell_execution_policy() -> None:
             .lower()
         )
     except (subprocess.CalledProcessError, OSError) as e:
-        print(f"WARNING: Could not read PowerShell execution policy: {e}")
+        logger.warning("Could not read PowerShell execution policy: %s", e)
         current = ""
 
     # RemoteSigned is requested; treat more permissive settings as OK.
@@ -434,11 +424,11 @@ def _ensure_windows_powershell_execution_policy() -> None:
                 "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force",
             ]
         )
-        print("PowerShell execution policy set to RemoteSigned (CurrentUser).")
+        logger.info("PowerShell execution policy set to RemoteSigned (CurrentUser).")
     except (subprocess.CalledProcessError, OSError) as e:
-        print(f"WARNING: Failed to set PowerShell execution policy: {e}")
-        print(
-            "Please run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
+        logger.warning("Failed to set PowerShell execution policy: %s", e)
+        logger.warning(
+            "Run manually: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned"
         )
 
 
@@ -463,29 +453,31 @@ def _setup_linux_environment(
         # Create workspace directory with proper permissions
         os.makedirs(workspace_path, exist_ok=True)
         os.chmod(workspace_path, 0o755)  # Ensure proper permissions
-        print(f"Created workspace directory: {workspace_path}")
+        logger.info("Created workspace directory: %s", workspace_path)
 
         # Check if running as root (not recommended)
-        if os.geteuid() == 0:
-            print("WARNING: Running as root is not recommended for Zephyr development")
-            print("Please consider using a regular user account for development.")
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            logger.warning(
+                "Running as root is not recommended for Zephyr development"
+            )
+            logger.warning("Consider using a regular user account for development.")
 
         # Create and activate Python virtual environment
         venv_path = os.path.join(workspace_path, ".venv")
-        print(f"Creating Python virtual environment in {venv_path}...")
+        logger.info("Creating Python virtual environment in %s...", venv_path)
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
         # Get path to pip in virtual environment
         venv_pip = os.path.join(venv_path, "bin", "pip")
 
         # Install West with specific version requirements in virtual environment
-        print(
+        logger.info(
             "Installing West tool with required dependencies in virtual environment..."
         )
         _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
-        print(f"Initializing Zephyr workspace in {workspace_path}...")
+        logger.info("Initializing Zephyr workspace in %s...", workspace_path)
         os.chdir(workspace_path)
 
         # Get path to west in virtual environment
@@ -510,7 +502,7 @@ def _setup_linux_environment(
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
-                print("Retry with proxy settings...")
+                logger.info("Retry with proxy settings...")
                 if zephyr_version == "latest":
                     _run_or_raise(
                         [venv_west, "init", "-m", zephyr_repo_url, "."],
@@ -531,7 +523,7 @@ def _setup_linux_environment(
                 raise
 
         # Update West with progress indicator
-        print("Updating West dependencies (this may take several minutes)...")
+        logger.info("Updating West dependencies (this may take several minutes)...")
         _run_or_raise(
             [venv_west, "update"],
             cwd=workspace_path,
@@ -540,7 +532,7 @@ def _setup_linux_environment(
         )
 
         # Install Zephyr Python dependencies in virtual environment
-        print("Installing Zephyr Python dependencies in virtual environment...")
+        logger.info("Installing Zephyr Python dependencies in virtual environment...")
         requirements_file = os.path.join(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
@@ -626,13 +618,13 @@ else
 fi
 """
 
-    with open(env_script_path, "w") as f:
+    with open(env_script_path, "w", encoding="utf-8") as f:
         f.write(script_content)
 
     # Make the script executable
     os.chmod(env_script_path, 0o755)
-    print(f"Created environment setup script: {env_script_path}")
-    print(
+    logger.info("Created environment setup script: %s", env_script_path)
+    logger.info(
         "To activate the Zephyr environment in future sessions, run: source zephyr_env.sh"
     )
 
@@ -675,13 +667,13 @@ else
 fi
 """
 
-    with open(env_script_path, "w") as f:
+    with open(env_script_path, "w", encoding="utf-8") as f:
         f.write(script_content)
 
     # Make the script executable
     os.chmod(env_script_path, 0o755)
-    print(f"Created environment setup script: {env_script_path}")
-    print(
+    logger.info("Created environment setup script: %s", env_script_path)
+    logger.info(
         "To activate the Zephyr environment in future sessions, run: source zephyr_env.sh"
     )
 
@@ -707,24 +699,24 @@ def _setup_macos_environment(
         # Create workspace directory with proper permissions
         os.makedirs(workspace_path, exist_ok=True)
         os.chmod(workspace_path, 0o755)  # Ensure proper permissions
-        print(f"Created workspace directory: {workspace_path}")
+        logger.info("Created workspace directory: %s", workspace_path)
 
         # Create and activate Python virtual environment
         venv_path = os.path.join(workspace_path, ".venv")
-        print(f"Creating Python virtual environment in {venv_path}...")
+        logger.info("Creating Python virtual environment in %s...", venv_path)
         subprocess.check_call([sys.executable, "-m", "venv", venv_path])
 
         # Get path to pip in virtual environment
         venv_pip = os.path.join(venv_path, "bin", "pip")
 
         # Install West with specific version requirements in virtual environment
-        print(
+        logger.info(
             "Installing West tool with required dependencies in virtual environment..."
         )
         _run_or_raise([venv_pip, "install", "west", "pyelftools"], cwd=workspace_path)
 
         # Initialize Zephyr workspace
-        print(f"Initializing Zephyr workspace in {workspace_path}...")
+        logger.info("Initializing Zephyr workspace in %s...", workspace_path)
         os.chdir(workspace_path)
 
         # Get path to west in virtual environment
@@ -749,7 +741,7 @@ def _setup_macos_environment(
             # Try with proxy settings if available
             env = os.environ.copy()
             if "http_proxy" in env or "https_proxy" in env:
-                print("Retry with proxy settings...")
+                logger.info("Retry with proxy settings...")
                 if zephyr_version == "latest":
                     _run_or_raise(
                         [venv_west, "init", "-m", zephyr_repo_url, "."],
@@ -770,7 +762,7 @@ def _setup_macos_environment(
                 raise
 
         # Update West with progress indicator
-        print("Updating West dependencies (this may take several minutes)...")
+        logger.info("Updating West dependencies (this may take several minutes)...")
         _run_or_raise(
             [venv_west, "update"],
             cwd=workspace_path,
@@ -779,7 +771,7 @@ def _setup_macos_environment(
         )
 
         # Install Zephyr Python dependencies in virtual environment
-        print("Installing Zephyr Python dependencies in virtual environment...")
+        logger.info("Installing Zephyr Python dependencies in virtual environment...")
         requirements_file = os.path.join(
             workspace_path, "zephyr", "scripts", "requirements.txt"
         )
@@ -847,17 +839,17 @@ def _check_windows_dependencies() -> Dict[str, Any]:
             "Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip -e --accept-package-agreements --accept-source-agreements"
         )
         try:
-            print("Installing dependencies with winget...")
+            logger.info("Installing dependencies with winget...")
             subprocess.run(install_cmd, shell=True, check=True)
-            print("Dependencies installed successfully.")
+            logger.info("Dependencies installed successfully.")
         except Exception as e:
-            print(f"Dependency installation failed: {e}")
+            logger.warning("Dependency installation failed: %s", e)
 
     try:
         # Check Python version
         if sys.version_info < (3, 8):
             return {"status": "error", "message": "Python 3.8 or higher is required"}
-        print(f"Python version: {platform.python_version()} (OK)")
+        logger.info("Python version: %s (OK)", platform.python_version())
 
         # Check Git
         if shutil.which("git") is None:
@@ -868,7 +860,7 @@ def _check_windows_dependencies() -> Dict[str, Any]:
         git_version = subprocess.check_output(
             ["git", "--version"], universal_newlines=True
         ).strip()
-        print(f"Git: {git_version} (OK)")
+        logger.info("Git: %s (OK)", git_version)
 
         # Check CMake
         if shutil.which("cmake") is None:
@@ -879,7 +871,7 @@ def _check_windows_dependencies() -> Dict[str, Any]:
         cmake_version = subprocess.check_output(
             ["cmake", "--version"], universal_newlines=True
         ).split()[2]
-        print(f"CMake version: {cmake_version}")
+        logger.info("CMake version: %s", cmake_version)
 
         # Simple version check (major.minor.patch)
         cmake_parts = cmake_version.split(".")
@@ -901,11 +893,10 @@ def _check_windows_dependencies() -> Dict[str, Any]:
             ninja_version = subprocess.check_output(
                 ["ninja", "--version"], universal_newlines=True
             ).strip()
-            print(f"Ninja: {ninja_version} (OK)")
+            logger.info("Ninja: %s (OK)", ninja_version)
         else:
-            print(
-                """Ninja not found (optional but recommended).
-                Install from https://github.com/ninja-build/ninja/releases"""
+            logger.warning(
+                "Ninja not found (optional but recommended). Install from https://github.com/ninja-build/ninja/releases"
             )
 
         return {
@@ -930,12 +921,12 @@ def _check_linux_dependencies() -> Dict[str, Any]:
         # Check Python version
         if sys.version_info < (3, 8):
             return {"status": "error", "message": "Python 3.8 or higher is required"}
-        print(f"Python version: {platform.python_version()} (OK)")
+        logger.info("Python version: %s (OK)", platform.python_version())
 
         # Check if running as root (not recommended)
         if hasattr(os, "geteuid"):
             if os.geteuid() == 0:
-                print("Warning: Running as root is not recommended")
+                logger.warning("Running as root is not recommended")
 
         # Check Git
         if shutil.which("git") is None:
@@ -946,7 +937,7 @@ def _check_linux_dependencies() -> Dict[str, Any]:
         git_version = subprocess.check_output(
             ["git", "--version"], universal_newlines=True
         ).strip()
-        print(f"Git: {git_version} (OK)")
+        logger.info("Git: %s (OK)", git_version)
 
         # Check CMake
         if shutil.which("cmake") is None:
@@ -957,7 +948,7 @@ def _check_linux_dependencies() -> Dict[str, Any]:
         cmake_version = subprocess.check_output(
             ["cmake", "--version"], universal_newlines=True
         ).split()[2]
-        print(f"CMake version: {cmake_version}")
+        logger.info("CMake version: %s", cmake_version)
 
         # Simple version check
         cmake_parts = cmake_version.split(".")
@@ -982,7 +973,7 @@ def _check_linux_dependencies() -> Dict[str, Any]:
         ninja_version = subprocess.check_output(
             ["ninja", "--version"], universal_newlines=True
         ).strip()
-        print(f"Ninja: {ninja_version} (OK)")
+        logger.info("Ninja: %s (OK)", ninja_version)
 
         # Check essential build tools
         essential_tools = ["gcc", "g++", "make"]
@@ -1015,7 +1006,7 @@ def _check_macos_dependencies() -> Dict[str, Any]:
         # Check Python version
         if sys.version_info < (3, 8):
             return {"status": "error", "message": "Python 3.8 or higher is required"}
-        print(f"Python version: {platform.python_version()} (OK)")
+        logger.info("Python version: %s (OK)", platform.python_version())
 
         # Check Git
         if shutil.which("git") is None:
@@ -1026,14 +1017,14 @@ def _check_macos_dependencies() -> Dict[str, Any]:
         git_version = subprocess.check_output(
             ["git", "--version"], universal_newlines=True
         ).strip()
-        print(f"Git: {git_version} (OK)")
+        logger.info("Git: %s (OK)", git_version)
 
         # Check Xcode Command Line Tools
         try:
             subprocess.check_output(
                 ["xcode-select", "--version"], universal_newlines=True
             )
-            print("Xcode Command Line Tools: Installed (OK)")
+            logger.info("Xcode Command Line Tools: Installed (OK)")
         except (subprocess.CalledProcessError, FileNotFoundError):
             return {
                 "status": "error",
@@ -1049,7 +1040,7 @@ def _check_macos_dependencies() -> Dict[str, Any]:
         cmake_version = subprocess.check_output(
             ["cmake", "--version"], universal_newlines=True
         ).split()[2]
-        print(f"CMake version: {cmake_version}")
+        logger.info("CMake version: %s", cmake_version)
 
         # Simple version check
         cmake_parts = cmake_version.split(".")
@@ -1074,7 +1065,7 @@ def _check_macos_dependencies() -> Dict[str, Any]:
         ninja_version = subprocess.check_output(
             ["ninja", "--version"], universal_newlines=True
         ).strip()
-        print(f"Ninja: {ninja_version} (OK)")
+        logger.info("Ninja: %s (OK)", ninja_version)
 
         return {
             "status": "success",
@@ -1138,7 +1129,7 @@ def _setup_windows_env_vars(workspace_path: str, venv_path: str) -> None:
     try:
         # Create a batch file to set environment variables and activate virtual environment
         env_batch_file = os.path.join(workspace_path, "setup_env.bat")
-        with open(env_batch_file, "w") as f:
+        with open(env_batch_file, "w", encoding="utf-8") as f:
             f.write("@echo off\n")
             f.write("echo Setting up Zephyr environment variables...\n")
             f.write(
@@ -1155,12 +1146,12 @@ def _setup_windows_env_vars(workspace_path: str, venv_path: str) -> None:
             f.write(
                 "echo Environment variables set and virtual environment activated.\n"
             )
-            f.write(f"echo Run this script before working with Zephyr projects.\n")
+            f.write("echo Run this script before working with Zephyr projects.\n")
 
-        print(f"Created environment setup batch file: {env_batch_file}")
-        print("Run this script before working with Zephyr projects.")
+        logger.info("Created environment setup batch file: %s", env_batch_file)
+        logger.info("Run this script before working with Zephyr projects.")
     except Exception as e:
-        print(f"Warning: Failed to create environment setup file: {str(e)}")
+        logger.warning("Failed to create environment setup file: %s", e)
 
 
 def _install_windows_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
@@ -1168,7 +1159,7 @@ def _install_windows_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any
     Install Zephyr SDK on Windows.
     """
     try:
-        print(f"Installing Zephyr SDK {sdk_version}...")
+        logger.info("Installing Zephyr SDK %s...", sdk_version)
 
         # Create SDK directory
         sdk_dir = os.path.join(workspace_path, "tools", "zephyr-sdk")
@@ -1178,22 +1169,83 @@ def _install_windows_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any
         # In a real implementation, you would download the installer and run it
         sdk_installer_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/zephyr-sdk-{sdk_version}_windows-x86_64.exe"
 
-        print(f"Please download and install Zephyr SDK from: {sdk_installer_url}")
-        print(f"Install it to: {sdk_dir}")
+        # For automation, use PowerShell to download and silently install the SDK.
+        ps_exe = shutil.which("powershell") or shutil.which("pwsh")
+        if not ps_exe:
+            message = "PowerShell not found; cannot automate Zephyr SDK install on Windows."
+            logger.error(message)
+            return {
+                "status": "error",
+                "message": message,
+                "details": {
+                    "sdk_installer_url": sdk_installer_url,
+                    "suggested_install_dir": sdk_dir,
+                },
+                "suggestions": [
+                    "Install Windows PowerShell (powershell) or PowerShell 7 (pwsh) and retry",
+                    "Or download the SDK installer from the provided URL and install it manually",
+                ],
+            }
 
-        # For automation, you could use PowerShell to download and install silently
-        # This is a placeholder for the actual implementation
+        sdk_installer_path = os.path.join(
+            sdk_dir, f"zephyr-sdk-{sdk_version}_windows-x86_64.exe"
+        )
+
+        download_cmd = [
+            ps_exe,
+            "-NoProfile",
+            "-Command",
+            f"Invoke-WebRequest -Uri '{sdk_installer_url}' -OutFile '{sdk_installer_path}'",
+        ]
+        logger.info("Downloading Zephyr SDK installer to: %s", sdk_installer_path)
+        _run_or_raise(download_cmd, cwd=workspace_path, retries=3, retry_backoff_seconds=2.0)
+
+        # Silent install: the Zephyr SDK Windows installer is typically NSIS.
+        # NSIS supports /S (silent) and /D=<dir> (must be last).
+        install_cmd = [
+            ps_exe,
+            "-NoProfile",
+            "-Command",
+            f"Start-Process -FilePath '{sdk_installer_path}' -ArgumentList '/S','/D={sdk_dir}' -Wait -PassThru | Out-Null",
+        ]
+        logger.info("Running Zephyr SDK installer silently...")
+        _run_or_raise(install_cmd, cwd=workspace_path, retries=1)
+        logger.info("Zephyr SDK installed successfully at: %s", sdk_dir)
 
         return {
             "status": "success",
-            "message": "Zephyr SDK installation instructions provided",
+            "message": "Zephyr SDK installed successfully",
             "sdk_path": sdk_dir,
+            "installer_path": sdk_installer_path,
         }
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
+        logger.exception("Windows SDK installation failed")
         return {
             "status": "error",
-            "message": f"Windows SDK installation failed: {str(e)}",
+            "message": "Windows SDK installation failed",
+            "details": {
+                "sdk_version": sdk_version,
+                "returncode": getattr(e, "returncode", None),
+                "cmd": getattr(e, "cmd", None),
+                "stdout": getattr(e, "output", None),
+                "stderr": getattr(e, "stderr", None),
+            },
+            "suggestions": [
+                "Verify internet connectivity and GitHub access",
+                "Try running again (transient download failures are common)",
+                "If silent install fails, run the downloaded installer manually",
+            ],
+        }
+    except OSError as e:
+        logger.exception("Windows SDK installation failed (OS error)")
+        return {
+            "status": "error",
+            "message": f"Windows SDK installation failed: {e}",
+            "suggestions": [
+                "Check file permissions for the workspace/tools directory",
+                "Ensure antivirus or endpoint protection is not blocking downloads/executables",
+            ],
         }
 
 
@@ -1202,7 +1254,7 @@ def _install_linux_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
     Install Zephyr SDK on Linux.
     """
     try:
-        print(f"Installing Zephyr SDK {sdk_version}...")
+        logger.info("Installing Zephyr SDK %s...", sdk_version)
 
         # Create SDK directory
         sdk_dir = os.path.join(workspace_path, "tools", "zephyr-sdk")
@@ -1213,18 +1265,23 @@ def _install_linux_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
         sdk_file = f"zephyr-sdk-{sdk_version}_linux-x86_64.tar.gz"
         sdk_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/{sdk_file}"
 
-        print(f"Downloading SDK from: {sdk_url}")
-        subprocess.check_call(["wget", sdk_url])
+        logger.info("Downloading SDK from: %s", sdk_url)
+        _run_or_raise(
+            ["wget", sdk_url],
+            cwd=sdk_dir,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         # Extract SDK
-        print("Extracting SDK...")
-        subprocess.check_call(["tar", "xf", sdk_file])
+        logger.info("Extracting SDK...")
+        _run_or_raise(["tar", "xf", sdk_file], cwd=sdk_dir)
 
         # Run setup script
         setup_script = os.path.join(sdk_dir, f"zephyr-sdk-{sdk_version}", "setup.sh")
         if os.path.exists(setup_script):
-            print("Running SDK setup script...")
-            subprocess.check_call(["bash", setup_script])
+            logger.info("Running SDK setup script...")
+            _run_or_raise(["bash", setup_script], cwd=sdk_dir)
 
         return {
             "status": "success",
@@ -1246,7 +1303,7 @@ def _install_macos_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
     Install Zephyr SDK on macOS.
     """
     try:
-        print(f"Installing Zephyr SDK {sdk_version}...")
+        logger.info("Installing Zephyr SDK %s...", sdk_version)
 
         # Create SDK directory
         sdk_dir = os.path.join(workspace_path, "tools", "zephyr-sdk")
@@ -1257,18 +1314,23 @@ def _install_macos_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
         sdk_file = f"zephyr-sdk-{sdk_version}_macos-x86_64.tar.gz"
         sdk_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/{sdk_file}"
 
-        print(f"Downloading SDK from: {sdk_url}")
-        subprocess.check_call(["curl", "-L", sdk_url, "-o", sdk_file])
+        logger.info("Downloading SDK from: %s", sdk_url)
+        _run_or_raise(
+            ["curl", "-L", sdk_url, "-o", sdk_file],
+            cwd=sdk_dir,
+            retries=3,
+            retry_backoff_seconds=2.0,
+        )
 
         # Extract SDK
-        print("Extracting SDK...")
-        subprocess.check_call(["tar", "xf", sdk_file])
+        logger.info("Extracting SDK...")
+        _run_or_raise(["tar", "xf", sdk_file], cwd=sdk_dir)
 
         # Run setup script
         setup_script = os.path.join(sdk_dir, f"zephyr-sdk-{sdk_version}", "setup.sh")
         if os.path.exists(setup_script):
-            print("Running SDK setup script...")
-            subprocess.check_call(["bash", setup_script])
+            logger.info("Running SDK setup script...")
+            _run_or_raise(["bash", setup_script], cwd=sdk_dir)
 
         return {
             "status": "success",
@@ -1528,18 +1590,17 @@ Examples:
 
     args = parser.parse_args()
 
-    # Print header
-    print("=" * 80)
-    print("Zephyr RTOS Development Environment Setup Tool".center(80))
-    print("=" * 80)
-    print(f"Setting up Zephyr environment in: {args.workspace}")
-    print(f"Zephyr version: {args.version}")
-    print(f"Install SDK: {args.install_sdk}")
+    # Log header
+    logger.info("%s", "=" * 80)
+    logger.info("%s", "Zephyr RTOS Development Environment Setup Tool".center(80))
+    logger.info("%s", "=" * 80)
+    logger.info("Setting up Zephyr environment in: %s", args.workspace)
+    logger.info("Zephyr version: %s", args.version)
+    logger.info("Install SDK: %s", args.install_sdk)
     if args.install_sdk:
-        print(f"SDK version: {args.sdk_version}")
-    print(f"Force mode: {args.force}")
-    print("=" * 80)
-    print()
+        logger.info("SDK version: %s", args.sdk_version)
+    logger.info("Force mode: %s", args.force)
+    logger.info("%s", "=" * 80)
 
     try:
         # Perform the environment setup
@@ -1552,57 +1613,60 @@ Examples:
         )
 
         # Display results in a user-friendly format
-        print("\n" + "=" * 80)
-        print("SETUP RESULTS:")
-        print("=" * 80)
-        print(f"Status: {'SUCCESS' if result['status'] == 'success' else 'ERROR'}")
-        print(f"Message: {result['message']}")
+        logger.info("%s", "=" * 80)
+        logger.info("SETUP RESULTS:")
+        logger.info("%s", "=" * 80)
+        logger.info(
+            "Status: %s",
+            "SUCCESS" if result["status"] == "success" else "ERROR",
+        )
+        logger.info("Message: %s", result["message"])
 
         if "details" in result:
-            print("\nDetails:")
+            logger.info("Details:")
             for key, value in result["details"].items():
-                print(f"  - {key}: {value}")
+                logger.info("- %s: %s", key, value)
 
         if "warnings" in result:
-            print("\nWarnings:")
+            logger.warning("Warnings:")
             for warning in result["warnings"]:
-                print(f"  ⚠️  {warning}")
+                logger.warning("%s", warning)
 
         if "errors" in result:
-            print("\nErrors:")
+            logger.error("Errors:")
             for error in result["errors"]:
-                print(f"  ❌ {error}")
+                logger.error("%s", error)
 
         # Print next steps
         if result["status"] == "success":
-            print("\n" + "=" * 80)
-            print("NEXT STEPS:")
-            print("=" * 80)
+            logger.info("%s", "=" * 80)
+            logger.info("NEXT STEPS:")
+            logger.info("%s", "=" * 80)
 
             if platform.system() == "Windows":
                 env_script = os.path.join(
                     os.path.abspath(args.workspace), "zephyr_env.cmd"
                 )
-                print(f"1. Run the environment setup script: {env_script}")
+                logger.info("1. Run the environment setup script: %s", env_script)
             else:
                 env_script = os.path.join(
                     os.path.abspath(args.workspace), "zephyr_env.sh"
                 )
-                print(f"1. Source the environment setup script: source {env_script}")
+                logger.info("1. Source the environment setup script: source %s", env_script)
 
-            print("2. To build your first application:")
-            print("   cd zephyr/samples/hello_world")
-            print("   west build -b <board-name> .")
-            print(
+            logger.info("2. To build your first application:")
+            logger.info("   cd zephyr/samples/hello_world")
+            logger.info("   west build -b <board-name> .")
+            logger.info(
                 "3. For more information, visit: https://docs.zephyrproject.org/latest/getting_started/index.html"
             )
 
         sys.exit(0 if result["status"] == "success" else 1)
 
     except KeyboardInterrupt:
-        print("\n\nSetup interrupted by user. Exiting.")
+        logger.warning("Setup interrupted by user. Exiting.")
         sys.exit(1)
     except Exception as e:
-        print(f"\n\nUnexpected error during setup: {str(e)}")
-        print("\nPlease check your environment and try again.")
+        logger.exception("Unexpected error during setup: %s", e)
+        logger.error("Please check your environment and try again.")
         sys.exit(1)
