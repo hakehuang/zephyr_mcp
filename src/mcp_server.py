@@ -335,6 +335,7 @@ try:
     from src.tools.fetch_branch_or_pr import fetch_branch_or_pr
     from src.tools.git_rebase import git_rebase
     from src.tools.setup_zephyr_environment import setup_zephyr_environment
+    from src.tools.trigger_remote_test import trigger_remote_test
 except ImportError:
     # Alternative import method, import directly from tools directory
     # 备选导入方案，直接从tools目录导入
@@ -353,6 +354,7 @@ except ImportError:
     from tools.fetch_branch_or_pr import fetch_branch_or_pr
     from tools.git_rebase import git_rebase
     from tools.setup_zephyr_environment import setup_zephyr_environment
+    from tools.trigger_remote_test import trigger_remote_test
 
 
 def register_all_tools(server) -> None:
@@ -378,6 +380,7 @@ def register_all_tools(server) -> None:
         "fetch_branch_or_pr": fetch_branch_or_pr,
         "git_rebase": git_rebase,
         "setup_zephyr_environment": setup_zephyr_environment,
+        "trigger_remote_test": trigger_remote_test,
     }
 
     for tool_name, tool_func in tools_to_register.items():
@@ -421,6 +424,7 @@ def __ensure_tools_are_registered(server):
         "fetch_branch_or_pr",
         "git_rebase",
         "setup_zephyr_environment",
+        "trigger_remote_test",
         "llm_tools",
         "get_llm_status",
         "generate_text",

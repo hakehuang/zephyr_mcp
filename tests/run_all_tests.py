@@ -31,6 +31,7 @@ class TestRunner:
             'test_docs_api',
             'test_edge_cases_trace_id',
             'test_fetch_tool',
+            'test_trigger_remote_test_tool',
             'test_integration_trace_id',
             'test_interactive_demo',
             'test_interactive_features',
