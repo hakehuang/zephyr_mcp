@@ -184,28 +184,38 @@ def ensure_venv_activated(allow_restart: bool = True):
 
 def check_venv_dependencies():
     """Check if required dependencies are installed in virtual environment
-    检查虚拟环境中是否安装了必需的依赖"""
+    检查虚拟环境中是否安装了必需的依赖
+
+    Note:
+        Some pip package names differ from their importable module names.
+        For example:
+        - python-dotenv -> import dotenv
+        - opentelemetry-sdk -> import opentelemetry.sdk
+    """
 
     if not is_venv_active():
         _eprint("[Venv] Cannot check dependencies: virtual environment not active")
         _eprint("[Venv] 无法检查依赖: 虚拟环境未激活")
         return False
 
-    required_packages = [
-        "requests",
-        "python-dotenv",
-        "openai",
-        "anthropic",
-        "opentelemetry-sdk",
-    ]
+    import importlib
+
+    # Map pip package name -> Python import module
+    required = {
+        "requests": "requests",
+        "python-dotenv": "dotenv",
+        "openai": "openai",
+        "anthropic": "anthropic",
+        "opentelemetry-sdk": "opentelemetry.sdk",
+    }
 
     missing_packages = []
 
-    for package in required_packages:
+    for package_name, module_name in required.items():
         try:
-            __import__(package)
+            importlib.import_module(module_name)
         except ImportError:
-            missing_packages.append(package)
+            missing_packages.append(package_name)
 
     if missing_packages:
         _eprint(f"[Venv] Missing required packages: {', '.join(missing_packages)}")

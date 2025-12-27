@@ -6,18 +6,13 @@ dotenv
 fastmcp
 venv_manager
 
-# Agno Agent 相关依赖
+# Agno Agent
 agno
 
-openai>=1.0.0  # OpenAI API客户端
-anthropic>=0.20.0  # Claude API客户端
-# DeepSeek API通过requests调用，无需额外安装特定客户端
+openai>=1.0.0
+anthropic>=0.20.0
 
-# Zephyr 相关工具（通常通过系统安装）
-# west (通过Zephyr SDK安装)
-# git (系统工具)
-
-# OpenTelemetry 相关依赖
+# OpenTelemetry
 opentelemetry-sdk>=1.23.0
 opentelemetry-api>=1.23.0
 opentelemetry-exporter-otlp>=1.23.0
