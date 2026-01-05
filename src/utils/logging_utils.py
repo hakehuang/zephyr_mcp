@@ -98,6 +98,13 @@ class StdioLoggerWriter(io.TextIOBase):
     """A file-like object that logs writes and can optionally raise.
 
     Used to enforce: tools should not write to stdout/stderr; they should log instead.
+
+    Note: `io.TextIOBase` exposes read-only `encoding`/`errors` attributes (implemented as
+    C-level descriptors). Setting them directly raises:
+    `attribute 'encoding' of '_io._TextIOBase' objects is not writable`.
+
+    To stay compatible with callers that expect `sys.stdout.encoding`, `sys.stdout.errors`,
+    and `sys.stdout.buffer`, we provide them as properties.
     """
 
     def __init__(
@@ -116,10 +123,21 @@ class StdioLoggerWriter(io.TextIOBase):
         self._strict = strict
         self._raised = False
 
-        # Match common TextIOWrapper attributes expected by callers.
-        self.encoding = encoding  # type: ignore[assignment]
-        self.errors = errors  # type: ignore[assignment]
-        self.buffer = _BytesToTextWriter(self, encoding=encoding, errors=errors)  # type: ignore[assignment]
+        self._encoding = encoding
+        self._errors = errors
+        self._buffer = _BytesToTextWriter(self, encoding=encoding, errors=errors)
+
+    @property
+    def encoding(self) -> str:  # type: ignore[override]
+        return self._encoding
+
+    @property
+    def errors(self) -> str:  # type: ignore[override]
+        return self._errors
+
+    @property
+    def buffer(self) -> _BytesToTextWriter:  # type: ignore[override]
+        return self._buffer
 
     def flush(self) -> None:  # type: ignore[override]
         return

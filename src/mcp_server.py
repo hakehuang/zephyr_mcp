@@ -336,6 +336,7 @@ try:
     from src.tools.git_rebase import git_rebase
     from src.tools.setup_zephyr_environment import setup_zephyr_environment
     from src.tools.trigger_remote_test import trigger_remote_test
+    from src.tools.nxp_downstream_setup import nxp_downstream_setup
 except ImportError:
     # Alternative import method, import directly from tools directory
     # 备选导入方案，直接从tools目录导入
@@ -355,6 +356,7 @@ except ImportError:
     from tools.git_rebase import git_rebase
     from tools.setup_zephyr_environment import setup_zephyr_environment
     from tools.trigger_remote_test import trigger_remote_test
+    from tools.nxp_downstream_setup import nxp_downstream_setup
 
 
 def register_all_tools(server) -> None:
@@ -381,6 +383,7 @@ def register_all_tools(server) -> None:
         "git_rebase": git_rebase,
         "setup_zephyr_environment": setup_zephyr_environment,
         "trigger_remote_test": trigger_remote_test,
+        "nxp_downstream_setup": nxp_downstream_setup,
     }
 
     for tool_name, tool_func in tools_to_register.items():
@@ -425,6 +428,7 @@ def __ensure_tools_are_registered(server):
         "git_rebase",
         "setup_zephyr_environment",
         "trigger_remote_test",
+        "nxp_downstream_setup",
         "llm_tools",
         "get_llm_status",
         "generate_text",

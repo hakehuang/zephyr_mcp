@@ -30,7 +30,8 @@ def test_imports():
         ('src.tools.test_git_connection', 'test_git_connection'),
         ('src.tools.get_git_config_status', 'get_git_config_status'),
         ('src.tools.fetch_branch_or_pr', 'fetch_branch_or_pr'),
-        ('src.tools.git_rebase', 'git_rebase')
+        ('src.tools.git_rebase', 'git_rebase'),
+        ('src.tools.nxp_downstream_setup', 'nxp_downstream_setup')
     ]
     
     print("\n测试工具函数导入:")
