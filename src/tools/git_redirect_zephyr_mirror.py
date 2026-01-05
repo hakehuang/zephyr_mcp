@@ -12,12 +12,9 @@ from typing import Dict, Any
 
 from src.utils.common_tools import check_tools
 
-
 # Reconfigure stdout with new encoding
 sys.stdout.reconfigure(encoding='utf-8')
 
-# Or wrap it in a new TextIOWrapper
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def git_redirect_zephyr_mirror(
     enable: bool = True, mirror_url: str = None
