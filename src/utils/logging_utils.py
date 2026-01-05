@@ -70,6 +70,30 @@ class _TruncatingListWriter(io.TextIOBase):
         return len(s)
 
 
+class _BytesToTextWriter(io.RawIOBase):
+    """A minimal bytes writer that forwards to a text writer.
+
+    Some libraries (notably pip/setuptools) write to `sys.stdout.buffer`.
+    When we replace `sys.stdout` with a custom `io.TextIOBase`, those callers may
+    still expect a `.buffer` attribute.
+    """
+
+    def __init__(self, text_writer: "StdioLoggerWriter", *, encoding: str = "utf-8", errors: str = "replace"):
+        self._text_writer = text_writer
+        self._encoding = encoding
+        self._errors = errors
+
+    def writable(self) -> bool:  # type: ignore[override]
+        return True
+
+    def write(self, b: bytes | bytearray | memoryview) -> int:  # type: ignore[override]
+        text = bytes(b).decode(self._encoding, errors=self._errors)
+        return self._text_writer.write(text)
+
+    def flush(self) -> None:  # type: ignore[override]
+        self._text_writer.flush()
+
+
 class StdioLoggerWriter(io.TextIOBase):
     """A file-like object that logs writes and can optionally raise.
 
@@ -83,12 +107,25 @@ class StdioLoggerWriter(io.TextIOBase):
         level: int,
         prefix: str,
         strict: bool,
+        encoding: str = "utf-8",
+        errors: str = "replace",
     ) -> None:
         self._logger = logger
         self._level = level
         self._prefix = prefix
         self._strict = strict
         self._raised = False
+
+        # Match common TextIOWrapper attributes expected by callers.
+        self.encoding = encoding  # type: ignore[assignment]
+        self.errors = errors  # type: ignore[assignment]
+        self.buffer = _BytesToTextWriter(self, encoding=encoding, errors=errors)  # type: ignore[assignment]
+
+    def flush(self) -> None:  # type: ignore[override]
+        return
+
+    def isatty(self) -> bool:  # type: ignore[override]
+        return False
 
     def write(self, s: str) -> int:  # type: ignore[override]
         if not s:

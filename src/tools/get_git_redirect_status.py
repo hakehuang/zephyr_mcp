@@ -7,6 +7,14 @@ import subprocess
 from typing import Dict, Any
 from src.utils.common_tools import check_tools
 
+import sys
+import io
+
+# Reconfigure stdout with new encoding
+sys.stdout.reconfigure(encoding='utf-8')
+
+# Or wrap it in a new TextIOWrapper
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def get_git_redirect_status() -> Dict[str, Any]:
     """

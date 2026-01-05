@@ -124,8 +124,8 @@ def setup_zephyr_environment(
     workspace_path: str,
     zephyr_version: str = "latest",
     install_sdk: bool = True,
-    sdk_version: str = "0.16.8",
-    platforms: List[str] = None,
+    sdk_version: str = "0.17.1",
+    platforms: Optional[List[str]] = None,
     force: bool = False,
 ) -> Dict[str, Any]:
     """
@@ -216,7 +216,7 @@ def _setup_windows_environment(
     zephyr_version: str,
     install_sdk: bool,
     sdk_version: str,
-    platforms: List[str],
+    platforms: Optional[List[str]],
 ) -> Dict[str, Any]:
     """
     Set up Zephyr environment on Windows according to official guidelines.
@@ -437,7 +437,7 @@ def _setup_linux_environment(
     zephyr_version: str,
     install_sdk: bool,
     sdk_version: str,
-    platforms: List[str],
+    platforms: Optional[List[str]],
 ) -> Dict[str, Any]:
     """
     Set up Zephyr environment on Linux according to official guidelines.
@@ -683,7 +683,7 @@ def _setup_macos_environment(
     zephyr_version: str,
     install_sdk: bool,
     sdk_version: str,
-    platforms: List[str],
+    platforms: Optional[List[str]],
 ) -> Dict[str, Any]:
     """
     Set up Zephyr environment on macOS according to official guidelines.
@@ -830,8 +830,28 @@ def _check_windows_dependencies() -> Dict[str, Any]:
     Check and install required dependencies on Windows.
     """
     if sys.platform == "win32":
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+        # Best-effort: ensure UTF-8 output on Windows.
+        # In hosted/tooling environments, stdout/stderr may be proxies where
+        # reconfiguration/re-wrapping is not permitted.
+        try:
+            if hasattr(sys.stdout, "reconfigure"):
+                sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            elif hasattr(sys.stdout, "buffer"):
+                sys.stdout = io.TextIOWrapper(
+                    sys.stdout.buffer, encoding="utf-8", errors="replace"
+                )
+        except Exception as e:
+            logger.debug("Could not reconfigure stdout to UTF-8: %s", e)
+
+        try:
+            if hasattr(sys.stderr, "reconfigure"):
+                sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+            elif hasattr(sys.stderr, "buffer"):
+                sys.stderr = io.TextIOWrapper(
+                    sys.stderr.buffer, encoding="utf-8", errors="replace"
+                )
+        except Exception as e:
+            logger.debug("Could not reconfigure stderr to UTF-8: %s", e)
 
         # Install dependencies using winget
         install_cmd = (
