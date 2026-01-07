@@ -339,6 +339,12 @@ def _git_rebase_internal(
     if interactive:
         rebase_cmd.append("-i")
 
+    # Force rebase
+    # 强制rebase
+    # NOTE: `--force-rebase` re-applies commits even if upstream contains them.
+    if force:
+        rebase_cmd.append("--force-rebase")
+
     # Determine rebase target
     # Determine rebase target
     # 确定rebase目标

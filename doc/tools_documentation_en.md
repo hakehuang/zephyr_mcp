@@ -90,8 +90,8 @@ Exception Handling:
 
 Parameters:
 - project_dir (str): Required. Project directory
-- source_branch (str): Required. Source branch to rebase from
-- onto_branch (Optional[str]): Optional. Target branch to rebase onto. If None, rebases current branch onto source_branch
+- source_branch (str): Required. Git reference to rebase onto (branch/tag/SHA)
+- onto_branch (Optional[str]): Optional. "--onto" target (branch/tag/SHA). If None, rebases current branch onto source_branch
 - interactive (bool): Optional. Whether to perform interactive rebase. Default: False
 - force (bool): Optional. Whether to force rebase without confirmation. Default: False
 

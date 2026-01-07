@@ -191,6 +191,13 @@ def check_venv_dependencies():
         For example:
         - python-dotenv -> import dotenv
         - opentelemetry-sdk -> import opentelemetry.sdk
+
+    Note: import names are not always the same as pip distribution names
+    (e.g. "python-dotenv" is imported as "dotenv").
+
+    检查虚拟环境中是否安装了必需的依赖。
+
+    注意：import 名称不一定与 pip 包名一致（例如："python-dotenv" 的 import 名为 "dotenv"）。
     """
 
     if not is_venv_active():
@@ -209,7 +216,7 @@ def check_venv_dependencies():
         "opentelemetry-sdk": "opentelemetry.sdk",
     }
 
-    missing_packages = []
+    missing_packages: list[str] = []
 
     for package_name, module_name in required.items():
         try:

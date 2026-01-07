@@ -7,9 +7,94 @@ File Description: Git rebase tool for Zephyr project
 
 import os
 import subprocess
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
+
 from src.utils.common_tools import check_tools
 from src.utils.internal_helpers import _git_rebase_internal
+
+
+def _run_git_cmd(project_dir: str, args: List[str]) -> subprocess.CompletedProcess:
+    """Run a git command in `project_dir` and return the CompletedProcess."""
+    return subprocess.run(["git", *args], cwd=project_dir, capture_output=True, text=True)
+
+
+def _error(msg: str) -> Dict[str, Any]:
+    return {"status": "error", "log": "", "error": msg}
+
+
+def _check_git_installed() -> Optional[Dict[str, Any]]:
+    """Return an error response dict if git is not available, else None."""
+    tools_status = check_tools(["git"])
+    if not tools_status.get("git", False):
+        return _error("git工具未安装")
+    return None
+
+
+def _check_project_dir_exists(project_dir: str) -> Optional[Dict[str, Any]]:
+    """Return an error response dict if directory does not exist, else None."""
+    if not os.path.exists(project_dir):
+        return _error(f"项目目录不存在: {project_dir}")
+    return None
+
+
+def _check_is_git_repo(project_dir: str) -> Optional[Dict[str, Any]]:
+    """Return an error response dict if directory is not a git repo, else None."""
+    try:
+        process = _run_git_cmd(project_dir, ["rev-parse", "--is-inside-work-tree"])
+        if process.returncode != 0:
+            return _error(f"指定目录不是Git仓库: {project_dir}")
+    except Exception as e:
+        return _error(f"检查Git仓库失败: {str(e)}")
+    return None
+
+
+def _get_current_branch(project_dir: str) -> Dict[str, Any]:
+    """Return {status, branch, error}."""
+    try:
+        process = _run_git_cmd(project_dir, ["rev-parse", "--abbrev-ref", "HEAD"])
+        if process.returncode != 0:
+            return {
+                "status": "error",
+                "branch": None,
+                "error": process.stderr.strip() or process.stdout.strip(),
+            }
+        return {"status": "success", "branch": process.stdout.strip(), "error": None}
+    except Exception as e:
+        return {"status": "error", "branch": None, "error": str(e)}
+
+
+def _verify_git_ref_exists(project_dir: str, ref: str) -> Optional[Dict[str, Any]]:
+    """Verify a git ref exists.
+
+    Accepts branches, tags, and commit SHAs.
+    """
+    # `rev-parse --verify <name>^{commit}` accepts:
+    # - branch names
+    # - tags
+    # - full/short commit SHAs
+    # We also try common remote/refs prefixes for convenience.
+    candidates = [
+        ref,
+        f"{ref}^{{commit}}",
+        f"refs/heads/{ref}",
+        f"refs/heads/{ref}^{{commit}}",
+        f"refs/tags/{ref}",
+        f"refs/tags/{ref}^{{commit}}",
+        f"origin/{ref}",
+        f"origin/{ref}^{{commit}}",
+        f"refs/remotes/origin/{ref}",
+        f"refs/remotes/origin/{ref}^{{commit}}",
+    ]
+
+    for cand in candidates:
+        try:
+            process = _run_git_cmd(project_dir, ["rev-parse", "--verify", "--quiet", cand])
+            if process.returncode == 0:
+                return None
+        except Exception:
+            continue
+
+    return _error(f"Git引用不存在(分支/标签/SHA): {ref}")
 
 
 def git_rebase(
@@ -27,10 +112,10 @@ def git_rebase(
     参数说明:
     - project_dir (str): Required. Project directory
     - project_dir (str): 必须。项目目录
-    - source_branch (str): Required. Source branch to rebase from
-    - source_branch (str): 必须。要从中rebase的源分支
-    - onto_branch (Optional[str]): Optional. Target branch to rebase onto. If None, rebases current branch onto source_branch
-    - onto_branch (Optional[str]): 可选。要rebase到的目标分支。如果为None，则将当前分支rebase到source_branch上
+    - source_branch (str): Required. Git reference to rebase onto (branch/tag/SHA)
+    - source_branch (str): 必须。要rebase到的Git引用（分支/标签/SHA）
+    - onto_branch (Optional[str]): Optional. "--onto" target (branch/tag/SHA). If None, rebases current branch onto source_branch
+    - onto_branch (Optional[str]): 可选。"--onto" 目标（分支/标签/SHA）。如果为None，则将当前分支rebase到source_branch上
     - interactive (bool): Optional. Whether to perform interactive rebase. Default: False
     - interactive (bool): 可选。是否执行交互式rebase。默认：False
     - force (bool): Optional. Whether to force rebase without confirmation. Default: False
@@ -46,98 +131,34 @@ def git_rebase(
     - Tool detection failure or command execution exception will be reflected in the returned error information
     - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
-    # Check if git tool is installed
-    # 检查git工具是否安装
-    tools_status = check_tools(["git"])
-    if not tools_status.get("git", False):
-        return {"status": "error", "log": "", "error": "git工具未安装"}
+    err = _check_git_installed()
+    if err:
+        return err
 
-    # Check if project directory exists
-    # 检查项目目录是否存在
-    if not os.path.exists(project_dir):
-        return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
+    err = _check_project_dir_exists(project_dir)
+    if err:
+        return err
 
-    # Check if it's a Git repository
-    # 检查是否是Git仓库
-    try:
-        cmd = ["git", "rev-parse", "--is-inside-work-tree"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        if process.returncode != 0:
-            return {
-                "status": "error",
-                "log": "",
-                "error": f"指定目录不是Git仓库: {project_dir}",
-            }
-    except Exception as e:
-        return {"status": "error", "log": "", "error": f"检查Git仓库失败: {str(e)}"}
+    err = _check_is_git_repo(project_dir)
+    if err:
+        return err
 
-    # Get current branch
-    # 获取当前分支
-    try:
-        cmd = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        current_branch = process.stdout.strip()
-    except Exception as e:
-        return {"status": "error", "log": "", "error": f"获取当前分支失败: {str(e)}"}
+    # Get current branch (kept for parity/diagnostics)
+    # 获取当前分支（用于诊断/保持旧行为一致）
+    current_branch_result = _get_current_branch(project_dir)
+    if current_branch_result["status"] != "success":
+        return _error(f"获取当前分支失败: {current_branch_result['error']}")
+    _ = current_branch_result["branch"]
 
-    # Check if source branch exists
-    # 检查源分支是否存在
-    try:
-        cmd = ["git", "show-ref", "--verify", f"refs/heads/{source_branch}"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        if process.returncode != 0:
-            # Check remote branch
-            # 检查远程分支
-            cmd = [
-                "git",
-                "show-ref",
-                "--verify",
-                f"refs/remotes/origin/{source_branch}",
-            ]
-            process = subprocess.run(
-                cmd, cwd=project_dir, capture_output=True, text=True
-            )
-            if process.returncode != 0:
-                return {
-                    "status": "error",
-                    "log": "",
-                    "error": f"源分支不存在: {source_branch}",
-                }
-    except Exception as e:
-        return {"status": "error", "log": "", "error": f"检查源分支失败: {str(e)}"}
+    # Validate refs (branch/tag/SHA)
+    err = _verify_git_ref_exists(project_dir, source_branch)
+    if err:
+        return err
 
-    # If onto_branch is specified, check if it exists
-    # 如果指定了onto_branch，检查它是否存在
     if onto_branch:
-        try:
-            cmd = ["git", "show-ref", "--verify", f"refs/heads/{onto_branch}"]
-            process = subprocess.run(
-                cmd, cwd=project_dir, capture_output=True, text=True
-            )
-            if process.returncode != 0:
-                # Check remote branch
-                # 检查远程分支
-                cmd = [
-                    "git",
-                    "show-ref",
-                    "--verify",
-                    f"refs/remotes/origin/{onto_branch}",
-                ]
-                process = subprocess.run(
-                    cmd, cwd=project_dir, capture_output=True, text=True
-                )
-                if process.returncode != 0:
-                    return {
-                        "status": "error",
-                        "log": "",
-                        "error": f"目标分支不存在: {onto_branch}",
-                    }
-        except Exception as e:
-            return {
-                "status": "error",
-                "log": "",
-                "error": f"检查目标分支失败: {str(e)}",
-            }
+        err = _verify_git_ref_exists(project_dir, onto_branch)
+        if err:
+            return err
 
     # Call internal function to execute rebase
     # 调用内部函数执行rebase

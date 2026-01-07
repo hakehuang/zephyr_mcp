@@ -126,7 +126,13 @@ class GitToolsTestCase:
         try:
             if self._git_rebase_internal:
                 # 测试缺少必要参数
-                result = self._git_rebase_internal("test_dir", None)
+                result = self._git_rebase_internal(
+                    project_dir="test_dir",
+                    source_branch=None,
+                    onto_branch=None,
+                    interactive=False,
+                    force=False,
+                )
                 print(f"缺少source_branch参数测试: {result.get('status')} - {result.get('error')}")
             
             print("\n注意：完整功能测试需要在实际Git仓库中进行")
@@ -167,7 +173,12 @@ class GitToolsTestCase:
             if self._fetch_branch_or_pr_internal:
                 test_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 # 测试缺少参数的情况
-                result = self._fetch_branch_or_pr_internal(project_dir=test_dir)
+                result = self._fetch_branch_or_pr_internal(
+                    project_dir=test_dir,
+                    branch_name=None,
+                    pr_number=None,
+                    remote_name="origin",
+                )
                 print(f"测试缺少参数: {result['error']}")
                 
             print("\n[+] fetch_branch_or_pr工具测试通过")

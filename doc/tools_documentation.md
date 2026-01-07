@@ -132,10 +132,10 @@ Parameters:
 参数说明:
 - project_dir (str): Required. Project directory
 - project_dir (str): 必须。项目目录
-- source_branch (str): Required. Source branch to rebase from
-- source_branch (str): 必须。要从中rebase的源分支
-- onto_branch (Optional[str]): Optional. Target branch to rebase onto. If None, rebases current branch onto source_branch
-- onto_branch (Optional[str]): 可选。要rebase到的目标分支。如果为None，则将当前分支rebase到source_branch上
+- source_branch (str): Required. Git reference to rebase onto (branch/tag/SHA)
+- source_branch (str): 必须。要rebase到的Git引用（分支/标签/SHA）
+- onto_branch (Optional[str]): Optional. "--onto" target (branch/tag/SHA). If None, rebases current branch onto source_branch
+- onto_branch (Optional[str]): 可选。"--onto" 目标（分支/标签/SHA）。如果为None，则将当前分支rebase到source_branch上
 - interactive (bool): Optional. Whether to perform interactive rebase. Default: False
 - interactive (bool): 可选。是否执行交互式rebase。默认：False
 - force (bool): Optional. Whether to force rebase without confirmation. Default: False

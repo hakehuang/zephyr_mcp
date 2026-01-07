@@ -427,6 +427,8 @@ Fetch a branch or pull request from a remote repository.
 在Zephyr项目目录中执行Git rebase操作。
 Execute Git rebase operation in Zephyr project directory.
 
+> Note: `source_branch`/`onto_branch` accept any Git reference (branch, tag, or commit SHA).
+
 ---
 
 ## 🔍 模块说明 / Module Documentation
