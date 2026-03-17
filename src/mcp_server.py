@@ -358,7 +358,6 @@ except ImportError:
     from tools.trigger_remote_test import trigger_remote_test
     from tools.nxp_downstream_setup import nxp_downstream_setup
 
-
 def register_all_tools(server) -> None:
     """Register all tools on the given MCP server instance.
 

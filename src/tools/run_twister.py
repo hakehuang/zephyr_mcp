@@ -9,6 +9,7 @@ File Description: Twister test tool for Zephyr project
 import os
 import re
 import subprocess
+import sys
 from typing import Dict, Any, Optional, Union, List
 from src.utils.common_tools import check_tools
 from src.utils.logging_utils import get_logger, print_to_logger
@@ -72,8 +73,17 @@ def run_twister(
     # 检查twister工具是否可用
     # 尝试找到twister脚本的位置（通常在zephyr/scripts目录下）
     twister_path = os.path.join(project_dir, "scripts", "twister")
+    twister_cmd: List[str] = []
     _dbg(f"[run_twister] Checking twister path: {twister_path}")
-    if not os.path.exists(twister_path):
+
+    # Note (Windows): scripts/twister is a python script without .py extension.
+    # Executing it directly via subprocess can raise:
+    #   [WinError 193] %1 is not a valid Win32 application
+    # So prefer invoking it through the current python interpreter.
+    if os.path.exists(twister_path):
+        _dbg(f"[run_twister] twister found at {twister_path}")
+        twister_cmd = [sys.executable, twister_path]
+    else:
         _dbg(f"[run_twister] twister not found at {twister_path}, checking system PATH...")
         tools_status = check_tools(["twister"])
         _dbg(f"[run_twister] check_tools result: {tools_status}")
@@ -85,9 +95,7 @@ def run_twister(
                 "debug": debug,
                 "error": "twister工具未找到，请确保正确设置了Zephyr环境",
             }
-        twister_path = "twister"
-    else:
-        _dbg(f"[run_twister] twister found at {twister_path}")
+        twister_cmd = ["twister"]
 
 
     # 检查项目目录是否存在
@@ -103,7 +111,7 @@ def run_twister(
 
     try:
         # 构建twister命令
-        cmd = [twister_path]
+        cmd = list(twister_cmd)
         _dbg(f"[run_twister] Initial command: {cmd}")
 
         # 添加平台参数

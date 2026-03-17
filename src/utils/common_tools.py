@@ -136,22 +136,38 @@ def run_command(
     retries: int = 0,
     retry_backoff_seconds: float = 1.0,
 ) -> Dict[str, Any]:
-    """
-    Execute command and return results
-    执行命令并返回结果
+    """Execute a command and return structured results.
+
+    Supports bounded retries with exponential backoff for likely transient network
+    errors. Timeouts are treated as transient and will also be retried when
+    ``retries`` is set.
 
     Args:
         cmd (list): Command and its arguments list
         cmd (list): 命令及其参数列表
         cwd (Optional[str]): Working directory
         cwd (Optional[str]): 工作目录
-        timeout (Optional[int]): Timeout in seconds
-        timeout (Optional[int]): 超时时间（秒）
+        timeout (Optional[int]): Timeout (seconds) for a single attempt
+        timeout (Optional[int]): 单次执行超时时间（秒）
+        env (Optional[Dict[str, str]]): Environment variables
+        env (Optional[Dict[str, str]]): 环境变量
+        retries (int): Additional retry attempts (0 means run once)
+        retries (int): 额外重试次数（0表示只执行一次）
+        retry_backoff_seconds (float): Base backoff in seconds
+        retry_backoff_seconds (float): 基础退避时间（秒）
 
     Returns:
-        Dict[str, Any]: Dictionary containing execution status, output and error information
-        Dict[str, Any]: 包含执行状态、输出和错误信息的字典
+        Dict[str, Any]: status, returncode, stdout, stderr, attempts
+        Dict[str, Any]: 状态、返回码、标准输出、标准错误、尝试次数
     """
+
+    def _coerce_text(value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, bytes):
+            return value.decode(errors="replace")
+        return str(value)
+
     def _is_transient_network_error(stdout: str, stderr: str) -> bool:
         combined = f"{stdout}\n{stderr}".lower()
         patterns = [
@@ -188,11 +204,16 @@ def run_command(
         ]
         return any(p in combined for p in patterns)
 
-    try:
-        attempts = max(1, int(retries) + 1)
-        last_process: Optional[subprocess.CompletedProcess] = None
+    attempts = max(1, int(retries) + 1)
+    last_process: Optional[subprocess.CompletedProcess] = None
+    last_timeout: Optional[subprocess.TimeoutExpired] = None
+    last_exception: Optional[Exception] = None
 
-        for attempt in range(attempts):
+    for attempt in range(attempts):
+        last_timeout = None
+        last_exception = None
+
+        try:
             last_process = subprocess.run(
                 cmd,
                 cwd=cwd,
@@ -201,46 +222,78 @@ def run_command(
                 text=True,
                 timeout=timeout,
             )
+        except subprocess.TimeoutExpired as e:
+            last_timeout = e
+        except Exception as e:
+            last_exception = e
 
-            if last_process.returncode == 0:
-                return {
-                    "status": "success",
-                    "returncode": 0,
-                    "stdout": last_process.stdout,
-                    "stderr": last_process.stderr,
-                    "attempts": attempt + 1,
-                }
+        if last_exception is not None:
+            # Non-timeout exceptions are usually not safe to retry.
+            return {
+                "status": "error",
+                "returncode": -1,
+                "stdout": "",
+                "stderr": str(last_exception),
+                "attempts": attempt + 1,
+            }
 
-            # Retry only for likely transient network problems.
-            can_retry = (
-                attempt < attempts - 1
-                and _is_transient_network_error(last_process.stdout, last_process.stderr)
-            )
-            if not can_retry:
-                break
+        if last_timeout is not None:
+            # Treat timeouts as transient when retries are enabled.
+            if attempt < attempts - 1:
+                sleep_seconds = (retry_backoff_seconds * (2**attempt)) + random.uniform(
+                    0.0, 0.5
+                )
+                time.sleep(sleep_seconds)
+                continue
 
-            # Exponential backoff with small jitter.
-            sleep_seconds = (retry_backoff_seconds * (2**attempt)) + random.uniform(
-                0.0, 0.5
-            )
-            time.sleep(sleep_seconds)
+            return {
+                "status": "error",
+                "returncode": -1,
+                "stdout": _coerce_text(last_timeout.stdout),
+                "stderr": _coerce_text(last_timeout.stderr) or "Command timed out",
+                "attempts": attempt + 1,
+            }
 
-        return {
-            "status": "success" if last_process and last_process.returncode == 0 else "error",
-            "returncode": -1 if last_process is None else last_process.returncode,
-            "stdout": "" if last_process is None else last_process.stdout,
-            "stderr": "" if last_process is None else last_process.stderr,
-            "attempts": attempts,
-        }
-    except subprocess.TimeoutExpired:
-        return {
-            "status": "error",
-            "returncode": -1,
-            "stdout": "",
-            "stderr": "Command timed out",
-        }
-    except Exception as e:
-        return {"status": "error", "returncode": -1, "stdout": "", "stderr": str(e)}
+        if last_process is None:
+            return {
+                "status": "error",
+                "returncode": -1,
+                "stdout": "",
+                "stderr": "Command failed to start",
+                "attempts": attempt + 1,
+            }
+
+        if last_process.returncode == 0:
+            return {
+                "status": "success",
+                "returncode": 0,
+                "stdout": last_process.stdout,
+                "stderr": last_process.stderr,
+                "attempts": attempt + 1,
+            }
+
+        # Retry only for likely transient network problems.
+        can_retry = attempt < attempts - 1 and _is_transient_network_error(
+            last_process.stdout, last_process.stderr
+        )
+        if not can_retry:
+            break
+
+        # Exponential backoff with small jitter.
+        sleep_seconds = (retry_backoff_seconds * (2**attempt)) + random.uniform(
+            0.0, 0.5
+        )
+        time.sleep(sleep_seconds)
+
+    return {
+        "status": "error"
+        if last_process is None
+        else ("success" if last_process.returncode == 0 else "error"),
+        "returncode": -1 if last_process is None else last_process.returncode,
+        "stdout": "" if last_process is None else last_process.stdout,
+        "stderr": "" if last_process is None else last_process.stderr,
+        "attempts": attempts if last_process is not None else 0,
+    }
 
 
 def ensure_directory_exists(directory_path: str) -> bool:
