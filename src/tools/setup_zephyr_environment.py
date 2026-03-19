@@ -124,7 +124,7 @@ def setup_zephyr_environment(
     workspace_path: str,
     zephyr_version: str = "latest",
     install_sdk: bool = True,
-    sdk_version: str = "0.17.1",
+    sdk_version: str = "1.0.0",
     platforms: Optional[List[str]] = None,
     force: bool = False,
 ) -> Dict[str, Any]:
@@ -1187,7 +1187,7 @@ def _install_windows_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any
 
         # Download and install SDK (simplified for example)
         # In a real implementation, you would download the installer and run it
-        sdk_installer_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/zephyr-sdk-{sdk_version}_windows-x86_64.exe"
+        sdk_installer_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/zephyr-sdk-{sdk_version}_windows-x86_64_gnu.exe"
 
         # For automation, use PowerShell to download and silently install the SDK.
         ps_exe = shutil.which("powershell") or shutil.which("pwsh")
@@ -1282,7 +1282,7 @@ def _install_linux_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
 
         # Download SDK
         os.chdir(sdk_dir)
-        sdk_file = f"zephyr-sdk-{sdk_version}_linux-x86_64.tar.gz"
+        sdk_file = f"zephyr-sdk-{sdk_version}_linux-x86_64_gnu.tar.gz"
         sdk_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/{sdk_file}"
 
         logger.info("Downloading SDK from: %s", sdk_url)
@@ -1331,7 +1331,7 @@ def _install_macos_sdk(workspace_path: str, sdk_version: str) -> Dict[str, Any]:
 
         # Download SDK
         os.chdir(sdk_dir)
-        sdk_file = f"zephyr-sdk-{sdk_version}_macos-x86_64.tar.gz"
+        sdk_file = f"zephyr-sdk-{sdk_version}_macos-x86_64_gnu.tar.gz"
         sdk_url = f"https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v{sdk_version}/{sdk_file}"
 
         logger.info("Downloading SDK from: %s", sdk_url)
