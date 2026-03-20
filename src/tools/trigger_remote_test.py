@@ -49,6 +49,10 @@ def _render_prompt(job_full_name: str, parameters: Dict[str, Any]) -> str:
 
 
 def trigger_remote_test(
+    TEST_TARGET_SERIES: str,
+    TEST_HWV2: str,
+    TEST_TARGET_REPO: str,
+    TEST_TARGET_TEST_FOLDER: str,
     jobFullName: str = "zephyr_test_pipe_quick",
     parameters: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
@@ -57,11 +61,17 @@ def trigger_remote_test(
     Function Description:
     - Generates a prompt in the requested `trigger_build { ... }` format.
     - Returns both the rendered prompt text and a structured representation.
+    - Exposes key test-target fields as required tool parameters.
 
     Parameters:
+    - TEST_TARGET_SERIES (str): Required target series/platform name.
+    - TEST_HWV2 (str): Required hardware-v2 selector.
+    - TEST_TARGET_REPO (str): Required repository URL under test.
+    - TEST_TARGET_TEST_FOLDER (str): Required test folder path.
     - jobFullName (str): Remote job full name. Default: "zephyr_test_pipe_quick".
     - parameters (Optional[Dict[str, Any]]): Optional parameter overrides.
-      These values are applied to both the structured request and the prompt.
+      These values are applied to both the structured request and the prompt,
+      except the required tool parameters above always take precedence.
 
     Returns:
     - Dict[str, Any]:
@@ -73,17 +83,33 @@ def trigger_remote_test(
 
     logger.info("[trigger_remote_test] Generating remote test trigger prompt")
 
+    required_parameters: Dict[str, Any] = {
+        "TEST_TARGET_SERIES": TEST_TARGET_SERIES,
+        "TEST_HWV2": TEST_HWV2,
+        "TEST_TARGET_REPO": TEST_TARGET_REPO,
+        "TEST_TARGET_TEST_FOLDER": TEST_TARGET_TEST_FOLDER,
+    }
+
+    missing_required = [
+        key for key, value in required_parameters.items() if value is None or not str(value).strip()
+    ]
+    if missing_required:
+        return {
+            "status": "error",
+            "error": f"Missing required parameters: {', '.join(missing_required)}",
+        }
+
     default_parameters: Dict[str, Any] = {
-        "TEST_TARGET_SERIES": "mimxrt1170_evk@A/mimxrt1176/cm4",
+        "TEST_TARGET_SERIES": TEST_TARGET_SERIES,
         "TEST_NOTIFIER": "hake.huang@nxp.com",
         "TEST_TWISTER_ADDITIONAL_PARAM": "",
         "TEST_TWISTER_SYSBUILD": "",
-        "TEST_HWV2": "Y",
+        "TEST_HWV2": TEST_HWV2,
         "TEST_TARGET_BRANCH": "main",
-        "TEST_TARGET_REPO": "https://github.com/zephyrproject-rtos/zephyr.git",
+        "TEST_TARGET_REPO": TEST_TARGET_REPO,
         "TEST_TARGET_COMMIT_HASH": "",
         "TEST_TARGET_PULL_ID": "100434",
-        "TEST_TARGET_TEST_FOLDER": "tests/kernel/common",
+        "TEST_TARGET_TEST_FOLDER": TEST_TARGET_TEST_FOLDER,
         "TEST_TOOLCHAIN": "zephyr",
         "TEST_TOOLCHAIN_KEYS": "",
         "token": "BITBUCKET_BUILD_RUN_PLAN_PLATFORM_QUICK",
@@ -93,6 +119,8 @@ def trigger_remote_test(
         for key, value in parameters.items():
             default_parameters[str(key)] = value
 
+    default_parameters.update(required_parameters)
+
     return {
         "status": "success",
         "prompt": _render_prompt(jobFullName, default_parameters),
@@ -101,7 +129,8 @@ def trigger_remote_test(
             "parameters": default_parameters,
         },
         "instructions": [
-            "Verify TEST_TARGET_SERIES / TEST_TARGET_PULL_ID / TEST_TARGET_COMMIT_HASH / TEST_TARGET_TEST_FOLDER before submitting.",
+            "Required fields supplied via the tool are TEST_TARGET_SERIES, TEST_HWV2, TEST_TARGET_REPO, and TEST_TARGET_TEST_FOLDER.",
+            "Verify TEST_TARGET_PULL_ID / TEST_TARGET_COMMIT_HASH before submitting.",
             "Use TEST_TARGET_SERIES for the platform name; keep TEST_TWISTER_ADDITIONAL_PARAM empty unless extra twister args are truly needed.",
         ],
     }

@@ -94,6 +94,14 @@ Function Description: Create a remote test trigger prompt template
 
 Parameters:
 参数说明:
+- TEST_TARGET_SERIES (str): Required target series/platform name.
+- TEST_TARGET_SERIES (str): 必须。目标系列/平台名称。
+- TEST_HWV2 (str): Required hardware-v2 selector.
+- TEST_HWV2 (str): 必须。硬件 v2 选择参数。
+- TEST_TARGET_REPO (str): Required repository URL under test.
+- TEST_TARGET_REPO (str): 必须。被测仓库地址。
+- TEST_TARGET_TEST_FOLDER (str): Required test folder path.
+- TEST_TARGET_TEST_FOLDER (str): 必须。测试目录路径。
 - jobFullName (str): Remote job full name. Default: "zephyr_test_pipe_quick".
 - jobFullName (str): 远程作业完整名称，默认为 "zephyr_test_pipe_quick"。
 - parameters (Optional[Dict[str, Any]]): Optional parameter overrides (structured output only).
@@ -116,6 +124,7 @@ Exception Handling:
 异常处理:
 - No direct remote execution is performed; only prompt/template generation.
 - 不直接执行远程操作，仅生成请求模板。
+
 === git_checkout ===
 Source: src/tools/git_checkout.py
 
