@@ -6,9 +6,14 @@ Function Description: west flash tool for flashing firmware using west command
 """
 
 from typing import Dict, Any, Optional
-import os
 import subprocess
 from src.utils.common_tools import check_tools
+from src.utils.input_validation import (
+    ValidationError,
+    split_cli_args,
+    validate_existing_directory,
+    validate_simple_token,
+)
 
 
 def west_flash(
@@ -50,11 +55,16 @@ def west_flash(
     if not tools_status.get("west", False):
         return {"status": "error", "log": "", "error": "west工具未安装"}
 
-    # 检查构建目录是否存在
-    if not os.path.exists(build_dir):
-        return {"status": "error", "log": "", "error": f"构建目录不存在: {build_dir}"}
-
     try:
+        build_dir = validate_existing_directory(build_dir, "build_dir")
+        if board:
+            board = validate_simple_token(board, "board")
+        if runner:
+            runner = validate_simple_token(runner, "runner")
+        if probe_id:
+            probe_id = validate_simple_token(probe_id, "probe_id")
+        extra_args = split_cli_args(flash_extra_args, "flash_extra_args")
+
         # 构建west flash命令
         cmd = ["west", "flash"]
 
@@ -65,17 +75,17 @@ def west_flash(
             cmd.extend(["--runner", runner])
         if probe_id:
             cmd.extend(["--probe-id", probe_id])
-        if flash_extra_args:
-            # 将额外参数作为字符串解析并添加
-            extra_args = flash_extra_args.split()
+        if extra_args:
             cmd.extend(extra_args)
 
         # 执行命令
-        process = subprocess.run(cmd, cwd=build_dir, capture_output=True, text=True)
+        process = subprocess.run(cmd, cwd=build_dir, capture_output=True, text=True, check=False)
 
         if process.returncode == 0:
             return {"status": "success", "log": process.stdout, "error": ""}
         else:
             return {"status": "error", "log": process.stdout, "error": process.stderr}
+    except ValidationError as e:
+        return {"status": "error", "log": "", "error": str(e)}
     except Exception as e:
         return {"status": "error", "log": "", "error": f"执行west flash失败: {str(e)}"}

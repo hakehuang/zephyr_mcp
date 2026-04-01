@@ -12,6 +12,14 @@ import subprocess
 import sys
 from typing import Dict, Any, Optional, Union, List
 from src.utils.common_tools import check_tools
+from src.utils.input_validation import (
+    ValidationError,
+    split_cli_args,
+    validate_existing_directory,
+    validate_non_empty_text,
+    validate_simple_token,
+    validate_string_list,
+)
 from src.utils.logging_utils import get_logger, print_to_logger
 
 
@@ -63,11 +71,31 @@ def run_twister(
         debug.append(message)
         print_to_logger(logger, message)
 
+    try:
+        project_dir = validate_existing_directory(project_dir, "project_dir")
+        if platform is not None:
+            platform = validate_simple_token(platform, "platform")
+        tests_list = validate_string_list(tests, "tests")
+        tests_list = [validate_non_empty_text(item, "tests", max_length=512) for item in tests_list]
+        test_cases_list = validate_string_list(test_cases, "test_cases")
+        test_cases_list = [
+            validate_non_empty_text(item, "test_cases", max_length=512)
+            for item in test_cases_list
+        ]
+        extra_args_list = split_cli_args(extra_args, "extra_args")
+    except ValidationError as exc:
+        return {
+            "status": "error",
+            "log": "",
+            "debug": debug,
+            "error": str(exc),
+        }
+
     _dbg(
         "[run_twister] Start twister execution with params: "
-        f"platform={platform}, tests={tests}, test_cases={test_cases}, "
+        f"platform={platform}, tests={tests_list}, test_cases={test_cases_list}, "
         f"enable_slow={enable_slow}, build_only={build_only}, "
-        f"extra_args={extra_args}, project_dir={project_dir}"
+        f"extra_args={extra_args_list}, project_dir={project_dir}"
     )
 
     # 检查twister工具是否可用
@@ -98,17 +126,6 @@ def run_twister(
         twister_cmd = ["twister"]
 
 
-    # 检查项目目录是否存在
-    if not os.path.exists(project_dir):
-        _dbg(f"[run_twister] 项目目录不存在: {project_dir}")
-        return {
-            "status": "error",
-            "log": "",
-            "debug": debug,
-            "error": f"项目目录不存在: {project_dir}",
-        }
-
-
     try:
         # 构建twister命令
         cmd = list(twister_cmd)
@@ -120,24 +137,16 @@ def run_twister(
             _dbg(f"[run_twister] Added platform: {platform}")
 
         # 添加测试路径参数
-        if tests:
-            if isinstance(tests, list):
-                for test in tests:
-                    cmd.extend(["-T", test])
-                    _dbg(f"[run_twister] Added test path: {test}")
-            else:
-                cmd.extend(["-T", tests])
-                _dbg(f"[run_twister] Added test path: {tests}")
+        if tests_list:
+            for test in tests_list:
+                cmd.extend(["-T", test])
+                _dbg(f"[run_twister] Added test path: {test}")
 
         # 添加测试用例参数
-        if test_cases:
-            if isinstance(test_cases, list):
-                for test_case in test_cases:
-                    cmd.extend(["-s", test_case])
-                    _dbg(f"[run_twister] Added test case: {test_case}")
-            else:
-                cmd.extend(["-s", test_cases])
-                _dbg(f"[run_twister] Added test case: {test_cases}")
+        if test_cases_list:
+            for test_case in test_cases_list:
+                cmd.extend(["-s", test_case])
+                _dbg(f"[run_twister] Added test case: {test_case}")
 
         # 添加其他可选参数
         if enable_slow:
@@ -148,9 +157,7 @@ def run_twister(
             _dbg("[run_twister] Build only mode enabled")
 
         # 添加额外参数
-        if extra_args:
-            # 将额外参数作为字符串解析并添加
-            extra_args_list = extra_args.split()
+        if extra_args_list:
             cmd.extend(extra_args_list)
             _dbg(f"[run_twister] Added extra args: {extra_args_list}")
 

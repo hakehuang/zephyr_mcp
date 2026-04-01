@@ -854,13 +854,24 @@ def _check_windows_dependencies() -> Dict[str, Any]:
             logger.debug("Could not reconfigure stderr to UTF-8: %s", e)
 
         # Install dependencies using winget
-        install_cmd = (
-            "winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf "
-            "Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip -e --accept-package-agreements --accept-source-agreements"
-        )
+        install_cmd = [
+            "winget",
+            "install",
+            "Kitware.CMake",
+            "Ninja-build.Ninja",
+            "oss-winget.gperf",
+            "Python.Python.3.12",
+            "Git.Git",
+            "oss-winget.dtc",
+            "wget",
+            "7zip.7zip",
+            "-e",
+            "--accept-package-agreements",
+            "--accept-source-agreements",
+        ]
         try:
             logger.info("Installing dependencies with winget...")
-            subprocess.run(install_cmd, shell=True, check=True)
+            subprocess.run(install_cmd, check=True)
             logger.info("Dependencies installed successfully.")
         except Exception as e:
             logger.warning("Dependency installation failed: %s", e)

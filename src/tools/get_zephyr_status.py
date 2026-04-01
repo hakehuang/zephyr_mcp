@@ -9,11 +9,13 @@ from typing import Dict, Any
 import os
 import subprocess
 from src.utils.common_tools import check_tools
+from src.utils.input_validation import ValidationError, validate_existing_directory
 from src.utils.logging_utils import get_logger
 
 
 def _is_git_repo(path: str) -> bool:
     try:
+        path = validate_existing_directory(path, "path")
         process = subprocess.run(
             ["git", "rev-parse", "--is-inside-work-tree"],
             cwd=path,
@@ -22,7 +24,7 @@ def _is_git_repo(path: str) -> bool:
             check=False,
         )
         return process.returncode == 0
-    except (OSError, subprocess.SubprocessError):
+    except (ValidationError, OSError, subprocess.SubprocessError):
         return False
 
 
@@ -80,11 +82,11 @@ def get_zephyr_status(project_dir: str) -> Dict[str, Any]:
         logger.error("git tool not installed")
         return {"status": "error", "log": "", "error": "git工具未安装"}
 
-    # Check if project directory exists
-    # 检查项目目录是否存在
-    if not os.path.exists(project_dir):
-        logger.error("Project directory does not exist: %s", project_dir)
-        return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
+    try:
+        project_dir = validate_existing_directory(project_dir, "project_dir")
+    except ValidationError as exc:
+        logger.error("Invalid project directory: %s", exc)
+        return {"status": "error", "log": "", "error": str(exc)}
 
     # Resolve which directory to treat as the Git repo.
     # For west workspaces, the root may not be a Git repo.

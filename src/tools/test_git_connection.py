@@ -5,10 +5,65 @@ Function Description: Test Git connection with provided credentials
 功能描述: 使用提供的凭据测试Git连接
 """
 
+from __future__ import annotations
+
 import os
+import stat
 import subprocess
+import tempfile
+from pathlib import Path
 from typing import Dict, Any
+from urllib.parse import urlparse
+
 from src.utils.common_tools import check_tools
+from src.utils.input_validation import (
+    ValidationError,
+    validate_existing_directory,
+    validate_non_empty_text,
+    validate_repo_url,
+)
+
+
+GIT_AUTH_HOSTS = {"github.com", "api.github.com"}
+
+
+def _create_askpass_script(username: str, password: str) -> tuple[str, dict[str, str]]:
+    env = os.environ.copy()
+    env["ZEPHYR_MCP_GIT_USERNAME"] = username
+    env["ZEPHYR_MCP_GIT_PASSWORD"] = password
+    env["GIT_TERMINAL_PROMPT"] = "0"
+
+    suffix = ".bat" if os.name == "nt" else ".sh"
+    fd, script_path = tempfile.mkstemp(prefix="zephyr_mcp_git_askpass_", suffix=suffix)
+    os.close(fd)
+
+    if os.name == "nt":
+        script = (
+            "@echo off\n"
+            "set prompt=%~1\n"
+            "echo %prompt% | findstr /I \"username\" >nul && (\n"
+            "  echo %ZEPHYR_MCP_GIT_USERNAME%\n"
+            ") || (\n"
+            "  echo %ZEPHYR_MCP_GIT_PASSWORD%\n"
+            ")\n"
+        )
+    else:
+        script = (
+            "#!/bin/sh\n"
+            "case \"$1\" in\n"
+            "  *Username*|*username*) printf '%s\\n' \"$ZEPHYR_MCP_GIT_USERNAME\" ;;\n"
+            "  *) printf '%s\\n' \"$ZEPHYR_MCP_GIT_PASSWORD\" ;;\n"
+            "esac\n"
+        )
+
+    Path(script_path).write_text(script, encoding="utf-8")
+    if os.name != "nt":
+        os.chmod(script_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+    env["GIT_ASKPASS"] = script_path
+    env["SSH_ASKPASS"] = script_path
+    return script_path, env
+
 
 
 def test_git_connection(
@@ -20,80 +75,60 @@ def test_git_connection(
     """
     Function Description: Test Git connection with provided credentials
     功能描述: 使用提供的凭据测试Git连接
-
-    Parameters:
-    参数说明:
-    - repo_url (str): Required. Git repository URL to test
-    - repo_url (str): 必须。要测试的Git仓库地址
-    - username (Optional[str]): Optional. Git username for authentication
-    - username (Optional[str]): 可选。Git认证用户名
-    - password (Optional[str]): Optional. Git password for authentication
-    - password (Optional[str]): 可选。Git认证密码
-    - project_dir (Optional[str]): Optional. Project directory for testing
-    - project_dir (Optional[str]): 可选。项目目录，用于测试
-
-    Returns:
-    返回值:
-    - Dict[str, Any]: Contains status, connection test results and error information
-    - Dict[str, Any]: 包含状态、连接测试结果和错误信息
-
-    Exception Handling:
-    异常处理:
-    - Tool detection failure or command execution exception will be reflected in the returned error information
-    - 工具检测失败或命令执行异常会体现在返回的错误信息中
     """
-    # 检查git工具是否安装
     tools_status = check_tools(["git"])
     if not tools_status.get("git", False):
         return {"status": "error", "log": "", "error": "git工具未安装"}
 
-    # 检查项目目录（如果指定了）
-    if project_dir is not None and not os.path.exists(project_dir):
-        return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
+    askpass_script: str | None = None
+    try:
+        repo_url = validate_repo_url(repo_url, "repo_url")
+        if project_dir is not None:
+            project_dir = validate_existing_directory(project_dir, "project_dir")
+        if username is not None:
+            username = validate_non_empty_text(username, "username", max_length=256)
+        if password is not None:
+            password = validate_non_empty_text(password, "password", max_length=512)
+    except ValidationError as exc:
+        return {"status": "error", "log": "", "error": str(exc), "connection_test_passed": False}
 
-    # 准备命令
-    cmd = ["git", "ls-remote", repo_url, "HEAD"]
-    cwd = project_dir if project_dir is not None else None
-
-    # 准备环境变量
     env = os.environ.copy()
+    env["GIT_TERMINAL_PROMPT"] = "0"
 
-    # 如果提供了凭据，构建带有凭据的URL
-    # 注意：这只是一个简单的测试方法，在实际生产环境中应使用更安全的凭据处理方式
-    test_url = repo_url
-    if username and password:
-        # 解析URL以添加凭据
-        try:
-            from urllib.parse import urlparse, urlunparse
+    if username or password:
+        if not (username and password):
+            return {
+                "status": "error",
+                "log": "",
+                "error": "username 和 password 必须同时提供",
+                "connection_test_passed": False,
+            }
 
-            parsed = urlparse(repo_url)
-            netloc = f"{username}:{password}@{parsed.netloc}"
-            test_url = urlunparse(
-                (
-                    parsed.scheme,
-                    netloc,
-                    parsed.path,
-                    parsed.params,
-                    parsed.query,
-                    parsed.fragment,
-                )
-            )
-            cmd[2] = test_url  # 更新命令中的URL
-        except ImportError:
-            # 如果urllib.parse不可用（Python 2.x），则使用简单方法
-            if "://" in repo_url:
-                scheme, rest = repo_url.split("://", 1)
-                test_url = f"{scheme}://{username}:{password}@{rest}"
-                cmd[2] = test_url
+        parsed = urlparse(repo_url)
+        if parsed.scheme in {"http", "https"} and parsed.hostname not in GIT_AUTH_HOSTS:
+            return {
+                "status": "error",
+                "log": "",
+                "error": "出于安全考虑，仅支持为 GitHub HTTPS 地址提供显式凭据测试",
+                "connection_test_passed": False,
+            }
+
+        askpass_script, env = _create_askpass_script(username, password)
+
+    cwd = project_dir or None
+    cmd = ["git", "ls-remote", repo_url, "HEAD"]
 
     try:
-        # 执行git ls-remote命令
         process = subprocess.run(
-            cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=30
-        )  # 设置超时以防止无限等待
-
+            cmd,
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
         if process.returncode == 0:
-            # 成功连接
             return {
                 "status": "success",
                 "log": f"成功连接到Git仓库: {repo_url}",
@@ -101,15 +136,14 @@ def test_git_connection(
                 "connection_test_passed": True,
                 "output_sample": process.stdout[:200] if process.stdout else "",
             }
-        else:
-            # 连接失败
-            error_msg = process.stderr.strip() if process.stderr else "未知错误"
-            return {
-                "status": "error",
-                "log": "",
-                "error": f"连接Git仓库失败: {error_msg}",
-                "connection_test_passed": False,
-            }
+
+        error_msg = process.stderr.strip() if process.stderr else "未知错误"
+        return {
+            "status": "error",
+            "log": "",
+            "error": f"连接Git仓库失败: {error_msg}",
+            "connection_test_passed": False,
+        }
     except subprocess.TimeoutExpired:
         return {
             "status": "error",
@@ -124,3 +158,9 @@ def test_git_connection(
             "error": f"测试Git连接时发生错误: {str(e)}",
             "connection_test_passed": False,
         }
+    finally:
+        if askpass_script:
+            try:
+                os.remove(askpass_script)
+            except OSError:
+                pass

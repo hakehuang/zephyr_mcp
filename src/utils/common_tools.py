@@ -11,6 +11,12 @@ import os
 import time
 import random
 
+from src.utils.input_validation import (
+    ValidationError,
+    validate_existing_directory,
+    validate_git_remote_name,
+    validate_non_empty_text,
+)
 from src.utils.venv_manager import activate_venv
 
 
@@ -55,10 +61,17 @@ def is_git_repository(project_dir: str) -> bool:
         bool: 如果是Git仓库返回True，否则返回False
     """
     try:
+        validated_dir = validate_existing_directory(project_dir, "project_dir")
         cmd = ["git", "rev-parse", "--is-inside-work-tree"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
+        process = subprocess.run(
+            cmd,
+            cwd=validated_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         return process.returncode == 0
-    except Exception:
+    except (ValidationError, OSError, subprocess.SubprocessError):
         return False
 
 
@@ -76,10 +89,17 @@ def get_current_branch(project_dir: str) -> Optional[str]:
         Optional[str]: 当前分支名称，如果无法获取返回None
     """
     try:
+        validated_dir = validate_existing_directory(project_dir, "project_dir")
         cmd = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
+        process = subprocess.run(
+            cmd,
+            cwd=validated_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         return process.stdout.strip() if process.returncode == 0 else None
-    except Exception:
+    except (ValidationError, OSError, subprocess.SubprocessError):
         return None
 
 
@@ -103,11 +123,19 @@ def is_branch_exists(
         bool: 如果分支存在返回True，否则返回False
     """
     try:
+        validated_dir = validate_existing_directory(project_dir, "project_dir")
+        validated_branch = validate_non_empty_text(branch_name, "branch_name", max_length=256)
+        validated_remote = validate_git_remote_name(remote, "remote")
+
         # Check local branch
         # 检查本地分支
-        local_cmd = ["git", "show-ref", "--verify", f"refs/heads/{branch_name}"]
+        local_cmd = ["git", "show-ref", "--verify", f"refs/heads/{validated_branch}"]
         local_process = subprocess.run(
-            local_cmd, cwd=project_dir, capture_output=True, text=True
+            local_cmd,
+            cwd=validated_dir,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         if local_process.returncode == 0:
             return True
@@ -118,13 +146,17 @@ def is_branch_exists(
             "git",
             "show-ref",
             "--verify",
-            f"refs/remotes/{remote}/{branch_name}",
+            f"refs/remotes/{validated_remote}/{validated_branch}",
         ]
         remote_process = subprocess.run(
-            remote_cmd, cwd=project_dir, capture_output=True, text=True
+            remote_cmd,
+            cwd=validated_dir,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         return remote_process.returncode == 0
-    except Exception:
+    except (ValidationError, OSError, subprocess.SubprocessError):
         return False
 
 

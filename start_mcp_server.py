@@ -27,14 +27,24 @@ def main():
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
         # Install dependencies using winget
-        install_cmd = (
-            "winget install Kitware.CMake Ninja-build.Ninja oss-winget.gperf "
-            "Python.Python.3.12 Git.Git oss-winget.dtc wget 7zip.7zip "
-            "-e --accept-package-agreements --accept-source-agreements"
-        )
+        install_cmd = [
+            "winget",
+            "install",
+            "Kitware.CMake",
+            "Ninja-build.Ninja",
+            "oss-winget.gperf",
+            "Python.Python.3.12",
+            "Git.Git",
+            "oss-winget.dtc",
+            "wget",
+            "7zip.7zip",
+            "-e",
+            "--accept-package-agreements",
+            "--accept-source-agreements",
+        ]
         try:
             print("Installing dependencies with winget...")
-            subprocess.run(install_cmd, shell=True, check=True)
+            subprocess.run(install_cmd, check=True)
             print("Dependencies installed successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Dependency installation failed (exit code {e.returncode}): {e}")

@@ -5,17 +5,27 @@ File Description: Git rebase tool for Zephyr project
 文件描述: Zephyr项目的Git rebase工具
 """
 
-import os
 import subprocess
 from typing import Dict, Any, Optional, List
 
-from src.utils.common_tools import check_tools
+from src.utils.common_tools import check_tools, is_git_repository
+from src.utils.input_validation import (
+    ValidationError,
+    validate_existing_directory,
+    validate_git_ref,
+)
 from src.utils.internal_helpers import _git_rebase_internal
 
 
 def _run_git_cmd(project_dir: str, args: List[str]) -> subprocess.CompletedProcess:
     """Run a git command in `project_dir` and return the CompletedProcess."""
-    return subprocess.run(["git", *args], cwd=project_dir, capture_output=True, text=True)
+    return subprocess.run(
+        ["git", *args],
+        cwd=project_dir,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
 
 def _error(msg: str) -> Dict[str, Any]:
@@ -32,19 +42,17 @@ def _check_git_installed() -> Optional[Dict[str, Any]]:
 
 def _check_project_dir_exists(project_dir: str) -> Optional[Dict[str, Any]]:
     """Return an error response dict if directory does not exist, else None."""
-    if not os.path.exists(project_dir):
-        return _error(f"项目目录不存在: {project_dir}")
+    try:
+        validate_existing_directory(project_dir, "project_dir")
+    except ValidationError as exc:
+        return _error(str(exc))
     return None
 
 
 def _check_is_git_repo(project_dir: str) -> Optional[Dict[str, Any]]:
     """Return an error response dict if directory is not a git repo, else None."""
-    try:
-        process = _run_git_cmd(project_dir, ["rev-parse", "--is-inside-work-tree"])
-        if process.returncode != 0:
-            return _error(f"指定目录不是Git仓库: {project_dir}")
-    except Exception as e:
-        return _error(f"检查Git仓库失败: {str(e)}")
+    if not is_git_repository(project_dir):
+        return _error(f"指定目录不是Git仓库: {project_dir}")
     return None
 
 
@@ -134,6 +142,14 @@ def git_rebase(
     err = _check_git_installed()
     if err:
         return err
+
+    try:
+        project_dir = validate_existing_directory(project_dir, "project_dir")
+        source_branch = validate_git_ref(source_branch, "source_branch")
+        if onto_branch:
+            onto_branch = validate_git_ref(onto_branch, "onto_branch")
+    except ValidationError as exc:
+        return _error(str(exc))
 
     err = _check_project_dir_exists(project_dir)
     if err:

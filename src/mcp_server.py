@@ -79,132 +79,135 @@ def _wrap_tool_with_venv_step(func):
 
     def _mask_param(param_name: str, value: Any) -> Any:
         name = (param_name or "").lower()
-        if any(s in name for s in ("password", "passwd", "token", "secret", "apikey", "api_key", "pat", "private_key")):
+        if any(
+            s in name
+            for s in (
+                "password",
+                "passwd",
+                "token",
+                "secret",
+                "apikey",
+                "api_key",
+                "pat",
+                "private_key",
+            )
+        ):
             return "<redacted>"
         return value
 
     sig = inspect.signature(func)
     for p in sig.parameters.values():
         if p.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
-            # fastmcp doesn't support *args/**kwargs tools anyway; fail early.
             raise TypeError("Functions with *args/**kwargs are not supported as tools")
 
-    # Build a signature string without annotations (avoid runtime annotation evaluation).
-    param_chunks: list[str] = []
-    saw_kwonly = False
-    for p in sig.parameters.values():
-        if p.kind == inspect.Parameter.KEYWORD_ONLY and not saw_kwonly:
-            param_chunks.append("*")
-            saw_kwonly = True
-
-        if p.default is inspect.Parameter.empty:
-            param_chunks.append(p.name)
-        else:
-            param_chunks.append(f"{p.name}={repr(p.default)}")
-
-    params_src = ", ".join(param_chunks)
-
-    # Build call argument list.
-    call_chunks: list[str] = []
-    for p in sig.parameters.values():
-        if p.kind == inspect.Parameter.KEYWORD_ONLY:
-            call_chunks.append(f"{p.name}={p.name}")
-        else:
-            call_chunks.append(p.name)
-    call_src = ", ".join(call_chunks)
-
+    strict_stdio = os.getenv("ZEPHYR_MCP_STRICT_STDIO", "1") != "0"
     wrapped_name = getattr(func, "__name__", "wrapped_tool")
 
-    strict_stdio = os.getenv("ZEPHYR_MCP_STRICT_STDIO", "1") != "0"
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
 
-    # Build a masked params dict expression like:
-    # {'a': _mask_param('a', a), 'b': _mask_param('b', b)}
-    masked_param_items: list[str] = []
-    for p in sig.parameters.values():
-        masked_param_items.append(f"'{p.name}': _mask_param('{p.name}', {p.name})")
-    masked_params_expr = "{" + ", ".join(masked_param_items) + "}"
+        debug = []
+        process_feedback = []
 
-    src = (
-        f"def {wrapped_name}({params_src}):\n"
-        f"    debug = []\n"
-        f"    process_feedback = []\n"
-        f"    def _pf(level, message, **extra):\n"
-        f"        event = {{'ts': time.time(), 'level': str(level), 'message': str(message), 'tool': '{wrapped_name}'}}\n"
-        f"        if extra:\n"
-        f"            event.update(extra)\n"
-        f"        process_feedback.append(event)\n"
-        f"    debug.append('INFO mcp_server: Invoking tool {wrapped_name}')\n"
-        f"    _pf('info', 'Invoking tool')\n"
-        f"    debug.append('INFO mcp_server: Params: ' + repr({masked_params_expr}))\n"
-        f"    debug.append('INFO mcp_server: Strict stdio=' + str(STRICT_STDIO))\n"
-        f"    started = time.time()\n"
-        f"    with capture_debug_logs(debug):\n"
-        f"        tool_logger = get_logger('tools.' + '{wrapped_name}')\n"
-        f"        _old_print = builtins.print\n"
-        f"        def _tool_print(*args, **kwargs):\n"
-        f"            return print_to_logger(tool_logger, *args, **kwargs)\n"
-        f"        builtins.print = _tool_print\n"
-        f"        try:\n"
-        f"            with redirect_stdio_to_logger(tool_logger, strict=STRICT_STDIO):\n"
-        f"                ok, err_en, err_zh = _ensure_venv_ready_for_tool()\n"
-        f"                if not ok:\n"
-        f"                    debug.append('ERROR mcp_server: ' + err_en)\n"
-        f"                    _pf('error', err_en, chinese_error=err_zh)\n"
-        f"                    return {{'status': 'error', 'success': False, 'error': err_en, 'chinese_error': err_zh, 'debug': debug, 'process_feedback': process_feedback}}\n"
-        f"                try:\n"
-        f"                    _pf('info', 'Tool execution started')\n"
-        f"                    result = _orig({call_src})\n"
-        f"                    _pf('info', 'Tool execution finished')\n"
-        f"                except Exception as e:\n"
-        f"                    debug.append('ERROR mcp_server: Tool raised exception: ' + str(e))\n"
-        f"                    _pf('error', str(e), exception_type=type(e).__name__)\n"
-        f"                    return {{'status': 'error', 'success': False, 'error': str(e), 'exception_type': type(e).__name__, 'debug': debug, 'process_feedback': process_feedback}}\n"
-        f"        finally:\n"
-        f"            builtins.print = _old_print\n"
-        f"    debug.append('INFO mcp_server: Finished in ' + str(round(time.time() - started, 3)) + 's')\n"
-        f"    _pf('info', 'Finished', duration_s=round(time.time() - started, 3))\n"
-        f"    if isinstance(result, dict):\n"
-        f"        existing = result.get('debug')\n"
-        f"        if isinstance(existing, list):\n"
-        f"            merged = []\n"
-        f"            seen = set()\n"
-        f"            for item in existing + debug:\n"
-        f"                key = str(item)\n"
-        f"                if key in seen:\n"
-        f"                    continue\n"
-        f"                seen.add(key)\n"
-        f"                merged.append(item)\n"
-        f"            result['debug'] = merged\n"
-        f"        else:\n"
-        f"            result['debug'] = debug\n"
-        f"        existing_pf = result.get('process_feedback')\n"
-        f"        if isinstance(existing_pf, list):\n"
-        f"            result['process_feedback'] = existing_pf + process_feedback\n"
-        f"        else:\n"
-        f"            result['process_feedback'] = process_feedback\n"
-        f"        return result\n"
-        f"    return {{'status': 'success', 'success': True, 'result': result, 'debug': debug, 'process_feedback': process_feedback}}\n"
-    )
+        def _pf(level, message, **extra):
+            event = {
+                "ts": time.time(),
+                "level": str(level),
+                "message": str(message),
+                "tool": wrapped_name,
+            }
+            if extra:
+                event.update(extra)
+            process_feedback.append(event)
 
-    ns: dict[str, Any] = {
-        "_orig": func,
-        "contextlib": contextlib,
-        "sys": sys,
-        "os": os,
-        "_ensure_venv_ready_for_tool": _ensure_venv_ready_for_tool,
-        "capture_debug_logs": capture_debug_logs,
-        "get_logger": get_logger,
-        "print_to_logger": print_to_logger,
-        "StdioLoggerWriter": StdioLoggerWriter,
-        "redirect_stdio_to_logger": redirect_stdio_to_logger,
-        "builtins": __import__("builtins"),
-        "time": time,
-        "_mask_param": _mask_param,
-        "STRICT_STDIO": strict_stdio,
-    }
-    exec(src, ns)  # noqa: S102
-    wrapped = ns[wrapped_name]
-    wrapped = functools.wraps(func)(wrapped)
+        masked_params = {
+            name: _mask_param(name, value)
+            for name, value in bound.arguments.items()
+        }
+
+        debug.append(f"INFO mcp_server: Invoking tool {wrapped_name}")
+        debug.append("INFO mcp_server: Params: " + repr(masked_params))
+        debug.append("INFO mcp_server: Strict stdio=" + str(strict_stdio))
+        _pf("info", "Invoking tool")
+        started = time.time()
+
+        with capture_debug_logs(debug):
+            tool_logger = get_logger("tools." + wrapped_name)
+            old_print = __import__("builtins").print
+
+            def _tool_print(*print_args, **print_kwargs):
+                return print_to_logger(tool_logger, *print_args, **print_kwargs)
+
+            __import__("builtins").print = _tool_print
+            try:
+                with redirect_stdio_to_logger(tool_logger, strict=strict_stdio):
+                    ok, err_en, err_zh = _ensure_venv_ready_for_tool()
+                    if not ok:
+                        debug.append("ERROR mcp_server: " + err_en)
+                        _pf("error", err_en, chinese_error=err_zh)
+                        return {
+                            "status": "error",
+                            "success": False,
+                            "error": err_en,
+                            "chinese_error": err_zh,
+                            "debug": debug,
+                            "process_feedback": process_feedback,
+                        }
+                    try:
+                        _pf("info", "Tool execution started")
+                        result = func(*bound.args, **bound.kwargs)
+                        _pf("info", "Tool execution finished")
+                    except Exception as e:
+                        debug.append("ERROR mcp_server: Tool raised exception: " + str(e))
+                        _pf("error", str(e), exception_type=type(e).__name__)
+                        return {
+                            "status": "error",
+                            "success": False,
+                            "error": str(e),
+                            "exception_type": type(e).__name__,
+                            "debug": debug,
+                            "process_feedback": process_feedback,
+                        }
+            finally:
+                __import__("builtins").print = old_print
+
+        debug.append(
+            "INFO mcp_server: Finished in " + str(round(time.time() - started, 3)) + "s"
+        )
+        _pf("info", "Finished", duration_s=round(time.time() - started, 3))
+        if isinstance(result, dict):
+            existing = result.get("debug")
+            if isinstance(existing, list):
+                merged = []
+                seen = set()
+                for item in existing + debug:
+                    key = str(item)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    merged.append(item)
+                result["debug"] = merged
+            else:
+                result["debug"] = debug
+
+            existing_pf = result.get("process_feedback")
+            if isinstance(existing_pf, list):
+                result["process_feedback"] = existing_pf + process_feedback
+            else:
+                result["process_feedback"] = process_feedback
+            return result
+
+        return {
+            "status": "success",
+            "success": True,
+            "result": result,
+            "debug": debug,
+            "process_feedback": process_feedback,
+        }
+
+    wrapped.__signature__ = sig
     return wrapped
 
 # Import MCP related libraries

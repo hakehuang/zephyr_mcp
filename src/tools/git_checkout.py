@@ -5,10 +5,13 @@ File Description: Git checkout tool for Zephyr project
 文件描述: Zephyr项目的Git checkout工具
 """
 
-import os
-import subprocess
 from typing import Dict, Any
-from src.utils.common_tools import check_tools
+from src.utils.common_tools import check_tools, is_git_repository
+from src.utils.input_validation import (
+    ValidationError,
+    validate_existing_directory,
+    validate_git_ref,
+)
 from src.utils.internal_helpers import _git_checkout_internal
 
 
@@ -40,24 +43,20 @@ def git_checkout(project_dir: str, ref: str) -> Dict[str, Any]:
     if not tools_status.get("git", False):
         return {"status": "error", "log": "", "error": "git工具未安装"}
 
-    # Check if project directory exists
-    # 检查项目目录是否存在
-    if not os.path.exists(project_dir):
-        return {"status": "error", "log": "", "error": f"项目目录不存在: {project_dir}"}
+    try:
+        project_dir = validate_existing_directory(project_dir, "project_dir")
+        ref = validate_git_ref(ref, "ref")
+    except ValidationError as exc:
+        return {"status": "error", "log": "", "error": str(exc)}
 
     # Check if it's a Git repository
     # 检查是否是Git仓库
-    try:
-        cmd = ["git", "rev-parse", "--is-inside-work-tree"]
-        process = subprocess.run(cmd, cwd=project_dir, capture_output=True, text=True)
-        if process.returncode != 0:
-            return {
-                "status": "error",
-                "log": "",
-                "error": f"指定目录不是Git仓库: {project_dir}",
-            }
-    except Exception as e:
-        return {"status": "error", "log": "", "error": f"检查Git仓库失败: {str(e)}"}
+    if not is_git_repository(project_dir):
+        return {
+            "status": "error",
+            "log": "",
+            "error": f"指定目录不是Git仓库: {project_dir}",
+        }
 
     # Call internal function to execute checkout
     # 调用内部函数执行checkout
