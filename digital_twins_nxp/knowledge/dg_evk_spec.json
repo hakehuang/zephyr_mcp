@@ -1,0 +1,50 @@
+{
+  "twin_id": "nxp.dg_evk",
+  "display_name": "DG-EVK",
+  "board_name": "dg_evk",
+  "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\dg_evk",
+  "notes_append": [
+    "Customized board derived from mimxrt1170_evk.",
+    "Use this seed as the starting point for a Zephyr custom board named dg_evk.",
+    "Preserves the existing lab validation profile for mimxrt1170-class hardware unless hardware wiring changes."
+  ],
+  "customization": {
+    "board_label": "dg_evk",
+    "base_reference_board": "mimxrt1170_evk",
+    "strategy": "inherit-and-customize",
+    "compatible_targets": [
+      "dg_evk@A/mimxrt1176/cm4",
+      "dg_evk@B/mimxrt1176/cm4",
+      "dg_evk@A/mimxrt1176/cm7",
+      "dg_evk@B/mimxrt1176/cm7"
+    ],
+    "zephyr_board_porting_tasks": [
+      "copy mimxrt1170_evk board directory to dg_evk",
+      "rename DTS, YAML, and defconfig files to dg_evk naming",
+      "update board.yml and target identifiers",
+      "adjust pinctrl, flash, ethernet, display, and connector mappings",
+      "validate build and flash on real hardware"
+    ],
+    "assumptions": [
+      "SoC remains mimxrt1176.",
+      "Revision model remains A/B unless changed later.",
+      "Initial capability set matches mimxrt1170_evk until custom hardware deltas are defined."
+    ]
+  },
+  "overrides": {
+    "classification": {
+      "form_factor": "custom_evk"
+    },
+    "development": {
+      "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\dg_evk"
+    },
+    "hardware": {
+      "targets": [
+        "dg_evk@A/mimxrt1176/cm4",
+        "dg_evk@B/mimxrt1176/cm4",
+        "dg_evk@A/mimxrt1176/cm7",
+        "dg_evk@B/mimxrt1176/cm7"
+      ]
+    }
+  }
+}

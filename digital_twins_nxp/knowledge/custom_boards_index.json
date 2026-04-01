@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-04-01T04:39:05.979331+00:00",
+  "custom_boards": {
+    "dg_evk": {
+      "base_board": "mimxrt1170_evk",
+      "path": "digital_twins_nxp\\knowledge\\twins\\dg_evk.json"
+    }
+  }
+}

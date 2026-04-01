@@ -1,0 +1,4636 @@
+{
+  "generated_at": "2026-04-01T04:21:55.833404+00:00",
+  "source_root": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp",
+  "board_count": 81,
+  "seeds": {
+    "frdm_imx91": {
+      "twin_id": "nxp.frdm_imx91",
+      "board": "frdm_imx91",
+      "display_name": "FRDM-IMX91",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_imx91/mimx9131"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "can",
+        "counter",
+        "net",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_imx91"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_imx93": {
+      "twin_id": "nxp.frdm_imx93",
+      "board": "frdm_imx93",
+      "display_name": "FRDM-IMX93",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_imx93/mimx9352/a55",
+          "frdm_imx93/mimx9352/m33",
+          "frdm_imx93/mimx9352/m33/ddr"
+        ],
+        "max_ram_kib": 4096,
+        "max_flash_kib": 128
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "gpio",
+        "i2c",
+        "net",
+        "pwm",
+        "spi",
+        "uart",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_imx93"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_imxrt1186": {
+      "twin_id": "nxp.frdm_imxrt1186",
+      "board": "frdm_imxrt1186",
+      "display_name": "FRDM-iMXRT1186",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1186"
+        ],
+        "variants": [
+          "extmem"
+        ],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_imxrt1186/mimxrt1186/cm33",
+          "frdm_imxrt1186/mimxrt1186/cm7",
+          "frdm_imxrt1186/mimxrt1186/cm7/extmem"
+        ],
+        "max_ram_kib": 8192,
+        "max_flash_kib": 16384
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "flash",
+        "gpio",
+        "i2c",
+        "mbox",
+        "netif:eth",
+        "spi",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "xtools",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_imxrt1186"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_k22f": {
+      "twin_id": "nxp.frdm_k22f",
+      "board": "frdm_k22f",
+      "display_name": "FRDM-K22F",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mk22f51212"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_k22f"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "dac",
+        "flash",
+        "gpio",
+        "i2c",
+        "nvs",
+        "pwm",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_k22f"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_k32l2b3": {
+      "twin_id": "nxp.frdm_k32l2b3",
+      "board": "frdm_k32l2b3",
+      "display_name": "FRDM-K32L2B3",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "k32l2b31a"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_k32l2b3"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "button",
+        "flash",
+        "gpio",
+        "i2c",
+        "led",
+        "lpuart",
+        "pinctrl",
+        "sram"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_k32l2b3"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_k64f": {
+      "twin_id": "nxp.frdm_k64f",
+      "board": "frdm_k64f",
+      "display_name": "FRDM-K64F",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mk64f12"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_k64f"
+        ],
+        "max_ram_kib": 192,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "nvs",
+        "pwm",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_k64f"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_k82f": {
+      "twin_id": "nxp.frdm_k82f",
+      "board": "frdm_k82f",
+      "display_name": "FRDM-K82F",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mk82f25615"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_k82f"
+        ],
+        "max_ram_kib": 192,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "nvs",
+        "pwm",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_k82f"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_ke15z": {
+      "twin_id": "nxp.frdm_ke15z",
+      "board": "frdm_ke15z",
+      "display_name": "FRDM-KE15Z",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mke15z7"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_ke15z"
+        ],
+        "max_ram_kib": 24,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "adc",
+        "flash",
+        "gpio",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_ke15z"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_ke16z": {
+      "twin_id": "nxp.frdm_ke16z",
+      "board": "frdm_ke16z",
+      "display_name": "FRDM-KE16Z",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mke16z4"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_ke16z"
+        ],
+        "max_ram_kib": 8,
+        "max_flash_kib": 64
+      },
+      "capabilities": [
+        "flash",
+        "gpio",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_ke16z"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_ke17z": {
+      "twin_id": "nxp.frdm_ke17z",
+      "board": "frdm_ke17z",
+      "display_name": "FRDM-KE17Z",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mke17z7"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_ke17z"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_ke17z"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_ke17z512": {
+      "twin_id": "nxp.frdm_ke17z512",
+      "board": "frdm_ke17z512",
+      "display_name": "FRDM-KE17Z512",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mke17z9"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_ke17z512"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_ke17z512"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_kl25z": {
+      "twin_id": "nxp.frdm_kl25z",
+      "board": "frdm_kl25z",
+      "display_name": "FRDM-KL25Z",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mkl25z4"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_kl25z"
+        ],
+        "max_ram_kib": 16,
+        "max_flash_kib": 128
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "flash",
+        "gpio",
+        "i2c",
+        "usb_device"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_kl25z"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_kw41z": {
+      "twin_id": "nxp.frdm_kw41z",
+      "board": "frdm_kw41z",
+      "display_name": "FRDM-KW41Z",
+      "classification": {
+        "vendor": "nxp",
+        "family": "other",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mkw41z4"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_kw41z"
+        ],
+        "max_ram_kib": 96,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "counter",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_kw41z"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxa153": {
+      "twin_id": "nxp.frdm_mcxa153",
+      "board": "frdm_mcxa153",
+      "display_name": "FRDM-MCXA153",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxa153"
+        ],
+        "max_ram_kib": 24,
+        "max_flash_kib": 128
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i3c",
+        "pwm",
+        "spi",
+        "uart",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxa153"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxa156": {
+      "twin_id": "nxp.frdm_mcxa156",
+      "board": "frdm_mcxa156",
+      "display_name": "FRDM-MCXA156",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxa156"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i3c",
+        "pwm",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxa156"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxa344": {
+      "twin_id": "nxp.frdm_mcxa344",
+      "board": "frdm_mcxa344",
+      "display_name": "FRDM-MCXA344",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxa344"
+        ],
+        "max_ram_kib": 48,
+        "max_flash_kib": 244
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "counter",
+        "flash",
+        "gpio",
+        "i2c",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxa344"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxa577": {
+      "twin_id": "nxp.frdm_mcxa577",
+      "board": "frdm_mcxa577",
+      "display_name": "FRDM-MCXA577",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxa577",
+          "frdm_mcxa577/mcxa577/ns",
+          "frdm_mcxa577/mcxa577/t1s"
+        ],
+        "max_ram_kib": 640,
+        "max_flash_kib": 2048
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxa577"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxaxx6": {
+      "twin_id": "nxp.frdm_mcxaxx6",
+      "board": "frdm_mcxaxx6",
+      "display_name": "frdm_mcxaxx6",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxa266",
+          "frdm_mcxa346",
+          "frdm_mcxa366"
+        ],
+        "max_ram_kib": 240,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "counter",
+        "dma",
+        "entropy",
+        "flash",
+        "gpio",
+        "i2c",
+        "i3c",
+        "opamp",
+        "spi",
+        "uart",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxaxx6"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxc242": {
+      "twin_id": "nxp.frdm_mcxc242",
+      "board": "frdm_mcxc242",
+      "display_name": "FRDM-MCXC242",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxc242"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxc242"
+        ],
+        "max_ram_kib": 16,
+        "max_flash_kib": 64
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "uart",
+        "usb_device",
+        "usbd"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxc242"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxc444": {
+      "twin_id": "nxp.frdm_mcxc444",
+      "board": "frdm_mcxc444",
+      "display_name": "FRDM-MCXC444",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxc444"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxc444"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "uart",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxc444"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxe247": {
+      "twin_id": "nxp.frdm_mcxe247",
+      "board": "frdm_mcxe247",
+      "display_name": "FRDM-MCXE247",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxe247"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxe247"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 1536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "comparator",
+        "counter",
+        "dma",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxe247"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxe31b": {
+      "twin_id": "nxp.frdm_mcxe31b",
+      "board": "frdm_mcxe31b",
+      "display_name": "FRDM-MCXE31B",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxe31b"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxe31b"
+        ],
+        "max_ram_kib": 288,
+        "max_flash_kib": 4096
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "dma",
+        "gpio",
+        "rtc",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxe31b"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxl255": {
+      "twin_id": "nxp.frdm_mcxl255",
+      "board": "frdm_mcxl255",
+      "display_name": "FRDM-MCXL255",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxl255/mcxl255/cpu0"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "gpio",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxl255"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxn236": {
+      "twin_id": "nxp.frdm_mcxn236",
+      "board": "frdm_mcxn236",
+      "display_name": "FRDM-MCXN236",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxn236"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "i3c",
+        "pwm",
+        "regulator",
+        "spi",
+        "usbd",
+        "video",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxn236"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxn947": {
+      "twin_id": "nxp.frdm_mcxn947",
+      "board": "frdm_mcxn947",
+      "display_name": "FRDM-MCXN947",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxn947/mcxn947/cpu0",
+          "frdm_mcxn947/mcxn947/cpu0/ns",
+          "frdm_mcxn947/mcxn947/cpu0/qspi",
+          "frdm_mcxn947/mcxn947/cpu1"
+        ],
+        "max_ram_kib": 320,
+        "max_flash_kib": 8192
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "i3c",
+        "netif:eth",
+        "nvs",
+        "pwm",
+        "regulator",
+        "rtc",
+        "sdhc",
+        "spi",
+        "tsi",
+        "usb_device",
+        "usbd",
+        "video",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxn947"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxw23": {
+      "twin_id": "nxp.frdm_mcxw23",
+      "board": "frdm_mcxw23",
+      "display_name": "FRDM-MCXW23",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw236"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxw23"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 1016
+      },
+      "capabilities": [
+        "arduino_gpio",
+        "counter",
+        "dma",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxw23"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxw70": {
+      "twin_id": "nxp.frdm_mcxw70",
+      "board": "frdm_mcxw70",
+      "display_name": "FRDM-MCXW70",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw70ac"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxw70"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 1536
+      },
+      "capabilities": [
+        "flash",
+        "gpio",
+        "pinctrl",
+        "trng",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxw70"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxw71": {
+      "twin_id": "nxp.frdm_mcxw71",
+      "board": "frdm_mcxw71",
+      "display_name": "FRDM-MCXW71",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw716c"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxw71"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "arduino_i2c",
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "flexio",
+        "gpio",
+        "i2c",
+        "netif:openthread",
+        "pinctrl",
+        "pwm",
+        "regulator",
+        "rtc",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxw71"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_mcxw72": {
+      "twin_id": "nxp.frdm_mcxw72",
+      "board": "frdm_mcxw72",
+      "display_name": "FRDM-MCXW72",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw727c"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_mcxw72"
+        ],
+        "max_ram_kib": 264,
+        "max_flash_kib": 2048
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dma",
+        "flexio",
+        "gpio",
+        "i2c",
+        "netif:openthread",
+        "pinctrl",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_mcxw72"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "frdm_rw612": {
+      "twin_id": "nxp.frdm_rw612",
+      "board": "frdm_rw612",
+      "display_name": "FRDM-RW612",
+      "classification": {
+        "vendor": "nxp",
+        "family": "rw61x",
+        "form_factor": "frdm",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "rw612"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "frdm_rw612"
+        ],
+        "max_ram_kib": 960,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "comparator",
+        "counter",
+        "dac",
+        "dma",
+        "entropy",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "i2s",
+        "netif:eth",
+        "netif:openthread",
+        "pwm",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\frdm_rw612"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8mm_evk": {
+      "twin_id": "nxp.imx8mm_evk",
+      "board": "imx8mm_evk",
+      "display_name": "i.MX8MM EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8mm_evk/mimx8mm6/a53",
+          "imx8mm_evk/mimx8mm6/a53/smp",
+          "imx8mm_evk/mimx8mm6/m4"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": 128
+      },
+      "capabilities": [
+        "gpio",
+        "i2c",
+        "net",
+        "smp",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8mm_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8mn_evk": {
+      "twin_id": "nxp.imx8mn_evk",
+      "board": "imx8mn_evk",
+      "display_name": "i.MX8MN EVK (Cortex-A53)",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8mn_evk/mimx8mn6/a53",
+          "imx8mn_evk/mimx8mn6/a53/smp"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "gpio",
+        "i2c",
+        "net",
+        "smp",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8mn_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8mp_evk": {
+      "twin_id": "nxp.imx8mp_evk",
+      "board": "imx8mp_evk",
+      "display_name": "i.MX8MP EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "arm64",
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8mp_evk/mimx8ml8/a53",
+          "imx8mp_evk/mimx8ml8/a53/smp",
+          "imx8mp_evk/mimx8ml8/adsp",
+          "imx8mp_evk/mimx8ml8/m7",
+          "imx8mp_evk/mimx8ml8/m7/ddr"
+        ],
+        "max_ram_kib": 2048,
+        "max_flash_kib": 2048
+      },
+      "capabilities": [
+        "can",
+        "gpio",
+        "i2c",
+        "net",
+        "smp",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "gnuarmemb",
+          "xcc",
+          "xt-clang",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8mp_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8mq_evk": {
+      "twin_id": "nxp.imx8mq_evk",
+      "board": "imx8mq_evk",
+      "display_name": "MIMX8MQ EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8mq_evk/mimx8mq6/m4"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 128
+      },
+      "capabilities": [],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8mq_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8qm_mek": {
+      "twin_id": "nxp.imx8qm_mek",
+      "board": "imx8qm_mek",
+      "display_name": "i.MX 8QuadMax Multisensory Enablement Kit (MEK)",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "mek",
+        "architectures": [
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimx8qm6"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8qm_mek/mimx8qm6/adsp"
+        ],
+        "max_ram_kib": null,
+        "max_flash_kib": null
+      },
+      "capabilities": [],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": false,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8qm_mek"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8qxp_mek": {
+      "twin_id": "nxp.imx8qxp_mek",
+      "board": "imx8qxp_mek",
+      "display_name": "i.MX 8QuadXPlus Multisensory Enablement Kit (MEK)",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "mek",
+        "architectures": [
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimx8qx6"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8qxp_mek/mimx8qx6/adsp"
+        ],
+        "max_ram_kib": null,
+        "max_flash_kib": null
+      },
+      "capabilities": [],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": false,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8qxp_mek"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx8ulp_evk": {
+      "twin_id": "nxp.imx8ulp_evk",
+      "board": "imx8ulp_evk",
+      "display_name": "i.MX 8ULP Evaluation Kit",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimx8ud7"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx8ulp_evk/mimx8ud7/adsp"
+        ],
+        "max_ram_kib": null,
+        "max_flash_kib": null
+      },
+      "capabilities": [],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": false,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx8ulp_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx91_evk": {
+      "twin_id": "nxp.imx91_evk",
+      "board": "imx91_evk",
+      "display_name": "i.MX91 EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx91_evk/mimx9131"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "counter",
+        "gpio",
+        "i2c",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx91_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx91_qsb": {
+      "twin_id": "nxp.imx91_qsb",
+      "board": "imx91_qsb",
+      "display_name": "i.MX91 QSB",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "qsb",
+        "architectures": [
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx91_qsb/mimx9111"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": false,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx91_qsb"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx93_evk": {
+      "twin_id": "nxp.imx93_evk",
+      "board": "imx93_evk",
+      "display_name": "i.MX93 EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx93_evk/mimx9352/a55",
+          "imx93_evk/mimx9352/a55/smp",
+          "imx93_evk/mimx9352/m33",
+          "imx93_evk/mimx9352/m33/ddr"
+        ],
+        "max_ram_kib": 4096,
+        "max_flash_kib": 128
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "flash",
+        "gpio",
+        "i2c",
+        "net",
+        "pwm",
+        "smp",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx93_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx943_evk": {
+      "twin_id": "nxp.imx943_evk",
+      "board": "imx943_evk",
+      "display_name": "i.MX943 EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx943_evk/mimx94398/a55",
+          "imx943_evk/mimx94398/a55/smp",
+          "imx943_evk/mimx94398/m33",
+          "imx943_evk/mimx94398/m33/ddr",
+          "imx943_evk/mimx94398/m7_0",
+          "imx943_evk/mimx94398/m7_1"
+        ],
+        "max_ram_kib": 10240,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "can",
+        "counter",
+        "gpio",
+        "i2c",
+        "i2s",
+        "net",
+        "netif:eth",
+        "pwm",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx943_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx95_evk": {
+      "twin_id": "nxp.imx95_evk",
+      "board": "imx95_evk",
+      "display_name": "i.MX95 EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx95_evk/mimx9596/a55",
+          "imx95_evk/mimx9596/a55/smp",
+          "imx95_evk/mimx9596/m7",
+          "imx95_evk/mimx9596/m7/ddr",
+          "imx95_evk/mimx9596/m7/flash"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "can",
+        "counter",
+        "dma",
+        "i2c",
+        "net",
+        "netif:eth",
+        "pwm",
+        "smp",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx95_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "imx95_evk_15x15": {
+      "twin_id": "nxp.imx95_evk_15x15",
+      "board": "imx95_evk_15x15",
+      "display_name": "i.MX95 15x15 EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "imx",
+        "form_factor": "other",
+        "architectures": [
+          "arm",
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "imx95_evk_15x15/mimx9596/a55",
+          "imx95_evk_15x15/mimx9596/m7"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "counter",
+        "dma",
+        "i2c",
+        "net",
+        "netif:eth",
+        "pwm",
+        "spi",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\imx95_evk_15x15"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso11u68": {
+      "twin_id": "nxp.lpcxpresso11u68",
+      "board": "lpcxpresso11u68",
+      "display_name": "LPCXpresso11U68",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc11u68"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso11u68"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "arduino_serial",
+        "clock_controller",
+        "eeprom",
+        "gpio",
+        "i2c",
+        "serial"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso11u68"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso51u68": {
+      "twin_id": "nxp.lpcxpresso51u68",
+      "board": "lpcxpresso51u68",
+      "display_name": "LPCXPRESSO51U68",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc51u68"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso51u68"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "counter",
+        "gint",
+        "gpio",
+        "i2c",
+        "spi"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso51u68"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso54114": {
+      "twin_id": "nxp.lpcxpresso54114",
+      "board": "lpcxpresso54114",
+      "display_name": "LPCXPRESSO54114",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc54114"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso54114/lpc54114/m0",
+          "lpcxpresso54114/lpc54114/m4"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "arduino_i2c",
+        "arduino_spi",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "spi"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso54114"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso55s06": {
+      "twin_id": "nxp.lpcxpresso55s06",
+      "board": "lpcxpresso55s06",
+      "display_name": "LPCXpresso55S06",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc55s06"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso55s06"
+        ],
+        "max_ram_kib": 96,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "can",
+        "flash",
+        "gint",
+        "gpio"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso55s06"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso55s16": {
+      "twin_id": "nxp.lpcxpresso55s16",
+      "board": "lpcxpresso55s16",
+      "display_name": "LPCXpresso55S16",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc55s16"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso55s16"
+        ],
+        "max_ram_kib": 96,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "can",
+        "counter",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "spi",
+        "usb_device",
+        "usbd"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso55s16"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso55s28": {
+      "twin_id": "nxp.lpcxpresso55s28",
+      "board": "lpcxpresso55s28",
+      "display_name": "LPCXpresso55S28",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc55s28"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso55s28"
+        ],
+        "max_ram_kib": 192,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_spi",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso55s28"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso55s36": {
+      "twin_id": "nxp.lpcxpresso55s36",
+      "board": "lpcxpresso55s36",
+      "display_name": "LPCXpresso55S36",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "lpc55s36"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso55s36"
+        ],
+        "max_ram_kib": 112,
+        "max_flash_kib": 246
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "can",
+        "comparator",
+        "dac",
+        "flash",
+        "gint",
+        "gpio",
+        "pwm",
+        "usb_device",
+        "usbd"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso55s36"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "lpcxpresso55s69": {
+      "twin_id": "nxp.lpcxpresso55s69",
+      "board": "lpcxpresso55s69",
+      "display_name": "LPCXPRESSO55S69",
+      "classification": {
+        "vendor": "nxp",
+        "family": "lpcxpresso",
+        "form_factor": "lpcxpresso",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "lpcxpresso55s69/lpc55s69/cpu0",
+          "lpcxpresso55s69/lpc55s69/cpu0/ns",
+          "lpcxpresso55s69/lpc55s69/cpu1"
+        ],
+        "max_ram_kib": 136,
+        "max_flash_kib": 256
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "counter",
+        "dma",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "i2s",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\lpcxpresso55s69"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "ls1046ardb": {
+      "twin_id": "nxp.ls1046ardb",
+      "board": "ls1046ardb",
+      "display_name": "LS1046A RDB",
+      "classification": {
+        "vendor": "nxp",
+        "family": "layerscape",
+        "form_factor": "other",
+        "architectures": [
+          "arm64"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "ls1046ardb",
+          "ls1046ardb/ls1046a/smp",
+          "ls1046ardb/ls1046a/smp/4cores"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [],
+      "development": {
+        "toolchains": [
+          "cross-compile",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\ls1046ardb"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mcx_nx4x_evk": {
+      "twin_id": "nxp.mcx_nx4x_evk",
+      "board": "mcx_nx4x_evk",
+      "display_name": "mcx_nx4x_evk",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mcx_n5xx_evk/mcxn547/cpu0",
+          "mcx_n9xx_evk/mcxn947/cpu0",
+          "mcx_n9xx_evk/mcxn947/cpu0/qspi",
+          "mcx_n9xx_evk/mcxn947/cpu1"
+        ],
+        "max_ram_kib": 320,
+        "max_flash_kib": 8192
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "i3c",
+        "netif:eth",
+        "nvs",
+        "pwm",
+        "regulator",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mcx_nx4x_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mcxw23_evk": {
+      "twin_id": "nxp.mcxw23_evk",
+      "board": "mcxw23_evk",
+      "display_name": "MCXW23-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw236"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mcxw23_evk"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 1016
+      },
+      "capabilities": [
+        "arduino_gpio",
+        "counter",
+        "dma",
+        "flash",
+        "gint",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mcxw23_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mcxw72_evk": {
+      "twin_id": "nxp.mcxw72_evk",
+      "board": "mcxw72_evk",
+      "display_name": "MCXW72-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mcx",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mcxw727c"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mcxw72_evk"
+        ],
+        "max_ram_kib": 264,
+        "max_flash_kib": 2048
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "gpio",
+        "i2c",
+        "pinctrl",
+        "pwm",
+        "spi",
+        "uart"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mcxw72_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1010_evk": {
+      "twin_id": "nxp.mimxrt1010_evk",
+      "board": "mimxrt1010_evk",
+      "display_name": "MIMXRT1010-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1011"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1010_evk"
+        ],
+        "max_ram_kib": 64,
+        "max_flash_kib": 16384
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "rtc",
+        "spi",
+        "usb_device"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1010_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1015_evk": {
+      "twin_id": "nxp.mimxrt1015_evk",
+      "board": "mimxrt1015_evk",
+      "display_name": "MIMXRT1015-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1015"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1015_evk"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 16384
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_serial",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "rtc",
+        "spi",
+        "usb_device"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1015_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1020_evk": {
+      "twin_id": "nxp.mimxrt1020_evk",
+      "board": "mimxrt1020_evk",
+      "display_name": "MIMXRT1020-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1021"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1020_evk"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 8192
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_serial",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1020_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1024_evk": {
+      "twin_id": "nxp.mimxrt1024_evk",
+      "board": "mimxrt1024_evk",
+      "display_name": "MIMXRT1024-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1024"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1024_evk"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 4096
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_serial",
+        "can",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "netif:eth",
+        "pwm",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1024_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1040_evk": {
+      "twin_id": "nxp.mimxrt1040_evk",
+      "board": "mimxrt1040_evk",
+      "display_name": "MIMXRT1040-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1042"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1040_evk"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 8192
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "counter",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "rtc",
+        "spi"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1040_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1050_evk": {
+      "twin_id": "nxp.mimxrt1050_evk",
+      "board": "mimxrt1050_evk",
+      "display_name": "MIMXRT1050-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1052"
+        ],
+        "variants": [
+          "hyperflash",
+          "qspi"
+        ],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1050_evk/mimxrt1052/hyperflash",
+          "mimxrt1050_evk/mimxrt1052/qspi"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_serial",
+        "counter",
+        "display",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1050_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1060_evk": {
+      "twin_id": "nxp.mimxrt1060_evk",
+      "board": "mimxrt1060_evk",
+      "display_name": "mimxrt1060_evk",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1060_evk/mimxrt1062/hyperflash",
+          "mimxrt1060_evk@A/mimxrt1062/qspi",
+          "mimxrt1060_evk@B/mimxrt1062/qspi",
+          "mimxrt1060_evk@C/mimxrt1062/qspi"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "can",
+        "counter",
+        "display",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "netif:eth",
+        "pwm",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1060_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1062_fmurt6": {
+      "twin_id": "nxp.mimxrt1062_fmurt6",
+      "board": "mimxrt1062_fmurt6",
+      "display_name": "MIMXRT1062-FMURT6",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1062"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1062_fmurt6"
+        ],
+        "max_ram_kib": 768,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "rtc",
+        "sdhc",
+        "spi",
+        "uart",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1062_fmurt6"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1064_evk": {
+      "twin_id": "nxp.mimxrt1064_evk",
+      "board": "mimxrt1064_evk",
+      "display_name": "MIMXRT1064-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1064"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1064_evk"
+        ],
+        "max_ram_kib": 32768,
+        "max_flash_kib": 4096
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_serial",
+        "can",
+        "counter",
+        "display",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "rtc",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "video",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1064_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1160_evk": {
+      "twin_id": "nxp.mimxrt1160_evk",
+      "board": "mimxrt1160_evk",
+      "display_name": "MIMXRT1160-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1166"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1160_evk/mimxrt1166/cm4",
+          "mimxrt1160_evk/mimxrt1166/cm7"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 16384
+      },
+      "capabilities": [
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "spi",
+        "uart",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1160_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1170_evk": {
+      "twin_id": "nxp.mimxrt1170_evk",
+      "board": "mimxrt1170_evk",
+      "display_name": "MIMXRT1170-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1176"
+        ],
+        "variants": [],
+        "revisions": [
+          "A",
+          "B"
+        ],
+        "revision_default": "B",
+        "targets": [
+          "mimxrt1170_evk@A/mimxrt1176/cm4",
+          "mimxrt1170_evk@B/mimxrt1176/cm4",
+          "mimxrt1170_evk@A/mimxrt1176/cm7",
+          "mimxrt1170_evk@B/mimxrt1176/cm7"
+        ],
+        "max_ram_kib": 65536,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dac",
+        "display",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "mipi_dsi",
+        "netif:eth",
+        "pwm",
+        "spi",
+        "usb_device",
+        "usbd",
+        "video",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1170_evk"
+      },
+      "lab_profile": {
+        "ssh_host": "ubuntu@10.17.12.234",
+        "ssh_password": "ubuntu",
+        "remote_zephyr_path": "/home/shared/disk/zephyr_project/zephyr_test/zephyr",
+        "serial_by_id": "/dev/serial/by-id/usb-NXP_Semiconductors_MCU-LINK_on-board__r0E2__CMSIS-DAP_V2.250_CMYBV2XFSPLRA-if02",
+        "flash_command": "west flash --runner linkserver --probe \"CMYBV2XFSPLRA\"",
+        "notes": [
+          "Target board context supplied by the local workspace notes.",
+          "Useful when validating the digital twin against real hardware."
+        ]
+      },
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt1180_evk": {
+      "twin_id": "nxp.mimxrt1180_evk",
+      "board": "mimxrt1180_evk",
+      "display_name": "MIMXRT1180-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1189"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt1180_evk/mimxrt1189/cm33",
+          "mimxrt1180_evk/mimxrt1189/cm7"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 16384
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "i3c",
+        "kpp",
+        "mbox",
+        "netif:eth",
+        "pwm",
+        "sdhc",
+        "spi",
+        "uart",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt1180_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt595_evk": {
+      "twin_id": "nxp.mimxrt595_evk",
+      "board": "mimxrt595_evk",
+      "display_name": "MIMXRT595-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt595s"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt595_evk/mimxrt595s/cm33",
+          "mimxrt595_evk/mimxrt595s/f1"
+        ],
+        "max_ram_kib": 4608,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "counter",
+        "dma",
+        "dmic",
+        "flash",
+        "gpio",
+        "i2c",
+        "i2s",
+        "pwm",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt595_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt685_evk": {
+      "twin_id": "nxp.mimxrt685_evk",
+      "board": "mimxrt685_evk",
+      "display_name": "MIMXRT685-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt685s"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt685_evk/mimxrt685s/cm33",
+          "mimxrt685_evk/mimxrt685s/hifi4"
+        ],
+        "max_ram_kib": 4608,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "arduino_gpio",
+        "arduino_i2c",
+        "arduino_serial",
+        "arduino_spi",
+        "comparator",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "i2s",
+        "i3c",
+        "pwm",
+        "sdhc",
+        "spi",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "xt-clang",
+          "xtools",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt685_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mimxrt700_evk": {
+      "twin_id": "nxp.mimxrt700_evk",
+      "board": "mimxrt700_evk",
+      "display_name": "MIMXRT700-EVK",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "evk",
+        "architectures": [
+          "arm",
+          "xtensa"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mimxrt700_evk/mimxrt798s/cm33_cpu0",
+          "mimxrt700_evk/mimxrt798s/cm33_cpu1",
+          "mimxrt700_evk/mimxrt798s/hifi1",
+          "mimxrt700_evk/mimxrt798s/hifi4"
+        ],
+        "max_ram_kib": 512,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "i3c",
+        "memc",
+        "sdhc",
+        "spi",
+        "uart",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "xcc",
+          "xt-clang",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mimxrt700_evk"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "mr_canhubk3": {
+      "twin_id": "nxp.mr_canhubk3",
+      "board": "mr_canhubk3",
+      "display_name": "MR-CANHUBK3",
+      "classification": {
+        "vendor": "nxp",
+        "family": "s32",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "s32k344"
+        ],
+        "variants": [
+          "mcuboot"
+        ],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "mr_canhubk3",
+          "mr_canhubk3/s32k344/mcuboot"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": 1919
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "display",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\mr_canhubk3"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "rd_rw612_bga": {
+      "twin_id": "nxp.rd_rw612_bga",
+      "board": "rd_rw612_bga",
+      "display_name": "RD-RW612-BGA",
+      "classification": {
+        "vendor": "nxp",
+        "family": "rw61x",
+        "form_factor": "reference_design",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "rw612"
+        ],
+        "variants": [
+          "ethernet"
+        ],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "rd_rw612_bga",
+          "rd_rw612_bga/rw612/ethernet"
+        ],
+        "max_ram_kib": 960,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "counter",
+        "dac",
+        "dma",
+        "dmic",
+        "entropy",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "i2s",
+        "netif:eth",
+        "netif:openthread",
+        "pwm",
+        "spi",
+        "usb_device",
+        "usb_host",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\rd_rw612_bga"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "rddrone_fmuk66": {
+      "twin_id": "nxp.rddrone_fmuk66",
+      "board": "rddrone_fmuk66",
+      "display_name": "RDDRONE-FMUK66",
+      "classification": {
+        "vendor": "nxp",
+        "family": "drone",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mk66f18"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "rddrone_fmuk66"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 2048
+      },
+      "capabilities": [
+        "can",
+        "counter",
+        "flash",
+        "gpio",
+        "i2c",
+        "nvs",
+        "pwm",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\rddrone_fmuk66"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "s32k148_evb": {
+      "twin_id": "nxp.s32k148_evb",
+      "board": "s32k148_evb",
+      "display_name": "S32K148EVB-Q176",
+      "classification": {
+        "vendor": "nxp",
+        "family": "s32",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "s32k148"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "s32k148_evb"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 1536
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "gpio",
+        "mpu",
+        "pinctrl",
+        "pwm",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\s32k148_evb"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "s32k5xxcvb": {
+      "twin_id": "nxp.s32k5xxcvb",
+      "board": "s32k5xxcvb",
+      "display_name": "S32K5XXCVB",
+      "classification": {
+        "vendor": "nxp",
+        "family": "s32",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "s32k566"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "s32k5xxcvb/s32k566/m7",
+          "s32k5xxcvb/s32k566/r52"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": 32768
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "i2c",
+        "pwm",
+        "spi",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\s32k5xxcvb"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "s32z2xxdc2": {
+      "twin_id": "nxp.s32z2xxdc2",
+      "board": "s32z2xxdc2",
+      "display_name": "X-S32Z27X-DC (DC2)",
+      "classification": {
+        "vendor": "nxp",
+        "family": "s32",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "s32z270"
+        ],
+        "variants": [],
+        "revisions": [
+          "B",
+          "D"
+        ],
+        "revision_default": "B",
+        "targets": [
+          "s32z2xxdc2/s32z270/rtu0",
+          "s32z2xxdc2@D/s32z270/rtu0",
+          "s32z2xxdc2/s32z270/rtu1",
+          "s32z2xxdc2@D/s32z270/rtu1"
+        ],
+        "max_ram_kib": 1024,
+        "max_flash_kib": null
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "crypto",
+        "dma",
+        "gpio",
+        "i2c",
+        "netif:eth",
+        "psi5",
+        "pwm",
+        "sent",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\s32z2xxdc2"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "twr_ke18f": {
+      "twin_id": "nxp.twr_ke18f",
+      "board": "twr_ke18f",
+      "display_name": "TWR-KE18F",
+      "classification": {
+        "vendor": "nxp",
+        "family": "tower",
+        "form_factor": "tower",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mke18f16"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "twr_ke18f"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dac",
+        "dma",
+        "flash",
+        "i2c",
+        "pwm",
+        "spi",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\twr_ke18f"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "twr_kv58f220m": {
+      "twin_id": "nxp.twr_kv58f220m",
+      "board": "twr_kv58f220m",
+      "display_name": "TWR-KV58F220M",
+      "classification": {
+        "vendor": "nxp",
+        "family": "tower",
+        "form_factor": "tower",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mkv58f24"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "twr_kv58f220m"
+        ],
+        "max_ram_kib": 128,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "flash",
+        "i2c"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\twr_kv58f220m"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "ucans32k1sic": {
+      "twin_id": "nxp.ucans32k1sic",
+      "board": "ucans32k1sic",
+      "display_name": "UCANS32K1SIC",
+      "classification": {
+        "vendor": "nxp",
+        "family": "s32",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "s32k146"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "ucans32k1sic"
+        ],
+        "max_ram_kib": 124,
+        "max_flash_kib": 1024
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "gpio",
+        "i2c",
+        "mpu",
+        "pinctrl",
+        "pwm",
+        "spi",
+        "uart",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": true,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\ucans32k1sic"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "usb_kw24d512": {
+      "twin_id": "nxp.usb_kw24d512",
+      "board": "usb_kw24d512",
+      "display_name": "USB-KW24D512",
+      "classification": {
+        "vendor": "nxp",
+        "family": "usb_dongle",
+        "form_factor": "usb_dongle",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mkw24d5"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "usb_kw24d512"
+        ],
+        "max_ram_kib": 32,
+        "max_flash_kib": 512
+      },
+      "capabilities": [
+        "flash",
+        "usb_device",
+        "usbd",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\usb_kw24d512"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    },
+    "vmu_rt1170": {
+      "twin_id": "nxp.vmu_rt1170",
+      "board": "vmu_rt1170",
+      "display_name": "VMU RT1170",
+      "classification": {
+        "vendor": "nxp",
+        "family": "mimxrt",
+        "form_factor": "other",
+        "architectures": [
+          "arm"
+        ],
+        "target_types": [
+          "mcu"
+        ]
+      },
+      "hardware": {
+        "socs": [
+          "mimxrt1176"
+        ],
+        "variants": [],
+        "revisions": [],
+        "revision_default": null,
+        "targets": [
+          "vmu_rt1170/mimxrt1176/cm7",
+          "vmu_rt1170/mimxrt1176/cm4"
+        ],
+        "max_ram_kib": 256,
+        "max_flash_kib": 65536
+      },
+      "capabilities": [
+        "adc",
+        "can",
+        "counter",
+        "dma",
+        "flash",
+        "gpio",
+        "hwinfo",
+        "i2c",
+        "netif:eth",
+        "pwm",
+        "spi",
+        "usb_device",
+        "watchdog"
+      ],
+      "development": {
+        "toolchains": [
+          "gnuarmemb",
+          "zephyr"
+        ],
+        "has_doc": true,
+        "has_support": false,
+        "board_cmake": true,
+        "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\vmu_rt1170"
+      },
+      "lab_profile": {},
+      "notes": [
+        "Generated from Zephyr board metadata.",
+        "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins."
+      ]
+    }
+  }
+}

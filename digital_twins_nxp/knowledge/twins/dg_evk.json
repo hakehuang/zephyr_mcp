@@ -1,0 +1,114 @@
+{
+  "twin_id": "nxp.dg_evk",
+  "board": "dg_evk",
+  "display_name": "DG-EVK",
+  "classification": {
+    "vendor": "nxp",
+    "family": "mimxrt",
+    "form_factor": "custom_evk",
+    "architectures": [
+      "arm"
+    ],
+    "target_types": [
+      "mcu"
+    ]
+  },
+  "hardware": {
+    "socs": [
+      "mimxrt1176"
+    ],
+    "variants": [],
+    "revisions": [
+      "A",
+      "B"
+    ],
+    "revision_default": "B",
+    "targets": [
+      "dg_evk@A/mimxrt1176/cm4",
+      "dg_evk@B/mimxrt1176/cm4",
+      "dg_evk@A/mimxrt1176/cm7",
+      "dg_evk@B/mimxrt1176/cm7"
+    ],
+    "max_ram_kib": 65536,
+    "max_flash_kib": 65536
+  },
+  "capabilities": [
+    "adc",
+    "can",
+    "counter",
+    "dac",
+    "display",
+    "dma",
+    "flash",
+    "gpio",
+    "hwinfo",
+    "i2c",
+    "mipi_dsi",
+    "netif:eth",
+    "pwm",
+    "spi",
+    "usb_device",
+    "usbd",
+    "video",
+    "watchdog"
+  ],
+  "development": {
+    "toolchains": [
+      "gnuarmemb",
+      "zephyr"
+    ],
+    "has_doc": true,
+    "has_support": false,
+    "board_cmake": true,
+    "board_source_path": "C:\\github\\zephyrproject\\zephyr\\boards\\nxp\\dg_evk"
+  },
+  "lab_profile": {
+    "ssh_host": "ubuntu@10.17.12.234",
+    "ssh_password": "ubuntu",
+    "remote_zephyr_path": "/home/shared/disk/zephyr_project/zephyr_test/zephyr",
+    "serial_by_id": "/dev/serial/by-id/usb-NXP_Semiconductors_MCU-LINK_on-board__r0E2__CMSIS-DAP_V2.250_CMYBV2XFSPLRA-if02",
+    "flash_command": "west flash --runner linkserver --probe \"CMYBV2XFSPLRA\"",
+    "notes": [
+      "Target board context supplied by the local workspace notes.",
+      "Useful when validating the digital twin against real hardware."
+    ]
+  },
+  "notes": [
+    "Generated from Zephyr board metadata.",
+    "Enrich this seed with connectors, sensor topology, timing, and physical constraints for higher-fidelity twins.",
+    "Customized board derived from mimxrt1170_evk.",
+    "Use this seed as the starting point for a Zephyr custom board named dg_evk.",
+    "Preserves the existing lab validation profile for mimxrt1170-class hardware unless hardware wiring changes."
+  ],
+  "derivation": {
+    "base_board": "mimxrt1170_evk",
+    "base_twin_id": "nxp.mimxrt1170_evk",
+    "derived_at": "2026-04-01T04:39:05.977923+00:00",
+    "mode": "customized_board"
+  },
+  "customization": {
+    "inherits_from": "mimxrt1170_evk",
+    "intended_zephyr_board_name": "dg_evk",
+    "board_label": "dg_evk",
+    "base_reference_board": "mimxrt1170_evk",
+    "strategy": "inherit-and-customize",
+    "compatible_targets": [
+      "dg_evk@A/mimxrt1176/cm4",
+      "dg_evk@B/mimxrt1176/cm4",
+      "dg_evk@A/mimxrt1176/cm7",
+      "dg_evk@B/mimxrt1176/cm7"
+    ],
+    "zephyr_board_porting_tasks": [
+      "copy mimxrt1170_evk board directory to dg_evk",
+      "rename DTS, YAML, and defconfig files to dg_evk naming",
+      "update board.yml and target identifiers",
+      "adjust pinctrl, flash, ethernet, display, and connector mappings",
+      "validate build and flash on real hardware"
+    ],
+    "assumptions": [
+      "SoC remains mimxrt1176.",
+      "Revision model remains A/B unless changed later.",
+      "Initial capability set matches mimxrt1170_evk until custom hardware deltas are defined."
+    ]
+  }
+}
