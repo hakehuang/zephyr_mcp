@@ -1,0 +1,3 @@
+# Kept below 0.26 because 0.26.0 can crash on preprocessor-heavy C files on Windows/Python 3.14.
+tree-sitter>=0.25.2,<0.26
+tree-sitter-c>=0.24.1,<0.25

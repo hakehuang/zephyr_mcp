@@ -1,0 +1,157 @@
+{
+  "scope": {
+    "name": "doris-zephyr-smart-access",
+    "profiles": [
+      "Matter + Aliro + NFC + BLE Channel Sounding + Thread + Zephyr",
+      "Matter + Aliro + NFC + UWB + BLE + Thread + Zephyr"
+    ],
+    "notes": [
+      "Doris is not a Zephyr-only product.",
+      "FreeRTOS appears in other Doris configurations.",
+      "Do not invent new requirements beyond the reviewed SRS anchors."
+    ]
+  },
+  "path_rules": [
+    {
+      "name": "bluetooth",
+      "patterns": [
+        "subsys/bluetooth/",
+        "include/zephyr/bluetooth/",
+        "drivers/bluetooth/"
+      ],
+      "tags": ["ble", "channel_sounding", "gatt"]
+    },
+    {
+      "name": "openthread",
+      "patterns": [
+        "modules/openthread/",
+        "subsys/net/",
+        "include/zephyr/net/"
+      ],
+      "tags": ["thread", "802154"]
+    },
+    {
+      "name": "dfu_storage",
+      "patterns": [
+        "subsys/dfu/",
+        "subsys/storage/",
+        "subsys/settings/",
+        "drivers/flash/"
+      ],
+      "tags": ["ota", "storage", "flash"]
+    },
+    {
+      "name": "kernel_realtime",
+      "patterns": [
+        "kernel/",
+        "subsys/logging/",
+        "subsys/pm/",
+        "drivers/can/"
+      ],
+      "tags": ["timing", "concurrency", "can"]
+    },
+    {
+      "name": "security",
+      "patterns": [
+        "modules/mbedtls/",
+        "modules/trusted-firmware-m/",
+        "subsys/secure_storage/",
+        "subsys/mgmt/"
+      ],
+      "tags": ["security", "keys", "credentials", "dfu"]
+    }
+  ],
+  "srs_items": [
+    {
+      "id": "3175745",
+      "title": "Matter + Aliro NFC/BLE CS Smart Lock SW Config with Zephyr",
+      "keywords": ["aliro", "matter", "nfc", "ble", "channel sounding", "thread", "zephyr"],
+      "review_focus": ["scope", "stack-composition", "wireless", "security"]
+    },
+    {
+      "id": "3175746",
+      "title": "Memory target for NFC/BLE CS Zephyr config",
+      "keywords": ["nvm", "ram", "flash", "ota", "external flash"],
+      "review_focus": ["memory", "storage", "ota"]
+    },
+    {
+      "id": "3175747",
+      "title": "Matter + Aliro NFC/UWB Smart Lock SW Config with Zephyr",
+      "keywords": ["aliro", "matter", "nfc", "uwb", "ble", "thread", "zephyr"],
+      "review_focus": ["scope", "stack-composition", "wireless", "security"]
+    },
+    {
+      "id": "3175748",
+      "title": "Memory target for NFC/UWB Zephyr config",
+      "keywords": ["nvm", "ram", "flash", "ota", "external flash"],
+      "review_focus": ["memory", "storage", "ota"]
+    },
+    {
+      "id": "3175742",
+      "title": "NFC door lock timing under 350 ms",
+      "keywords": ["nfc", "timing", "latency", "transaction"],
+      "review_focus": ["timing", "realtime"]
+    },
+    {
+      "id": "3175743",
+      "title": "BLE CS door lock timing under 300 ms",
+      "keywords": ["ble", "channel sounding", "timing", "latency"],
+      "review_focus": ["timing", "realtime", "wireless"]
+    },
+    {
+      "id": "3175771",
+      "title": "CAN Keep Alive under full load",
+      "keywords": ["can", "keep alive", "full load", "busy", "nfc", "ble"],
+      "review_focus": ["timing", "realtime", "concurrency"]
+    },
+    {
+      "id": "3175901",
+      "title": "Aliro SDK based configuration",
+      "keywords": ["aliro", "sdk", "matter", "uwb", "nfc", "security"],
+      "review_focus": ["stack-composition", "integration"]
+    },
+    {
+      "id": "3176012",
+      "title": "Phase coherency for channel sounding sniffing",
+      "keywords": ["phase coherency", "channel sounding", "cs"],
+      "review_focus": ["wireless", "controller"]
+    },
+    {
+      "id": "3176013",
+      "title": "MW30 GATT profile support",
+      "keywords": ["gatt", "profile", "bluetooth"],
+      "review_focus": ["wireless", "ble"]
+    },
+    {
+      "id": "3176014",
+      "title": "Zephyr BLE stack shall be supported",
+      "keywords": ["zephyr ble", "bluetooth"],
+      "review_focus": ["platform", "wireless"]
+    },
+    {
+      "id": "3176015",
+      "title": "OpenThread support",
+      "keywords": ["openthread", "thread", "1.4.0", "802.15.4"],
+      "review_focus": ["platform", "wireless", "thread"]
+    },
+    {
+      "id": "3176016",
+      "title": "Proprietary protocol over compliant 802.15.4 PHY/MAC",
+      "keywords": ["802.15.4", "ieee 802.15.4", "phy", "mac", "proprietary"],
+      "review_focus": ["wireless", "thread", "mac"]
+    },
+    {
+      "id": "1105037",
+      "title": "Matter credential protection and accelerated security paths",
+      "keywords": ["dac", "noc", "case", "pase", "spake2", "ecc", "secure storage"],
+      "review_focus": ["security", "credentials"]
+    },
+    {
+      "id": "1295829",
+      "title": "Hosted gateway with ZephyrOS - lower confidence",
+      "keywords": ["hosted", "gateway", "zigbee", "zephyros"],
+      "review_focus": ["scope", "non-baseline"],
+      "status": "lower-confidence"
+    }
+  ]
+}
