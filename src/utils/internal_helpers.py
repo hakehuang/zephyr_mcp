@@ -69,7 +69,9 @@ def _git_checkout_internal(project_dir: str, ref: str) -> Dict[str, Any]:
     return {"status": "success", "log": log, "error": None}
 
 
-def _west_update_internal(project_dir: str) -> Dict[str, Any]:
+def _west_update_internal(
+    project_dir: str, projects: Optional[list[str]] = None
+) -> Dict[str, Any]:
     """
     Internal function: Execute west update operation
     内部函数：执行west update操作
@@ -103,8 +105,10 @@ def _west_update_internal(project_dir: str) -> Dict[str, Any]:
     # Execute west update
     # 执行west update
     log.append("开始执行west update...")
+    command = ["west", "update"] + (projects or [])
+    log.append(f"Running: {' '.join(command)}")
     update_result = run_command(
-        ["west", "update"],
+        command,
         cwd=project_dir,
         retries=3,
         retry_backoff_seconds=2.0,
